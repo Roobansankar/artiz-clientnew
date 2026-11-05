@@ -273,14 +273,15 @@ function Letter() {
   )
 }
 
-export default function ShopPage({ category, categoryCollections = [], categoryProducts, ancestors = [] }) {
+export default function ShopPage({ category, collection, categoryCollections = [], categoryProducts, initialSort }) {
+  const currentCollection = category || collection
   return (
     <>
-      <PageBanner title={category?.name} description={category?.description} />
-      {(!category || categoryCollections.length > 0) && <ShopByCollection items={category ? categoryCollections : collections} category={Boolean(category)} />}
-      <ShopGrid key={category?.slug || 'all'} products={categoryProducts} catalogMode={Boolean(category)} currency={category ? 'INR' : 'USD'} />
-      <NewArrivals />
-      {!category && <><LatestNine /><YouMayAlsoLike /><Feedback /></>}
+      <PageBanner title={currentCollection?.name} description={currentCollection?.description} />
+      {(!currentCollection || categoryCollections.length > 0) && <ShopByCollection items={currentCollection ? categoryCollections : collections} category={Boolean(currentCollection)} />}
+      <ShopGrid key={currentCollection?.slug || 'all'} products={categoryProducts} catalogMode={Boolean(currentCollection)} currency={currentCollection ? 'INR' : 'USD'} initialSort={initialSort} />
+      {!collection && <NewArrivals />}
+      {!currentCollection && <><LatestNine /><YouMayAlsoLike /><Feedback /></>}
       <Promises />
       <Letter />
     </>

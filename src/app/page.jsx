@@ -1,4 +1,4 @@
-import { BundleBuilder, CompareProducts, DiningBanner, FeaturedCollection, FeaturedSlides, TabbedCollection } from '../sections/Commerce'
+import { BundleBuilder, DiningBanner, FeaturedCollection, FeaturedSlides, TabbedCollection } from '../sections/Commerce'
 import { BeforeAfter, Blog, CountdownSale, Faq, Lookbook, Marquee, Promotions, RoomStories, TrustedBy, VideoHero } from '../sections/Story'
 import { CuratedCollections, Hero, ImageCollage, ShopByCategory } from '../sections/Top'
 
@@ -11,7 +11,6 @@ export default function HomePage() {
       <ShopByCategory />
       <FeaturedCollection />
       <DiningBanner />
-      <CompareProducts />
       <FeaturedSlides />
       <BundleBuilder />
       <TabbedCollection />

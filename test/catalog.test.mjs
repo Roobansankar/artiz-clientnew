@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { categoryProducts, descendantSlugs, firstAvailableVariant, productOption, shopProduct } from '../src/catalog.js'
+import { categoryProducts, descendantSlugs, featuredProducts, firstAvailableVariant, productOption, shopProduct } from '../src/catalog.js'
 
 const categories = [
   { slug: 'furniture', name: 'Furniture', parentSlug: null },
@@ -8,6 +8,20 @@ const categories = [
   { slug: 'coffee-tables', name: 'Coffee Tables', parentSlug: 'tables' },
   { slug: 'chairs', name: 'Chairs', parentSlug: 'furniture' },
 ]
+
+test('featured collections use their own admin flag and exclude unpublished products', () => {
+  const products = [
+    { id: 'new', published: true, isNewArrival: true, isBestSeller: false },
+    { id: 'best', published: true, isNewArrival: false, isBestSeller: true },
+    { id: 'both', published: true, isNewArrival: true, isBestSeller: true },
+    { id: 'draft', published: false, isNewArrival: true, isBestSeller: true },
+    { id: 'ordinary', published: true },
+  ]
+  assert.deepEqual(featuredProducts(products, 'isNewArrival').map(p => p.id), ['new', 'both'])
+  assert.deepEqual(featuredProducts(products, 'isBestSeller').map(p => p.id), ['best', 'both'])
+  assert.deepEqual(featuredProducts(products, 'unknown'), [])
+  assert.deepEqual(featuredProducts([], 'isBestSeller'), [])
+})
 
 test('category listings include direct, descendant, and additional assignments exactly once', () => {
   const products = [

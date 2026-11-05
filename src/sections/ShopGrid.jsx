@@ -187,7 +187,7 @@ const ViewIcon = ({ n }) => (
   <span className="flex gap-[3px]">{Array.from({ length: n }, (_, i) => <span key={i} className="h-3.5 w-[2px] bg-current" />)}</span>
 )
 
-export default function ShopGrid({ products = shopProducts, catalogMode = false, currency = 'USD' }) {
+export default function ShopGrid({ products = shopProducts, catalogMode = false, currency = 'USD', initialSort = 'title-ascending' }) {
   const maxPrice = Math.max(10, Math.ceil(Math.max(0, ...products.map(product => product.price))))
   const formatMoney = currency === 'INR' ? value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(value) : money
   const empty = useMemo(() => ({ availability: [], size: [], spec: [], color: [], fabric: [], brand: [], price: [0, maxPrice] }), [maxPrice])
@@ -202,7 +202,7 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
     } : { size: SIZES, spec: SPECS, color: Object.keys(SWATCH), fabric: FABRICS, brand: ['Bed', 'Furniture', 'Tables'] }
   }, [products, catalogMode])
   const [f, setF] = useState(empty)
-  const [sort, setSort] = useState('title-ascending')
+  const [sort, setSort] = useState(initialSort)
   const [cols, setCols] = useState(3)
   const [showFilters, setShowFilters] = useState(true)
   const [drawer, setDrawer] = useState(false)

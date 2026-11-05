@@ -18,6 +18,11 @@ export function categoryProducts(slug, categories, products) {
   return products.filter(product => [product.categorySlug, ...(product.collectionSlugs || [])].some(value => slugs.has(value)))
 }
 
+export function featuredProducts(products, flag) {
+  if (!['isNewArrival', 'isBestSeller'].includes(flag)) return []
+  return products.filter(product => product.published !== false && product[flag] === true)
+}
+
 export function shopProduct(product, categories) {
   const variants = Array.isArray(product.variants) ? product.variants : []
   const unique = values => [...new Set(values.filter(Boolean))]
@@ -55,3 +60,4 @@ export function productOption(product, index = firstAvailableVariant(product)) {
 export function formatPrice(value, currency = 'INR') {
   return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value)
 }
+

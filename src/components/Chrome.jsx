@@ -11,8 +11,8 @@ import { ADDRESS, Logo, Price, Socials } from './ui'
 
 export function Footer() {
   const cols = [
-    { title: 'Quick Links', links: ['FAQ', 'Find store location', 'Privacy Policy', 'Refund Policy', 'Terms of Service'] },
-    { title: 'Company', links: ['Wishlist', 'My account', 'Product compare', 'Cart', 'About us'] },
+    { title: 'Quick Links', links: [{ label: 'FAQ', href: '/faq' }, { label: 'Find store location', href: '#' }, { label: 'Privacy Policy', href: '#' }, { label: 'Refund Policy', href: '#' }, { label: 'Terms of Service', href: '#' }] },
+    { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '#' }, { label: 'My account', href: '#' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
   ]
   return (
     <footer className="bg-espresso pb-24 pt-[60px] text-white/75 md:pb-[35px] lg:pt-[80px]">
@@ -30,7 +30,7 @@ export function Footer() {
             <h4 className="mb-5 text-lg text-white">{c.title}</h4>
             <ul className="space-y-3">
               {c.links.map((l) => (
-                <li key={l}><a href="#" className="inline-block transition-all duration-300 hover:translate-x-1 hover:text-terra">{l}</a></li>
+                <li key={l.label}><a href={l.href} className="inline-block transition-all duration-300 hover:translate-x-1 hover:text-terra">{l.label}</a></li>
               ))}
             </ul>
           </div>

@@ -6,8 +6,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { formatPrice } from '../catalog'
 import { useStore } from '../store'
+import { ADDRESS } from '../site'
 
-export const ADDRESS = 'Coimbatore, Tamil Nadu, India'
+export { ADDRESS }
 
 export function Logo({ light = false, className = '' }) {
   return (
