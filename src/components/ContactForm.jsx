@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 const topics = ['Product question', 'Order and delivery', 'Returns and care', 'Design advice', 'Something else']
 
-const field = 'h-12 w-full rounded-full border border-sand bg-white px-5 text-[15px] text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-terra'
+const field = 'h-12 w-full rounded-lg border border-sand bg-white px-4 text-[15px] text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-terra focus:ring-2 focus:ring-terra/10'
 
 export default function ContactForm() {
   const [status, setStatus] = useState({ state: 'idle', message: '' })
@@ -36,10 +36,10 @@ export default function ContactForm() {
   const sending = status.state === 'sending'
 
   return (
-    <div className="rounded-3xl border border-sand bg-white p-6 md:p-9">
-      <span className="subtitle">Send us a message</span>
-      <h2 className="h2-title text-[26px] md:text-[32px]">Tell us what’s on your mind.</h2>
-      <p className="mt-3 text-muted">A question about a piece, an order, or an idea for a room — we’re happy to help.</p>
+    <div>
+      <span className="text-xs font-medium uppercase tracking-[0.16em] text-terra">Send a message</span>
+      <h2 className="mt-3 font-heading text-[28px] font-semibold leading-tight md:text-[34px]">What can we help you with?</h2>
+      <p className="mt-3 text-sm leading-relaxed text-muted">Leave your details below. We will get back to you by email.</p>
 
       {status.state === 'success' && (
         <p role="status" className="mt-6 flex items-start gap-3 rounded-2xl bg-peach px-5 py-4 text-[15px] text-ink">
@@ -53,7 +53,7 @@ export default function ContactForm() {
         </p>
       )}
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form onSubmit={onSubmit} className="mt-8 space-y-5">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="contact-name" className="mb-2 block text-sm font-medium">Your name</label>
@@ -78,13 +78,13 @@ export default function ContactForm() {
 
         <div>
           <label htmlFor="contact-message" className="mb-2 block text-sm font-medium">Message</label>
-          <textarea id="contact-message" name="message" required minLength={10} maxLength={5000} rows={6} placeholder="Tell us a little more (10 characters or more)…" className="min-h-[150px] w-full rounded-2xl border border-sand bg-white px-5 py-4 text-[15px] text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-terra" />
+          <textarea id="contact-message" name="message" required minLength={10} maxLength={5000} rows={6} placeholder="Tell us a little more (10 characters or more)…" className="min-h-[150px] w-full rounded-lg border border-sand bg-white px-4 py-4 text-[15px] text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-terra" />
         </div>
 
-        <button type="submit" disabled={sending} className="btn-dark w-full disabled:cursor-not-allowed disabled:opacity-60">
+        <button type="submit" disabled={sending} className="btn-dark w-full sm:w-auto disabled:cursor-not-allowed disabled:opacity-60">
           {sending ? 'Sending…' : 'Send message'} <Send size={16} aria-hidden="true" />
         </button>
-        <p className="text-xs text-muted">We usually reply within one business day.</p>
+        <p className="text-xs text-muted">Your details will only be used to respond to your enquiry.</p>
       </form>
     </div>
   )

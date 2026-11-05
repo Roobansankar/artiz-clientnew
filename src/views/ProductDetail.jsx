@@ -140,7 +140,7 @@ export default function ProductDetail({ product, category, related }) {
 
               <div className="mt-5 border-t border-sand">
                 <ProductAccordion title="Product details"><p className="whitespace-pre-line">{product.details || product.description}</p><p className="mt-3 text-xs">Product reference: {product.id}</p></ProductAccordion>
-                <ProductAccordion title="Description"><p className="whitespace-pre-line">{product.description}</p></ProductAccordion>
+                <ProductAccordion title="How can I style this piece?"><p>Start with a spot that suits its size and purpose, then pair it with colors and textures already in your room. Leave a little space around it for a balanced look, and use the dimensions above to check the fit before ordering.</p></ProductAccordion>
                 <ProductAccordion title="Additional information">
                   <dl className="divide-y divide-sand">{details.map(([label, value]) => <div key={label} className="grid grid-cols-[100px_1fr] gap-4 py-3 text-sm"><dt className="font-medium text-ink">{label}</dt><dd>{value}</dd></div>)}</dl>
                   {!details.length && <p>See the product description for details.</p>}

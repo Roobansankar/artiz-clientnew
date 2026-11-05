@@ -236,7 +236,7 @@ export function Faq() {
       <div className="container-x grid gap-10 lg:grid-cols-[2fr_3fr] lg:gap-16">
         <Reveal className="flex flex-col gap-6">
           <div className="overflow-hidden rounded-3xl">
-            <img src="/images/banner18.png" alt="" className="aspect-[720/600] w-full object-cover transition-transform duration-700 hover:scale-105" />
+            <img src="/images/empty-collection.webp" alt="Illustrated cozy corner with an armchair, side table, lamp, and plant" loading="lazy" className="aspect-[720/600] w-full bg-cream object-contain transition-transform duration-700 hover:scale-105" />
           </div>
           <div className="rounded-2xl bg-peach p-6">
             <h3 className="text-lg">Do you have more questions?</h3>
