@@ -160,7 +160,7 @@ export default function Header() {
         <div className="container-x flex h-[42px] items-center justify-between">
           <div className="hidden gap-5 md:flex">
             <a href="#" className="hover:text-terra">Orders</a>
-            <a href="#" className="hover:text-terra">Profile</a>
+            <Link href="/account" className="hover:text-terra">Profile</Link>
           </div>
           <Socials size={14} className="mx-auto md:mx-0" />
           <p className="hidden items-center gap-1.5 md:flex">
@@ -200,7 +200,7 @@ export default function Header() {
 
           <div className="flex items-center gap-4">
             <button onClick={() => setSearchOpen(true)} aria-label="Search" className="hover:text-terra cursor-pointer"><SearchIcon size={22} /></button>
-            <a href="#" aria-label="Log in" className="hidden hover:text-terra sm:block"><UserIcon size={24} /></a>
+            <Link href="/account" aria-label="My account" className="hidden hover:text-terra sm:block"><UserIcon size={24} /></Link>
             <a href="#" aria-label="Wishlist" className="relative hidden hover:text-terra sm:block">
               <HeartIcon size={24} />
               <span className="absolute -right-2 -top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-terra text-[10px] text-white">{wishlist.length}</span>
@@ -253,8 +253,8 @@ export default function Header() {
               </ul>
               <div className="my-12 grid gap-4 px-5">
                 <h4 className="text-lg">My account</h4>
-                <a href="#" className="btn-dark w-full"><User size={16} /> Log in</a>
-                <a href="#" className="btn-outline w-full">Register</a>
+                <Link href="/account" onClick={() => setMobile(false)} className="btn-dark w-full"><User size={16} /> Log in</Link>
+                <Link href="/account?mode=register" onClick={() => setMobile(false)} className="btn-outline w-full">Register</Link>
               </div>
               <div className="mt-auto px-5 pb-8">
                 <p className="flex items-center gap-2 text-sm text-muted">

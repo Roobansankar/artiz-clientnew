@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUp, Home, MapPin, Minus, Plus, Search, ShoppingBag, Store, User, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { formatPrice } from '../catalog'
 import { money } from '../data'
 import { useStore } from '../store'
@@ -12,7 +13,7 @@ import { ADDRESS, Logo, Price, Socials } from './ui'
 export function Footer() {
   const cols = [
     { title: 'Quick Links', links: [{ label: 'FAQ', href: '/faq' }, { label: 'Find store location', href: '#' }, { label: 'Privacy Policy', href: '#' }, { label: 'Refund Policy', href: '#' }, { label: 'Terms of Service', href: '#' }] },
-    { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '#' }, { label: 'My account', href: '#' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
+    { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '#' }, { label: 'My account', href: '/account' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
   ]
   return (
     <footer className="bg-espresso pb-24 pt-[60px] text-white/75 md:pb-[35px] lg:pt-[80px]">
@@ -198,13 +199,14 @@ export function EmailPopup() {
 }
 
 export function MobileBar() {
+  const router = useRouter()
   const { cart, setCartOpen } = useStore()
   const items = [
     { icon: Home, label: 'Home' },
     { icon: Search, label: 'Search' },
     { icon: Store, label: 'Shop' },
     { icon: ShoppingBag, label: 'cart', on: () => setCartOpen(true), badge: cart.reduce((n, i) => n + i.qty, 0) },
-    { icon: User, label: 'account' },
+    { icon: User, label: 'account', on: () => router.push('/account') },
   ]
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-sand bg-white py-2 md:hidden">
