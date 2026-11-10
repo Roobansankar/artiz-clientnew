@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 
 async function proxy(request, { params }) {
   const endpoint = (await params).path.join('/')
-  const methods = { me: ['GET'], config: ['GET'], google: ['GET'], 'google/callback': ['GET'], login: ['POST'], register: ['POST'], logout: ['POST'], profile: ['PATCH'], addresses: ['GET', 'POST'], wishlist: ['GET', 'POST'], orders: ['GET'] }
+  const methods = { me: ['GET'], config: ['GET'], google: ['GET'], 'google/callback': ['GET'], login: ['POST'], register: ['POST'], logout: ['POST'], profile: ['PATCH'], addresses: ['GET', 'POST'], wishlist: ['GET', 'POST'], orders: ['GET'], 'checkout/config': ['GET'], 'checkout/order': ['POST'], 'checkout/verify': ['POST'] }
   const allowed = methods[endpoint] || (/^addresses\/[a-z0-9]+$/.test(endpoint) ? ['PUT', 'DELETE'] : /^wishlist\/[a-z0-9]+$/.test(endpoint) ? ['DELETE'] : null)
   if (!allowed) return Response.json({ message: 'Endpoint not found.' }, { status: 404 })
   if (!allowed.includes(request.method)) return Response.json({ message: 'Method not allowed.' }, { status: 405 })

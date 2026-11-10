@@ -115,13 +115,12 @@ function Orders() {
   const resource = useResource('/api/auth/orders')
   return <><ResourceStatus resource={resource} />{resource.data?.orders.length === 0 && <Empty icon={Package} text="Your orders will appear here." />}
     <div className="space-y-5">{resource.data?.orders.map(order => <article key={order.number} className="overflow-hidden rounded-2xl border border-sand">
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-cream p-5"><div><h3 className="text-sm font-semibold">{order.number}</h3><p className="mt-1 text-xs text-muted">{new Date(order.createdAt).toLocaleDateString('en-IN', { dateStyle: 'medium' })}</p></div><div className="text-right"><span className="rounded-full bg-white px-3 py-1 text-xs text-terra">Paid</span><p className="mt-2 text-sm font-medium">{formatPrice(order.amount, order.currency)}</p></div></div>
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-cream p-5"><div><h3 className="text-sm font-semibold">{order.number}</h3><p className="mt-1 text-xs text-muted">{new Date(order.createdAt).toLocaleDateString('en-IN', { dateStyle: 'medium' })}</p></div><div className="text-right"><span className="rounded-full bg-white px-3 py-1 text-xs text-terra">{order.paymentMethod === 'COD' ? (order.status === 'PAID' ? 'Cash on Delivery · Paid' : 'Cash on Delivery · Payment due') : order.paymentMethod === 'EMI' || order.paymentChannel === 'emi' ? 'Paid · Razorpay EMI' : 'Paid · Razorpay'}</span><p className="mt-2 text-sm font-medium">{formatPrice(order.amount, order.currency)}</p></div></div>
       <ul className="divide-y divide-sand px-5">{order.items.map((item, index) => <li key={index} className="flex items-center gap-4 py-4"><img src={item.image || '/images/categories/decor.jpg'} alt="" className="h-16 w-16 rounded-lg object-cover" /><div className="min-w-0 flex-1"><p className="text-sm font-medium">{item.name}</p>{item.variantLabel && <p className="mt-1 text-xs text-muted">{item.variantLabel}</p>}<p className="mt-1 text-xs text-muted">Qty {item.quantity}</p></div><span className="text-sm">{formatPrice(item.unitPrice * item.quantity, order.currency)}</span></li>)}</ul>
       {order.shipping && <p className="border-t border-sand px-5 py-4 text-xs leading-relaxed text-muted">Delivery to: {[order.shipping.fullName, order.shipping.line1, order.shipping.city, order.shipping.postalCode].filter(Boolean).join(', ')}</p>}
     </article>)}</div>
   </>
 }
-
 function Wishlist() {
   const { wishlist, toggleWish, wishlistError } = useStore()
   const resource = useResource('/api/products')
@@ -135,11 +134,13 @@ function Wishlist() {
 export default function AccountDashboard({ customer, onChange, onLogout, loggingOut, logoutError }) {
   const search = useSearchParams()
   const active = accountSections.some(([id]) => id === search.get('section')) ? search.get('section') : 'overview'
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [active])
   const title = accountSections.find(([id]) => id === active)[1]
   const descriptions = { profile: 'Your name, email and contact details.', orders: 'Keep your purchases in one place.', wishlist: 'A little space for your favorites.', addresses: 'Ready for your next delivery.' }
   return <section className="bg-white pb-16 pt-7 md:pb-20 md:pt-10"><div className="container-x max-w-[1240px]">
     <div className="relative overflow-hidden rounded-2xl bg-cream p-6 md:p-9">
-      <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 h-72 w-72 rounded-full border-[40px] border-sand/35" />
       <div className="relative flex flex-wrap items-center justify-between gap-5">
         <div className="flex min-w-0 items-center gap-4 md:gap-5"><CustomerAvatar customer={customer} className="h-16 w-16 border-4 border-white text-xl md:h-20 md:w-20" /><div className="min-w-0"><p className="mb-2 text-[10px] font-medium uppercase tracking-[0.2em] text-terra">Your Artiz account</p><h1 className="text-[26px] font-semibold leading-tight md:text-[36px]">Hello, {customer.name.split(' ')[0]}.</h1><p className="mt-2 max-w-[210px] truncate text-xs text-muted sm:max-w-none md:text-sm">{customer.email}</p></div></div>
         <button disabled={loggingOut} onClick={onLogout} className="relative inline-flex items-center gap-2 rounded-full border border-sand bg-white/70 px-4 py-2.5 text-xs font-medium transition-colors hover:bg-white hover:text-terra disabled:opacity-50"><LogOut size={15} />{loggingOut ? 'Signing out…' : 'Sign out'}</button>

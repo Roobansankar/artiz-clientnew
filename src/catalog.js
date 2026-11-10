@@ -18,8 +18,10 @@ export function categoryProducts(slug, categories, products) {
   return products.filter(product => [product.categorySlug, ...(product.collectionSlugs || [])].some(value => slugs.has(value)))
 }
 
+const collectionFlags = new Set(['isNewArrival', 'isBestSeller', 'isCurated'])
+
 export function featuredProducts(products, flag) {
-  if (!['isNewArrival', 'isBestSeller'].includes(flag)) return []
+  if (!collectionFlags.has(flag)) return []
   return products.filter(product => product.published !== false && product[flag] === true)
 }
 

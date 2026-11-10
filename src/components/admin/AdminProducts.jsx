@@ -10,7 +10,7 @@ import { attributesOf, pricesVary, variantLabel } from '@/lib/variants';
 import AdminCategories from './AdminCategories';
 import VariantEditor, { blankSetup, hasVariantProblems, setupFrom, toPayload } from './VariantEditor';
 import ProductCategoryPicker from './ProductCategoryPicker';
-const blank = () => ({ name: '', description: '', details: '', categorySlug: '', collectionSlugs: [], material: '', dimensions: '', variants: blankSetup(), retainedImages: [], published: false, isNewArrival: true, isBestSeller: false, isFeatured: false });
+const blank = () => ({ name: '', description: '', details: '', categorySlug: '', collectionSlugs: [], material: '', dimensions: '', variants: blankSetup(), retainedImages: [], published: false, isNewArrival: true, isBestSeller: false, isFeatured: false, isCurated: false });
 const productEditPath = (product) => {
     return `/admin/products/${product.slug || product.id}/edit`;
 };
@@ -46,6 +46,8 @@ export default function AdminProducts() {
     const [showVariantProblems, setShowVariantProblems] = useState(false);
     const [fieldErrors, setFieldErrors] = useState({});
     const [deleting, setDeleting] = useState(null);
+    const [selected, setSelected] = useState([]);
+    const [bulkDeleting, setBulkDeleting] = useState(false);
     useEffect(() => {
         if (managingCategories)
             return;
@@ -87,9 +89,24 @@ export default function AdminProducts() {
         setPreviews(urls);
         return () => urls.forEach(url => URL.revokeObjectURL(url));
     }, [files]);
-    useEffect(() => { if (!deleting)
-        return; const escape = (event) => { if (event.key === 'Escape')
-        setDeleting(null); }; window.addEventListener('keydown', escape); return () => window.removeEventListener('keydown', escape); }, [deleting]);
+    useEffect(() => {
+        setSelected(current => current.filter(id => products.some(product => product.id === id)));
+    }, [products]);
+    useEffect(() => {
+        // Opening a product replaces the list content; start the detail view at the top.
+        if (detailId)
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }, [detailId]);
+    useEffect(() => {
+        if (!deleting && !bulkDeleting)
+            return;
+        const escape = (event) => { if (event.key === 'Escape') {
+            setDeleting(null);
+            setBulkDeleting(false);
+        } };
+        window.addEventListener('keydown', escape);
+        return () => window.removeEventListener('keydown', escape);
+    }, [deleting, bulkDeleting]);
     useEffect(() => {
         if (creatingProduct) {
             initializeEditor();
@@ -120,7 +137,7 @@ export default function AdminProducts() {
         setFieldErrors({});
         setFiles([]);
         setShowVariantProblems(false);
-        setEditor(product ? { id: product.id, name: product.name, description: product.description, details: product.details || '', categorySlug: product.categorySlug, collectionSlugs: product.collectionSlugs || [], material: product.material, dimensions: product.dimensions, variants: setupFrom(product.variants?.length ? product.variants : (product.swatches ?? []).map(color => ({ color, price: product.amount, mrp: product.mrp ?? null, stock: 0 })), product.amount, product.mrp), retainedImages: product.images || [], published: !!product.published, isNewArrival: !!product.isNewArrival, isBestSeller: !!product.isBestSeller, isFeatured: !!product.isFeatured } : blank());
+        setEditor(product ? { id: product.id, name: product.name, description: product.description, details: product.details || '', categorySlug: product.categorySlug, collectionSlugs: product.collectionSlugs || [], material: product.material, dimensions: product.dimensions, variants: setupFrom(product.variants?.length ? product.variants : (product.swatches ?? []).map(color => ({ color, price: product.amount, mrp: product.mrp ?? null, stock: 0 })), product.amount, product.mrp), retainedImages: product.images || [], published: !!product.published, isNewArrival: !!product.isNewArrival, isBestSeller: !!product.isBestSeller, isFeatured: !!product.isFeatured, isCurated: !!product.isCurated } : blank());
     }
     function field(key, value) { setEditor(current => current ? { ...current, [key]: value } : current); }
     async function save(event) {
@@ -202,6 +219,43 @@ export default function AdminProducts() {
             setSaving(false);
         }
     }
+    async function confirmBulkDelete() {
+        if (!selected.length || saving)
+            return;
+        setSaving(true);
+        setFormError('');
+        const ids = [...selected];
+        const failed = [];
+        let unauthorized = false;
+        for (const id of ids) {
+            try {
+                const response = await fetch(`/api/admin/products/${encodeURIComponent(id)}`, { method: 'DELETE' });
+                if (response.status === 401) {
+                    unauthorized = true;
+                    break;
+                }
+                if (!response.ok)
+                    failed.push(id);
+            }
+            catch {
+                failed.push(id);
+            }
+        }
+        setSaving(false);
+        setBulkDeleting(false);
+        if (unauthorized) {
+            router.replace('/admin/login');
+            return;
+        }
+        const deleted = ids.length - failed.length;
+        setSelected(failed);
+        if (deleted)
+            toast.success(deleted === 1 ? 'Product deleted' : `${deleted} products deleted`, { description: deleted === 1 ? 'The selected product was deleted.' : `${deleted} selected products were deleted.` });
+        if (failed.length)
+            toast.error(failed.length === 1 ? '1 product could not be deleted' : `${failed.length} products could not be deleted`, { description: 'They are still selected. Please try again.' });
+        setReload(n => n + 1);
+        router.refresh();
+    }
     const categoryName = (slug) => catalogCategories.find(c => c.slug === slug)?.name || slug;
     const publishedCount = products.filter(p => p.published).length;
     const outOfStockCount = products.filter(p => !p.stock).length;
@@ -223,6 +277,17 @@ export default function AdminProducts() {
     const pageCount = Math.max(1, Math.ceil(visible.length / pageSize));
     const currentPage = Math.min(page, pageCount);
     const pageProducts = visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    const pageIds = pageProducts.map(product => product.id);
+    const allOnPageSelected = pageIds.length > 0 && pageIds.every(id => selected.includes(id));
+    const someOnPageSelected = pageIds.some(id => selected.includes(id));
+    function toggleAllOnPage() {
+        setSelected(current => allOnPageSelected
+            ? current.filter(id => !pageIds.includes(id))
+            : [...new Set([...current, ...pageIds])]);
+    }
+    function toggleSelected(id) {
+        setSelected(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
+    }
     const hasFilters = query !== '' || categoryFilter !== 'all' || stockFilter !== 'all' || status !== 'all';
     function clearFilters() { setQuery(''); setCategoryFilter('all'); setStockFilter('all'); setStatus('all'); setPage(1); }
     if (managingCategories)
@@ -265,7 +330,7 @@ export default function AdminProducts() {
                 setFiles(current => [...current, ...incoming]);
                 setFormError('');
             }}/></label>
-        <div className="ad-editor-flags">{[['published', 'Published on website'], ['isNewArrival', 'New Arrivals'], ['isBestSeller', 'Best Sellers'], ['isFeatured', 'Featured collection']].map(([key, label]) => <label key={key}><input type="checkbox" checked={editor[key]} onChange={e => field(key, e.target.checked)}/>{label}</label>)}</div>
+        <div className="ad-editor-flags">{[['published', 'Published on website'], ['isNewArrival', 'New Arrivals'], ['isBestSeller', 'Best Sellers'], ['isFeatured', 'Featured collection'], ['isCurated', 'Curated collection']].map(([key, label]) => <label key={key}><input type="checkbox" checked={editor[key]} onChange={e => field(key, e.target.checked)}/>{label}</label>)}</div>
       </fieldset>
       {formError && <div className="ad-product-error" role="alert"><p>{formError}</p>{Object.entries(fieldErrors).filter(([key]) => key !== 'variants').map(([key, errors]) => <p key={key}>{key}: {errors.join(', ')}</p>)}</div>}
       <button className="ad-primary" disabled={saving} type="submit">{saving ? 'Converting images & saving...' : editor.id ? 'Save changes' : 'Create product'}</button>
@@ -279,7 +344,7 @@ export default function AdminProducts() {
     <dl className="ad-product-detail-fields">{[
                 ['Product ID', detail.id], ['Status', detail.published ? 'Published' : 'Draft'], ['Price', <ProductPrice key="price" product={detail}/>], ['Total stock', String(detail.stock || 0)],
                 ['Category', categoryName(detail.categorySlug)], ['Collections', detail.collectionSlugs?.map(categoryName).join(', ') || 'None'],
-                ['Material', detail.material || '—'], ['Dimensions', detail.dimensions || '—'], ['Homepage', [detail.isNewArrival && 'New arrival', detail.isBestSeller && 'Best seller', detail.isFeatured && 'Featured'].filter(Boolean).join(', ') || 'None'],
+                ['Material', detail.material || '—'], ['Dimensions', detail.dimensions || '—'], ['Homepage', [detail.isNewArrival && 'New arrival', detail.isBestSeller && 'Best seller', detail.isFeatured && 'Featured', detail.isCurated && 'Curated'].filter(Boolean).join(', ') || 'None'],
             ].map(([label, value]) => <div key={String(label)}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
     <h3>Variants, pricing &amp; stock</h3>
     <div className="ad-table-scroll"><table className="ad-variant-table"><thead><tr><th scope="col">Variant</th><th scope="col">Selling price</th><th scope="col">MRP</th><th scope="col">Stock</th></tr></thead><tbody>{(detail.variants ?? []).map((variant, index) => <tr key={index}><td><span className="ad-swatch-preview"><span>{variant.color && <i style={{ background: variant.color }}/>}{variantLabel(variant, true) || (attributesOf(detail.variants).length ? `Variant ${index + 1}` : 'Default')}</span></span></td><td>{formatINR(variant.price)}</td><td>{variant.mrp == null ? '—' : formatINR(variant.mrp)}</td><td><span className={`ad-stock-dot ${!variant.stock ? 'out' : variant.stock <= 5 ? 'low' : 'in'}`} aria-hidden="true"/> {variant.stock ? variant.stock : 'Out of stock'}</td></tr>)}</tbody></table></div>
@@ -300,18 +365,24 @@ export default function AdminProducts() {
         <select aria-label="Filter by inventory" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}><option value="all">All inventory</option><option value="in">In stock</option><option value="low">Low stock (1-5)</option><option value="out">Out of stock</option></select>
         <select aria-label="Sort products" value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}><option value="recent">Recently updated</option><option value="name">Name: A-Z</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="stock">Stock: low to high</option></select>
         {hasFilters && <button className="ad-secondary" onClick={clearFilters}>Clear filters</button>}
+        {selected.length > 0 && <div className="ad-product-bulk-bar" role="group" aria-label="Bulk actions">
+          <span>{selected.length} selected</span>
+          <button className="ad-secondary" onClick={() => setSelected([])}>Clear</button>
+          <button className="ad-secondary ad-danger" onClick={() => { setFormError(''); setBulkDeleting(true); }}>Delete selected</button>
+        </div>}
       </div>
       {error && <div role="alert" className="ad-product-error">{error} <button className="ad-secondary" onClick={() => setReload(n => n + 1)}>Retry</button></div>}
       <div className="ad-table-scroll ad-products-table-scroll" tabIndex={0} role="region" aria-label="Product catalog table" aria-busy={loading}>
-        <table className="ad-products-table"><caption className="sr">Product catalog with prices, publication status, inventory, and editing actions</caption><thead><tr><th scope="col">S.No</th><th scope="col">Product</th><th scope="col">Status</th><th scope="col">Inventory</th><th scope="col">Category</th><th scope="col">MRP</th><th scope="col">Price</th><th scope="col">Homepage</th><th scope="col" className="ad-align-right">Actions</th></tr></thead>
-          <tbody>{loading ? Array.from({ length: 5 }, (_, i) => <tr key={i} aria-hidden="true">{Array.from({ length: 9 }, (_, j) => <td key={j}><span className="ad-product-loading"/></td>)}</tr>) : error ? <tr><td colSpan={9} className="ad-empty">Products could not be loaded. Please retry.</td></tr> : !pageProducts.length ? <tr><td colSpan={8}><div className="ad-product-table-empty"><strong>{products.length ? 'No matching products' : 'Your catalog is ready for its first product'}</strong><p>{products.length ? 'Try another search or clear your filters.' : 'Add product details and images to start building your collection.'}</p><button className="ad-secondary" onClick={products.length ? clearFilters : () => edit()}>{products.length ? 'Clear filters' : '+ Add product'}</button></div></td></tr> : pageProducts.map((p, index) => <tr key={p.id} className="ad-product-clickable-row" onClick={() => setDetailId(p.id)}>
+        <table className="ad-products-table"><thead><tr><th scope="col" className="ad-select-cell"><input type="checkbox" aria-label="Select all products on this page" checked={allOnPageSelected} onChange={toggleAllOnPage} ref={element => { if (element) element.indeterminate = someOnPageSelected && !allOnPageSelected; }}/></th><th scope="col">S.No</th><th scope="col">Product</th><th scope="col">Status</th><th scope="col">Inventory</th><th scope="col">Category</th><th scope="col">MRP</th><th scope="col">Price</th><th scope="col">Homepage</th><th scope="col" className="ad-align-right">Actions</th></tr></thead>
+          <tbody>{loading ? Array.from({ length: 5 }, (_, i) => <tr key={i} aria-hidden="true">{Array.from({ length: 10 }, (_, j) => <td key={j}><span className="ad-product-loading"/></td>)}</tr>) : error ? <tr><td colSpan={10} className="ad-empty">Products could not be loaded. Please retry.</td></tr> : !pageProducts.length ? <tr><td colSpan={10}><div className="ad-product-table-empty"><strong>{products.length ? 'No matching products' : 'Your catalog is ready for its first product'}</strong><p>{products.length ? 'Try another search or clear your filters.' : 'Add product details and images to start building your collection.'}</p><button className="ad-secondary" onClick={products.length ? clearFilters : () => edit()}>{products.length ? 'Clear filters' : '+ Add product'}</button></div></td></tr> : pageProducts.map((p, index) => <tr key={p.id} className={`ad-product-clickable-row${selected.includes(p.id) ? ' ad-row-selected' : ''}`} onClick={() => setDetailId(p.id)}>
+            <td className="ad-select-cell" onClick={event => event.stopPropagation()}><input type="checkbox" aria-label={`Select ${p.name}`} checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)}/></td>
             <td className="ad-product-serial">{(currentPage - 1) * pageSize + index + 1}</td>
             <td><div className="ad-table-product"><button className="ad-table-product-photo" onClick={() => setDetailId(p.id)} aria-label={`View details for ${p.name}`}><Image src={p.image} alt="" width={48} height={48}/></button><div><button className="ad-product-name" onClick={() => setDetailId(p.id)}>{p.name}</button><small>/products/{p.slug}</small></div></div></td>
             <td><span className={`ad-status ${p.published ? 'paid' : 'neutral'}`}><i aria-hidden="true"/>{p.published ? 'Published' : 'Draft'}</span></td>
             <td><div className="ad-product-stock"><span className={`ad-stock-dot ${!p.stock ? 'out' : p.stock <= 5 ? 'low' : 'in'}`} aria-hidden="true"/><span>{!p.stock ? 'Out of stock' : `${p.stock} in stock`}</span></div>{!!p.stock && p.stock <= 5 && <small className="ad-stock-hint">Low stock</small>}{(() => { const soldOut = (p.variants ?? []).filter(variant => !variant.stock).length; return !!p.stock && soldOut > 0 && <small className="ad-stock-hint">{soldOut} of {p.variants.length} variants sold out</small>; })()}</td>
             <td className="ad-product-category-cell">{categoryName(p.categorySlug)}</td>
             <td className="ad-product-price-cell">{p.mrp == null ? '—' : formatINR(p.mrp)}</td><td className="ad-product-price-cell">{pricesVary(p) && <small className="ad-muted">From </small>}{p.price}</td>
-            <td><div className="ad-product-placement">{p.isNewArrival && <span>New arrival</span>}{p.isBestSeller && <span>Best seller</span>}{p.isFeatured && <span>Featured</span>}{!p.isNewArrival && !p.isBestSeller && !p.isFeatured && <span className="ad-muted">&mdash;</span>}</div></td>
+            <td><div className="ad-product-placement">{p.isNewArrival && <span>New arrival</span>}{p.isBestSeller && <span>Best seller</span>}{p.isFeatured && <span>Featured</span>}{p.isCurated && <span>Curated</span>}{!p.isNewArrival && !p.isBestSeller && !p.isFeatured && !p.isCurated && <span className="ad-muted">&mdash;</span>}</div></td>
             <td><div className="ad-product-row-actions"><button className="ad-secondary" aria-label={`Edit ${p.name}`} onClick={event => { event.stopPropagation(); edit(p); }}>Edit</button><button className="ad-secondary ad-danger" aria-label={`Delete ${p.name}`} onClick={event => { event.stopPropagation(); setFormError(''); setDeleting(p); }}>Delete</button></div></td>
           </tr>)}</tbody>
         </table>
@@ -319,5 +390,6 @@ export default function AdminProducts() {
       <div className="ad-product-list-footer"><span role="status" aria-live="polite">{loading ? 'Loading products...' : error ? 'Products unavailable' : visible.length ? `Showing ${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, visible.length)} of ${visible.length} products` : '0 products'}</span><div><label>Rows per page <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option></select></label><span>Page {currentPage} of {pageCount}</span><button className="ad-secondary" aria-label="Previous page" disabled={loading || currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</button><button className="ad-secondary" aria-label="Next page" disabled={loading || currentPage >= pageCount} onClick={() => setPage(currentPage + 1)}>Next</button></div></div>
     </div>
     {deleting && <div className="ad-modal-backdrop" onClick={() => setDeleting(null)}><section className="ad-customer-modal" role="alertdialog" aria-modal="true" aria-labelledby="ad-delete-product-title" onClick={e => e.stopPropagation()}><header><div><h2 id="ad-delete-product-title">Delete product?</h2><p>{deleting.name} and its images will be permanently removed. This cannot be undone.</p></div></header>{formError && <p className="ad-auth-error" role="alert">{formError}</p>}<div className="ad-modal-actions"><button className="ad-secondary" autoFocus onClick={() => setDeleting(null)}>Cancel</button><button className="ad-secondary ad-danger" disabled={saving} onClick={confirmDelete}>{saving ? 'Deleting...' : 'Delete product'}</button></div></section></div>}
+    {bulkDeleting && <div className="ad-modal-backdrop" onClick={() => { if (!saving) setBulkDeleting(false); }}><section className="ad-customer-modal" role="alertdialog" aria-modal="true" aria-labelledby="ad-bulk-delete-title" onClick={e => e.stopPropagation()}><header><div><h2 id="ad-bulk-delete-title">Delete selected products?</h2><p>{selected.length === 1 ? '1 product' : `${selected.length} products`} and their images will be permanently removed. This cannot be undone.</p></div></header><div className="ad-modal-actions"><button className="ad-secondary" autoFocus disabled={saving} onClick={() => setBulkDeleting(false)}>Cancel</button><button className="ad-secondary ad-danger" disabled={saving} onClick={confirmBulkDelete}>{saving ? 'Deleting...' : `Delete ${selected.length === 1 ? 'product' : `${selected.length} products`}`}</button></div></section></div>}
   </section>;
 }

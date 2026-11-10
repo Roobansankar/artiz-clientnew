@@ -54,7 +54,7 @@ test('cross-site login and Google start remain blocked; callback POST is rejecte
 })
 
 test('account methods forward scoped profile, address, wishlist and order requests', async () => {
-  for (const [endpoint, method, handler] of [['profile', 'PATCH', PATCH], ['addresses', 'GET', GET], ['addresses', 'POST', POST], ['addresses/cm123', 'PUT', PUT], ['addresses/cm123', 'DELETE', DELETE], ['wishlist', 'GET', GET], ['wishlist', 'POST', POST], ['wishlist/cm123', 'DELETE', DELETE], ['orders', 'GET', GET]]) {
+  for (const [endpoint, method, handler] of [['profile', 'PATCH', PATCH], ['addresses', 'GET', GET], ['addresses', 'POST', POST], ['addresses/cm123', 'PUT', PUT], ['addresses/cm123', 'DELETE', DELETE], ['wishlist', 'GET', GET], ['wishlist', 'POST', POST], ['wishlist/cm123', 'DELETE', DELETE], ['orders', 'GET', GET], ['checkout/config', 'GET', GET], ['checkout/order', 'POST', POST], ['checkout/verify', 'POST', POST]]) {
     globalThis.fetch = async (url, options) => {
       assert.ok(url.endsWith(`/api/auth/${endpoint}`))
       assert.equal(options.method, method)

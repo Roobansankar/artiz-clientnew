@@ -7,6 +7,7 @@ const StoreCtx = createContext(null)
 
 export function StoreProvider({ children }) {
   const [cart, setCart] = useState([])
+  const [cartLoaded, setCartLoaded] = useState(false)
   const [wishlist, setWishlist] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
   const [quickView, setQuickView] = useState(null)
@@ -15,6 +16,14 @@ export function StoreProvider({ children }) {
   const wishRef = useRef([])
   const ownerRef = useRef(null)
   const wishQueue = useRef(Promise.resolve())
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('artiz-cart-v1') || '[]')
+      if (Array.isArray(saved)) setCart(saved.filter(item => item && typeof item.id === 'string' && Number.isFinite(item.qty) && item.qty > 0 && item.qty <= 10 && Number.isFinite(item.price)))
+    } catch { /* A damaged cart starts empty. */ }
+    setCartLoaded(true)
+  }, [])
+  useEffect(() => { if (cartLoaded) { try { localStorage.setItem('artiz-cart-v1', JSON.stringify(cart)) } catch {} } }, [cart, cartLoaded])
   useEffect(() => {
     const controller = new AbortController()
     fetch('/api/auth/me', { cache: 'no-store', signal: controller.signal }).then(r => r.ok ? r.json() : Promise.reject()).then(data => setCustomer(data.customer)).catch(() => {})
@@ -83,7 +92,7 @@ export function StoreProvider({ children }) {
 
   return (
     <StoreCtx.Provider
-      value={{ cart, addToCart, updateQty, cartOpen, setCartOpen, wishlist, toggleWish, quickView, setQuickView, customer, setCustomer, wishlistError }}
+      value={{ cart, cartLoaded, clearCart: () => setCart([]), addToCart, updateQty, cartOpen, setCartOpen, wishlist, toggleWish, quickView, setQuickView, customer, setCustomer, wishlistError }}
     >
       {children}
     </StoreCtx.Provider>

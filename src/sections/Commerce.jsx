@@ -12,28 +12,43 @@ import { ArrowBtn, Price, ProductCard, Reveal, SectionHeading, ViewAll } from '.
 import { featuredSlides, money, products, tabs } from '../data'
 import { useStore } from '../store'
 
-export function FeaturedCollection() {
+export function FeaturedCollection({ products: curatedProducts = [] }) {
+  const { addToCart, wishlist, toggleWish } = useStore()
   return (
     <section className="pb-[60px] lg:pb-[90px]">
       <div className="container-x">
-        <SectionHeading sub="Curated Selection" title="Designed for Modern Homes" right={<ViewAll />} />
+        <SectionHeading sub="Curated Selection" title="Designed for Modern Homes" right={<ViewAll href="/curated-collection" />} />
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
           <Reveal>
-            <a href="#" className="group relative block h-full min-h-[460px] overflow-hidden rounded-2xl">
+            <Link href="/curated-collection" className="group relative block h-full min-h-[460px] overflow-hidden rounded-2xl">
               <img src="/images/banner6.png" alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
                 <span className="mb-2 text-sm text-white/85">Living Room Refresh</span>
-                <h3 className="text-[28px] leading-tight">Up to 30% Off on Sofas & Tables</h3>
+                <h3 className="text-[28px] leading-tight">Thoughtfully chosen for your home</h3>
                 <span className="mt-6"><span className="btn-light">Shop Collection</span></span>
               </div>
-            </a>
+            </Link>
           </Reveal>
           <Reveal delay={0.1} className="min-w-0">
-            <Swiper modules={[Autoplay]} spaceBetween={24} slidesPerView={1.3} autoplay={{ delay: 4000, disableOnInteraction: true, pauseOnMouseEnter: true }} breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}>
-              {products.slice(0, 8).map((p) => (
-                <SwiperSlide key={p.id}><ProductCard p={p} /></SwiperSlide>
-              ))}
-            </Swiper>
+            {curatedProducts.length ? <Swiper modules={[Autoplay]} spaceBetween={24} slidesPerView={1.3} autoplay={{ delay: 4000, disableOnInteraction: true, pauseOnMouseEnter: true }} breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}>
+              {curatedProducts.map(product => {
+                const href = `/products/${product.slug || product.id}`
+                const wished = wishlist.includes(product.id)
+                const option = productOption(product)
+                return <SwiperSlide key={product.id}>
+                  <article className="group/curated relative">
+                    <Link href={href} className="relative block aspect-square overflow-hidden rounded-2xl bg-white">
+                      <img src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} loading="lazy" className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover/curated:scale-105 ${product.images?.[1] ? 'group-hover/curated:opacity-0 group-focus-within/curated:opacity-0' : ''}`} />
+                      {product.images?.[1] && <img src={product.images[1]} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover/curated:scale-105 group-hover/curated:opacity-100 group-focus-within/curated:opacity-100" />}
+                    </Link>
+                    <button type="button" onClick={() => toggleWish(product.id)} aria-label={`${wished ? 'Remove' : 'Save'} ${product.name} ${wished ? 'from' : 'to'} wishlist`} aria-pressed={wished} className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white opacity-0 transition-opacity group-hover/curated:opacity-100 focus:opacity-100"><Heart size={18} className={wished ? 'fill-terra text-terra' : ''} /></button>
+                    <Link href={href} className="mt-4 block font-heading text-base font-medium hover:text-terra">{product.name}</Link>
+                    <div className="mt-2 text-sm"><ProductPrice product={product} /></div>
+                    <button type="button" disabled={option.stock <= 0} onClick={() => addToCart(shopProduct(product, []))} className="btn-dark mt-4 w-full disabled:cursor-not-allowed disabled:opacity-50">{option.stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
+                  </article>
+                </SwiperSlide>
+              })}
+            </Swiper> : <p className="rounded-2xl bg-peach p-8 text-sm text-muted">Curated pieces will be available soon.</p>}
           </Reveal>
         </div>
       </div>

@@ -448,12 +448,13 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
           <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-espresso/50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCompareOpen(false)}>
             <motion.div initial={{ y: 30 }} animate={{ y: 0 }} exit={{ y: 30 }} className="max-h-[85vh] w-full max-w-5xl overflow-auto rounded-2xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
               <div className="mb-5 flex items-center justify-between"><h3 className="text-2xl">Compare products</h3><button onClick={() => setCompareOpen(false)} aria-label="Close" className="cursor-pointer"><X /></button></div>
-              <table className="w-full min-w-[560px] text-sm">
+              <table className="w-full min-w-[560px] table-fixed text-sm">
+                <colgroup><col style={{ width: '128px' }} />{comparedItems.map(product => <col key={product.id} />)}</colgroup>
                 <tbody>
                   <tr>
-                    <td className="w-32" />
+                    <td />
                     {comparedItems.map((p) => (
-                      <td key={p.id} className="p-2 align-top"><img src={p.img} alt="" className="aspect-square w-full rounded-lg object-cover" /><p className="mt-2 font-semibold">{p.title}</p></td>
+                      <td key={p.id} className="p-2 align-top"><div className="flex h-48 items-center justify-center overflow-hidden rounded-lg bg-cream md:h-56"><img src={p.img} alt={p.title} className="h-full w-full object-contain" /></div><p className="mt-2 font-semibold">{p.title}</p></td>
                     ))}
                   </tr>
                   {[['Price', (p) => formatMoney(p.price)], ['Brand', (p) => p.vendor], ['Availability', (p) => (p.available ? 'In stock' : 'Out of stock')], ['Colors', (p) => p.colors.join(', ')], ['Added', (p) => p.created]].map(([k, fn]) => (

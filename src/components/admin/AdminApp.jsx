@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import AdminOrders from './AdminOrders';
+import AdminOrderDetail from './AdminOrderDetail';
 import AdminCustomers from './AdminCustomers';
 import AdminProducts from './AdminProducts';
 import AdminGallery from './AdminGallery';
 import './admin.css';
-import RevenueChart from './RevenueChart';
+import AdminDashboard from './AdminDashboard';
 import ContactMessages from './ContactMessages';
 import AdminNotifications from './AdminNotifications';
 import AdminContentSkeleton from './AdminContentSkeleton';
@@ -49,14 +50,6 @@ const nav = [
 ];
 const settingLinks = ['General', 'Members', 'Notifications', 'Security'];
 const colors = [{ name: 'Green', value: '#00a155' }, { name: 'Blue', value: '#2563eb' }, { name: 'Violet', value: '#7c3aed' }, { name: 'Rose', value: '#e11d48' }, { name: 'Orange', value: '#ea580c' }];
-const orders = [
-    { id: '1048', name: 'Aarav Sharma', initials: 'AS', email: 'aarav.sharma@example.com', item: 'Cloud Boucle Armchair', date: '20 Oct, 10:42', amount: 18900, status: 'Paid' },
-    { id: '1047', name: 'Diya Patel', initials: 'DP', email: 'diya.patel@example.com', item: 'Oak Coffee Table', date: '20 Oct, 09:18', amount: 12400, status: 'Paid' },
-    { id: '1046', name: 'Rohan Mehta', initials: 'RM', email: 'rohan.mehta@example.com', item: 'Terracotta Weave Rug', date: '19 Oct, 16:35', amount: 6800, status: 'Refunded' },
-    { id: '1045', name: 'Ananya Rao', initials: 'AR', email: 'ananya.rao@example.com', item: 'Linen Platform Bed', date: '19 Oct, 14:08', amount: 32900, status: 'Paid' },
-    { id: '1044', name: 'Kabir Singh', initials: 'KS', email: 'kabir.singh@example.com', item: 'Glass Pendant Light', date: '18 Oct, 11:52', amount: 4200, status: 'Failed' },
-];
-const money = (n) => '₹' + n.toLocaleString('en-IN');
 export default function AdminApp({ login = false }) {
     const pathname = usePathname();
     const router = useRouter();
@@ -102,7 +95,7 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
     const router = useRouter();
     const isLogin = login || pathname === '/admin/login';
     const isSettings = pathname.startsWith('/admin/settings');
-    const section = isSettings ? 'Settings' : pathname.startsWith('/admin/products/') ? 'Products' : nav.find(n => n.path === pathname)?.label || 'Home';
+    const section = isSettings ? 'Settings' : pathname.startsWith('/admin/products/') ? 'Products' : pathname.startsWith('/admin/orders/') ? 'Orders' : nav.find(n => n.path === pathname)?.label || 'Home';
     const settingsTab = pathname.split('/')[3] || 'general';
     const [dark, setDark] = useState(false);
     const [accent, setAccent] = useState(colors[0].value);
@@ -112,9 +105,7 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
     const [themeOpen, setThemeOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
-    const [query, setQuery] = useState('');
     const [navQuery, setNavQuery] = useState('');
-    const [status, setStatus] = useState('All');
     const [period, setPeriod] = useState('Daily');
     const [range, setRange] = useState('Last 14 days');
     const [notice, setNotice] = useState('');
@@ -125,7 +116,7 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
         if (saved && colors.some(c => c.value === saved))
             setAccent(saved);
     }, []);
-    useEffect(() => { setQuery(''); setStatus('All'); setMenu(false); setProfileOpen(false); }, [pathname]);
+    useEffect(() => { setMenu(false); setProfileOpen(false); }, [pathname]);
     useEffect(() => { if (!notice)
         return; const t = setTimeout(() => setNotice(''), 4500); return () => clearTimeout(t); }, [notice]);
     useEffect(() => { if (searchOpen)
@@ -140,11 +131,7 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
     } }; window.addEventListener('keydown', handler); return () => window.removeEventListener('keydown', handler); }, []);
     const chooseMode = (value) => { document.documentElement.dataset.adminTheme = value ? 'dark' : 'light'; setDark(value); localStorage.setItem('artiz-admin-dark', String(value)); };
     const chooseColor = (value) => { setAccent(value); localStorage.setItem('artiz-admin-accent', value); };
-    const filteredOrders = orders.filter(o => `${o.id} ${o.name} ${o.email} ${o.item}`.toLowerCase().includes(query.toLowerCase()) && (status === 'All' || status === o.status));
-    const exportOrders = () => { const csv = ['ID,Date,Status,Email,Amount', ...filteredOrders.map(o => [o.id, o.date.replace(',', ''), o.status, o.email, o.amount].join(','))].join('\n'); const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); const a = document.createElement('a'); a.href = url; a.download = 'artiz-demo-orders.csv'; a.click(); URL.revokeObjectURL(url); setNotice('Demo orders exported.'); };
     const appearance = <div className="ad-appearance"><button className="ad-icon-button" aria-label="Choose theme color" aria-expanded={themeOpen} onClick={() => setThemeOpen(!themeOpen)}><Icon name="palette"/></button><button className="ad-icon-button" aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} onClick={() => chooseMode(!dark)}><Icon name={dark ? 'sun' : 'moon'}/></button>{themeOpen && <div className="ad-theme-popover"><strong>Theme color</strong><p>Customize your workspace.</p><div className="ad-color-options">{colors.map(c => <button key={c.name} onClick={() => chooseColor(c.value)} aria-pressed={accent === c.value} className={accent === c.value ? 'selected' : ''}><i style={{ background: c.value }}/>{c.name}{accent === c.value && <Icon name="check" size={13}/>}</button>)}</div></div>}</div>;
-    const salesTable = <div className="ad-table-scroll"><table><thead><tr><th>ID</th><th>Date</th><th>Status</th><th>Email</th><th className="ad-align-right">Amount</th></tr></thead><tbody>{filteredOrders.map(o => <tr key={o.id}><td>#{o.id}</td><td className="ad-muted">{o.date}</td><td><span className={`ad-status ${o.status.toLowerCase()}`}><i />{o.status}</span></td><td className="ad-muted">{o.email}</td><td className="ad-align-right ad-medium">{money(o.amount)}</td></tr>)}</tbody></table>{!filteredOrders.length && <div className="ad-empty">No orders match your filters.</div>}</div>;
-    const revenue = range === 'Last 7 days' ? 248600 : range === 'Last 30 days' ? 862400 : 486280;
     return <div className={`ad-root ${dark ? 'ad-dark' : ''} ${collapsed ? 'ad-collapsed' : ''}`} style={{ '--ad-accent': accent }}>
     {isLogin ? <main className="ad-login"><Link href="/" className="ad-login-brand"><span className="ad-logo">A</span>Artiz <span>Admin</span></Link><div className="ad-login-tools">{appearance}</div><section className="ad-login-card"><div className="ad-login-symbol"><Icon name="lock" size={25}/></div><h1>Log in to your account</h1><p>Welcome back! Enter your details to continue.</p><AdminLoginForm onAuthenticated={onAuthenticated}/><div className="ad-login-divider"><span>Admin access</span></div><p className="ad-login-demo">Sign in with your Artiz administrator account.</p><Link href="/" className="ad-back">← Back to Artiz storefront</Link></section><footer className="ad-login-footer">© 2026 Artiz. All rights reserved.</footer></main> : <>
       {menu && <button className="ad-overlay" aria-label="Close navigation" onClick={() => setMenu(false)}/>}
@@ -161,13 +148,13 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
             setNotice('Could not sign out. Please try again.');
         } }}><Icon name="logout" size={16}/>Log out</button></div>}<button className="ad-profile" title="Account menu" onClick={() => setProfileOpen(!profileOpen)} aria-expanded={profileOpen}><span className="ad-avatar">AD</span><span className="ad-sidebar-text">{admin?.name || 'Admin'}</span><span className="ad-sidebar-text ad-team-chevron"><Icon name="chevron" size={15}/></span></button></div></aside>
       <div className="ad-workarea"><header className="ad-topbar"><div className="ad-topbar-title"><button className="ad-icon-button ad-desktop-collapse" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} onClick={() => setCollapsed(!collapsed)}><Icon name="panel"/></button><button className="ad-icon-button ad-mobile-menu" aria-label="Open navigation" onClick={() => setMenu(true)}><Icon name="panel"/></button><h1>{section}</h1></div><div className="ad-topbar-actions">{appearance}<AdminNotifications enabled={!!admin && !isLogin}/></div></header>
-      {(section === 'Home' || section === 'Analytics') && <div className="ad-toolbar"><div className="ad-date-select"><Icon name="calendar" size={16}/><select aria-label="Date range" value={range} onChange={e => setRange(e.target.value)}><option>Last 14 days</option><option>Last 7 days</option><option>Last 30 days</option></select></div><span className="ad-toolbar-separator"/><select className="ad-period" aria-label="Chart interval" value={period} onChange={e => setPeriod(e.target.value)}><option>Daily</option><option>Weekly</option><option>Monthly</option></select><span className="ad-toolbar-demo">Demo data</span></div>}
+      {(section === 'Home' || section === 'Analytics') && <div className="ad-toolbar"><div className="ad-date-select"><Icon name="calendar" size={16}/><select aria-label="Date range" value={range} onChange={e => setRange(e.target.value)}><option>Last 14 days</option><option>Last 7 days</option><option>Last 30 days</option></select></div><span className="ad-toolbar-separator"/><select className="ad-period" aria-label="Chart interval" value={period} onChange={e => setPeriod(e.target.value)}><option>Daily</option><option>Weekly</option><option>Monthly</option></select><span className="ad-muted ad-small">India time</span></div>}
       {isSettings && <nav className="ad-settings-tabs" aria-label="Settings tabs">{settingLinks.map(n => <Link key={n} href={n === 'General' ? '/admin/settings' : '/admin/settings/' + n.toLowerCase()} className={settingsTab === n.toLowerCase() ? 'active' : ''}>{n}</Link>)}</nav>}
       <main className="ad-main" aria-busy={contentLoading}>
       {authError ? <section className="ad-workspace-error" role="alert"><h2>Could not load this page</h2><p>{authError}</p><button className="ad-primary" onClick={onRetry}>Try again</button><Link href="/admin/login">Back to login</Link></section> : contentLoading ? <AdminContentSkeleton section={section}/> : <>
-      {(section === 'Home' || section === 'Analytics') && <><div className="ad-stats">{[{ title: 'Customers', value: range === 'Last 7 days' ? '642' : '1,284', change: '+14.6%', icon: 'users' }, { title: 'Conversions', value: '3.62%', change: '+0.8%', icon: 'pie' }, { title: 'Revenue', value: money(revenue), change: '+13.4%', icon: 'dollar' }, { title: 'Orders', value: range === 'Last 7 days' ? '126' : '248', change: '+20.4%', icon: 'cart' }].map(s => <Link href={s.title === 'Customers' ? '/admin/customers' : s.title === 'Orders' ? '/admin/orders' : '/admin/analytics'} className="ad-stat" key={s.title}><span className="ad-stat-icon"><Icon name={s.icon} size={20}/></span><span className="ad-stat-label">{s.title}</span><div><strong>{s.value}</strong><span className="ad-change">{s.change}</span></div></Link>)}</div><RevenueChart range={range} period={period} total={revenue}/>{salesTable}</>}
+      {(section === 'Home' || section === 'Analytics') && <AdminDashboard range={range} period={period}/>} 
       {section === 'Contact Messages' && <ContactMessages />}
-      {section === 'Orders' && <AdminOrders notify={setNotice}/>}
+      {section === 'Orders' && (pathname.startsWith('/admin/orders/') ? <AdminOrderDetail id={pathname.split('/')[3]} /> : <AdminOrders notify={setNotice}/>)}
       {section === 'Customers' && <AdminCustomers />}
       {section === 'Products' && <AdminProducts />}
       {section === 'Gallery' && <AdminGallery />}

@@ -115,7 +115,7 @@ export function CartDrawer() {
       </ul>
       <div className="border-t border-sand p-6">
         <div className="mb-4 flex justify-between text-lg font-semibold"><span>Subtotal</span><span>{Object.entries(totals).length ? Object.entries(totals).map(([currency, amount]) => <span key={currency} className="block text-right">{formatPrice(amount, currency)}</span>) : money(0)}</span></div>
-        <button className="btn-dark w-full">Check out</button>
+        {cart.length > 0 ? <Link href="/checkout" onClick={() => setCartOpen(false)} className="btn-dark w-full">Check out</Link> : <button disabled className="btn-dark w-full opacity-50">Check out</button>}
         <button onClick={() => setCartOpen(false)} className="btn-outline mt-3 w-full">Continue shopping</button>
       </div>
     </Drawer>

@@ -2,6 +2,16 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { categoryProducts, descendantSlugs, featuredProducts, firstAvailableVariant, productOption, shopProduct } from '../src/catalog.js'
 
+test('curated collection includes only published products selected in admin', () => {
+  const products = [
+    { id: 'curated', published: true, isCurated: true },
+    { id: 'draft', published: false, isCurated: true },
+    { id: 'other', published: true, isCurated: false },
+  ]
+  assert.deepEqual(featuredProducts(products, 'isCurated').map(product => product.id), ['curated'])
+  assert.deepEqual(featuredProducts([], 'isCurated'), [])
+})
+
 const categories = [
   { slug: 'furniture', name: 'Furniture', parentSlug: null },
   { slug: 'tables', name: 'Tables', parentSlug: 'furniture' },
