@@ -13,7 +13,7 @@ import { ADDRESS, Logo, Price, Socials } from './ui'
 export function Footer() {
   const cols = [
     { title: 'Quick Links', links: [{ label: 'FAQ', href: '/faq' }, { label: 'Find store location', href: '#' }, { label: 'Privacy Policy', href: '#' }, { label: 'Refund Policy', href: '#' }, { label: 'Terms of Service', href: '#' }] },
-    { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '#' }, { label: 'My account', href: '/account' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
+    { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '/account?section=wishlist' }, { label: 'My account', href: '/account' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
   ]
   return (
     <footer className="bg-espresso pb-24 pt-[60px] text-white/75 md:pb-[35px] lg:pt-[80px]">

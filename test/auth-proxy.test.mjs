@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const source = await readFile(new URL('../src/app/api/auth/[...path]/route.js', import.meta.url), 'utf8')
-const { GET, POST } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`)
+const { GET, POST, PATCH, PUT, DELETE } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`)
 const realFetch = globalThis.fetch
 after(() => { globalThis.fetch = realFetch })
 
@@ -51,4 +51,24 @@ test('cross-site login and Google start remain blocked; callback POST is rejecte
   assert.equal((await GET(request('google', { headers: { 'sec-fetch-site': 'cross-site' } }), context('google'))).status, 403)
   assert.equal((await POST(request('google/callback', { method: 'POST' }), context('google/callback'))).status, 405)
   assert.equal((await GET(request('unknown'), context('unknown'))).status, 404)
+})
+
+test('account methods forward scoped profile, address, wishlist and order requests', async () => {
+  for (const [endpoint, method, handler] of [['profile', 'PATCH', PATCH], ['addresses', 'GET', GET], ['addresses', 'POST', POST], ['addresses/cm123', 'PUT', PUT], ['addresses/cm123', 'DELETE', DELETE], ['wishlist', 'GET', GET], ['wishlist', 'POST', POST], ['wishlist/cm123', 'DELETE', DELETE], ['orders', 'GET', GET]]) {
+    globalThis.fetch = async (url, options) => {
+      assert.ok(url.endsWith(`/api/auth/${endpoint}`))
+      assert.equal(options.method, method)
+      assert.equal(options.headers.cookie, 'artiz_customer_session=test')
+      return Response.json({ ok: true })
+    }
+    const response = await handler(request(endpoint, { method, headers: { cookie: 'artiz_customer_session=test', origin: 'http://localhost:3001' } }), context(endpoint))
+    assert.equal(response.status, 200)
+  }
+})
+
+test('account mutations reject cross-site requests and wrong methods', async () => {
+  globalThis.fetch = async () => { throw new Error('Must not call upstream') }
+  assert.equal((await PATCH(request('profile', { method: 'PATCH', headers: { 'sec-fetch-site': 'cross-site' } }), context('profile'))).status, 403)
+  assert.equal((await DELETE(request('addresses/cm123', { method: 'DELETE', headers: { origin: 'https://attacker.example' } }), context('addresses/cm123'))).status, 403)
+  assert.equal((await POST(request('orders', { method: 'POST' }), context('orders'))).status, 405)
 })

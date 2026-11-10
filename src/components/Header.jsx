@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useStore } from '../store'
 import { ADDRESS, Logo, Socials } from './ui'
+import AccountMenu from './AccountMenu'
 
 const extraLinks = [
   { label: 'New Arrivals', href: '/new-arrivals', children: [] },
@@ -159,7 +160,7 @@ export default function Header() {
       <div className="bg-espresso text-[13px] text-white/90">
         <div className="container-x flex h-[42px] items-center justify-between">
           <div className="hidden gap-5 md:flex">
-            <a href="#" className="hover:text-terra">Orders</a>
+            <Link href="/account?section=orders" className="hover:text-terra">Orders</Link>
             <Link href="/account" className="hover:text-terra">Profile</Link>
           </div>
           <Socials size={14} className="mx-auto md:mx-0" />
@@ -200,11 +201,11 @@ export default function Header() {
 
           <div className="flex items-center gap-4">
             <button onClick={() => setSearchOpen(true)} aria-label="Search" className="hover:text-terra cursor-pointer"><SearchIcon size={22} /></button>
-            <Link href="/account" aria-label="My account" className="hidden hover:text-terra sm:block"><UserIcon size={24} /></Link>
-            <a href="#" aria-label="Wishlist" className="relative hidden hover:text-terra sm:block">
+            <AccountMenu />
+            <Link href="/account?section=wishlist" aria-label="Wishlist" className="relative hidden hover:text-terra sm:block">
               <HeartIcon size={24} />
               <span className="absolute -right-2 -top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-terra text-[10px] text-white">{wishlist.length}</span>
-            </a>
+            </Link>
             <button onClick={() => setCartOpen(true)} aria-label="Cart" className="relative hover:text-terra cursor-pointer">
               <CartIcon size={24} />
               <motion.span key={count} initial={{ scale: 0.4 }} animate={{ scale: 1 }} className="absolute -right-2 -top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-espresso text-[10px] text-white">{count}</motion.span>
