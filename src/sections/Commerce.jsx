@@ -1,7 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Check, Phone, Plus } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Heart, Phone, Plus } from 'lucide-react'
+import Link from 'next/link'
+import ProductPrice from '../components/ProductPrice'
+import { formatPrice, productOption, shopProduct } from '../catalog'
 import { useState } from 'react'
 import { Autoplay, EffectFade } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -165,64 +168,67 @@ export function FeaturedSlides() {
   )
 }
 
-export function BundleBuilder() {
-  const { addToCart } = useStore()
+export function BundleBuilder({ products: featuredProducts = [] }) {
+  const { wishlist, toggleWish, addToCart } = useStore()
   const [picked, setPicked] = useState([])
-  const items = products.slice(0, 4)
-  const toggle = (id) => setPicked((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))
-  const chosen = items.filter((p) => picked.includes(p.id))
-  const total = chosen.reduce((n, p) => n + p.price, 0)
+  const items = featuredProducts.slice(0, 4)
+  const chosen = items.filter(product => picked.includes(product.id) && productOption(product).stock > 0)
+  const total = chosen.reduce((sum, product) => sum + productOption(product).price, 0)
   const need = Math.max(0, 2 - chosen.length)
-
+  const toggle = id => setPicked(current => current.includes(id) ? current.filter(value => value !== id) : [...current, id])
   return (
-    <section className="section-py bg-white">
+    <section className="section-py bg-white" aria-label="Featured collection">
       <div className="container-x">
-        <SectionHeading sub="Build Your Bundle" title="Build your space." />
+        <SectionHeading sub="Featured collection" title="Styled by Artiz" right={<ViewAll href="/shop/furniture" />} />
         <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            {items.map((p, i) => {
-              const on = picked.includes(p.id)
-              return (
-                <Reveal key={p.id} delay={i * 0.08}>
-                  <div className={`rounded-2xl border-2 p-2 transition-colors ${on ? 'border-terra' : 'border-transparent'}`}>
-                    <ProductCard p={p} />
-                    <button onClick={() => toggle(p.id)} className={`mt-4 w-full rounded-full py-2.5 text-sm font-medium transition-colors cursor-pointer ${on ? 'bg-terra text-white' : 'border border-ink hover:bg-ink hover:text-white'}`}>
-                      {on ? 'Selected' : 'Select Option'}
-                    </button>
-                  </div>
-                </Reveal>
-              )
-            })}
-          </div>
-          <Reveal delay={0.2}>
-            <aside className="sticky top-28 rounded-2xl bg-cream p-6">
-              <h3 className="text-xl">Your bundle</h3>
-              <ul className="mt-4 min-h-[120px] space-y-3">
-                <AnimatePresence>
-                  {chosen.map((p) => (
-                    <motion.li key={p.id} layout initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="flex items-center gap-3">
-                      <img src={p.img} alt="" className="h-12 w-12 rounded-lg bg-white object-contain" />
-                      <span className="flex-1 text-sm">{p.title}</span>
-                      <span className="text-sm font-medium">{money(p.price)}</span>
-                    </motion.li>
-                  ))}
-                </AnimatePresence>
-              </ul>
-              {need > 0 && <p className="text-sm text-muted">Select {need} more item{need > 1 ? 's' : ''} to create bundle</p>}
-              <div className="mt-4 flex justify-between border-t border-sand pt-4 font-semibold">
-                <span>Total</span><span>{money(total)}</span>
-              </div>
-              <button disabled={need > 0} onClick={() => chosen.forEach((p) => addToCart(p))} className="btn-dark mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50">
-                Add Bundle to Cart
-              </button>
-            </aside>
-          </Reveal>
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+          {items.map((product, index) => {
+            const href = `/products/${product.slug || product.id}`
+            const wished = wishlist.includes(product.id)
+            const selected = picked.includes(product.id)
+            const option = productOption(product)
+            return (
+              <Reveal key={product.id} delay={index * 0.08}>
+                <div className={`group/featured relative rounded-2xl border-2 p-3 transition-colors ${selected ? 'border-terra' : 'border-transparent'}`}>
+                  <Link href={href} className="group block overflow-hidden rounded-xl bg-cream">
+                    <img src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  </Link>
+                  <button type="button" onClick={() => toggleWish(product.id)} aria-label={`Save ${product.name} to wishlist`} aria-pressed={wished} className="pointer-events-none absolute right-5 top-5 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-0 transition-opacity duration-200 hover:bg-peach group-hover/featured:pointer-events-auto group-hover/featured:opacity-100 focus:pointer-events-auto focus:opacity-100 group-focus-within/featured:pointer-events-auto group-focus-within/featured:opacity-100">
+                    <Heart size={18} className={wished ? 'fill-terra text-terra' : ''} />
+                  </button>
+                  <Link href={href} className="mt-4 block font-heading text-base font-medium hover:text-terra">{product.name}</Link>
+                  <div className="mt-2 text-sm"><ProductPrice product={product} option={option} /></div>
+                  <button type="button" disabled={option.stock <= 0} aria-pressed={selected} onClick={() => toggle(product.id)} className={`mt-4 w-full cursor-pointer rounded-full py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'bg-terra text-white' : 'border border-ink hover:bg-ink hover:text-white'}`}>
+                    {option.stock <= 0 ? 'Out of stock' : selected ? 'Selected' : 'Select Option'}
+                  </button>
+                </div>
+              </Reveal>
+            )
+          })}
         </div>
+        <Reveal delay={0.2}>
+          <aside className="sticky top-28 rounded-2xl bg-cream p-6">
+            <h3 className="text-xl">Your bundle</h3>
+            <ul className="mt-4 min-h-[120px] space-y-3">
+              {chosen.map(product => (
+                <li key={product.id} className="flex items-center gap-3">
+                  <img src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt="" className="h-12 w-12 rounded-lg bg-white object-contain" />
+                  <span className="flex-1 text-sm">{product.name}</span>
+                  <span className="text-sm font-medium">{formatPrice(productOption(product).price)}</span>
+                </li>
+              ))}
+            </ul>
+            {need > 0 && <p className="text-sm text-muted">Select {need} more item{need > 1 ? 's' : ''} to create bundle</p>}
+            <div className="mt-4 flex justify-between border-t border-sand pt-4 font-semibold"><span>Total</span><span>{formatPrice(total)}</span></div>
+            <button type="button" disabled={need > 0} onClick={() => { chosen.forEach(product => addToCart(shopProduct(product, []))); setPicked([]) }} className="btn-dark mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50">Add Bundle to Cart</button>
+          </aside>
+        </Reveal>
+        </div>
+        {!items.length && <p className="py-8 text-muted">Featured pieces will be available soon.</p>}
       </div>
     </section>
   )
 }
-
 export function TabbedCollection() {
   const [tab, setTab] = useState('All')
   const list = (tab === 'All' ? products : products.filter((p) => p.cat === tab)).slice(0, 8)
