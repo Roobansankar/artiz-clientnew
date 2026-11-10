@@ -148,7 +148,7 @@ export function VideoHero() {
     <section ref={ref} className="py-[60px] lg:py-[90px]">
       <motion.div style={{ scale, borderRadius: radius }} className="relative mx-auto min-h-[520px] overflow-hidden md:min-h-[680px]">
         <video src="/images/hero-video.mp4" autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-black/35" />
+        <div className="absolute inset-0 bg-espresso/35" />
         <div className="container-x relative flex min-h-[520px] flex-col items-center justify-center text-center text-white md:min-h-[680px]">
           <button onClick={() => setOpen(true)} aria-label="Play video" className="mb-8 grid h-20 w-20 animate-pulse-ring place-items-center rounded-full bg-white text-espresso transition-transform hover:scale-110 cursor-pointer">
             <Play size={24} fill="currentColor" />
@@ -162,7 +162,7 @@ export function VideoHero() {
       </motion.div>
       <AnimatePresence>
         {open && (
-          <motion.div className="fixed inset-0 z-[70] grid place-items-center bg-black/80 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpen(false)}>
+          <motion.div className="fixed inset-0 z-[70] grid place-items-center bg-espresso/80 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpen(false)}>
             <button className="absolute right-6 top-6 text-white cursor-pointer" aria-label="Close video"><X size={28} /></button>
             <motion.video initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }} src="/images/hero-video.mp4" controls autoPlay className="max-h-[80vh] w-full max-w-5xl rounded-xl" onClick={(e) => e.stopPropagation()} />
           </motion.div>

@@ -57,7 +57,7 @@ function Drawer({ open, onClose, children, side = 'right' }) {
   return (
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-[80] bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
+        <motion.div className="fixed inset-0 z-[80] bg-espresso/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
           <motion.aside
             initial={{ x: side === 'right' ? '100%' : '-100%' }}
             animate={{ x: 0 }}
@@ -135,7 +135,7 @@ function QuickViewBody({ p, close }) {
   const { addToCart, setQuickView } = useStore()
   const [qty, setQty] = useState(1)
   return (
-        <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-black/50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close}>
+        <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-espresso/50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close}>
           <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }} className="relative grid w-full max-w-4xl overflow-hidden rounded-3xl bg-white md:grid-cols-2" onClick={(e) => e.stopPropagation()}>
             <button onClick={close} className="absolute right-4 top-4 z-10 cursor-pointer" aria-label="Close"><X /></button>
             <img src={p.img} alt={p.title} className="aspect-square w-full bg-cream object-contain p-8" />
@@ -146,7 +146,7 @@ function QuickViewBody({ p, close }) {
               <p className="mt-5 line-clamp-3 text-muted">{p.description || 'Crafted with premium materials for everyday comfort.'}</p>
               {p.slug && <Link href={`/products/${p.slug}`} onClick={close} className="mt-4 inline-block text-sm underline underline-offset-4 hover:text-terra">View full details</Link>}
               <p className="mt-6 text-sm font-medium">Color</p>
-              <div className="mt-2 flex gap-2">{p.swatches.map((s) => <span key={s.name} title={s.name} className="h-7 w-7 rounded-full border border-black/10" style={{ background: s.hex }} />)}</div>
+              <div className="mt-2 flex gap-2">{p.swatches.map((s) => <span key={s.name} title={s.name} className="h-7 w-7 rounded-full border border-sand/10" style={{ background: s.hex }} />)}</div>
               <div className="mt-8 flex gap-3">
                 <div className="inline-flex items-center rounded-full border border-sand">
                   <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-3 cursor-pointer" aria-label="Decrease"><Minus size={14} /></button>
@@ -177,7 +177,7 @@ export function EmailPopup() {
   return (
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-[90] grid place-items-center bg-black/50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close}>
+        <motion.div className="fixed inset-0 z-[90] grid place-items-center bg-espresso/50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close}>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative grid w-full max-w-3xl overflow-hidden rounded-3xl bg-cream md:grid-cols-2" onClick={(e) => e.stopPropagation()}>
             <img src="/images/banner11.png" alt="" className="hidden h-full w-full object-cover md:block" />
             <div className="p-8 text-center md:p-10">

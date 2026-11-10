@@ -95,7 +95,7 @@ function Dropdown({ item }) {
           <Link href={item.href} className="group/feature relative block min-h-[260px] w-[26%] max-w-[340px] shrink-0 overflow-hidden rounded-xl bg-cream">
             {hasImage ? <>
               <img src={item.image} alt={`${item.label} collection`} onError={() => setFailedImage(item.image)} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover/feature:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-espresso/70 via-espresso/10 to-transparent" />
             </> : <div aria-hidden="true" className="absolute inset-0 flex items-start justify-center bg-sand/40 pt-10 text-muted/40"><ImageIcon size={64} strokeWidth={1} /></div>}
             <div className={`relative flex h-full min-h-[260px] flex-col justify-end p-6 ${hasImage ? 'text-white' : 'text-ink'}`}>
               <span className="text-[10px] font-medium uppercase tracking-[0.18em]">The Artiz Collection</span>
@@ -169,7 +169,7 @@ export default function Header() {
         </div>
       </div>
 
-      <header className="sticky top-0 z-40 w-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+      <header className="sticky top-0 z-40 w-full bg-cream shadow-[0_4px_20px_rgba(73,51,39,0.06)]">
         <div className="container-x flex h-[64px] items-center justify-between gap-4">
           <button className="min-[1440px]:hidden cursor-pointer" onClick={() => setMobile(true)} aria-label="Open menu"><Menu /></button>
           <Logo className="shrink-0" />
@@ -216,7 +216,7 @@ export default function Header() {
       {/* Search overlay */}
       <AnimatePresence>
         {searchOpen && (
-          <motion.div className="fixed inset-0 z-[60] bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSearchOpen(false)}>
+          <motion.div className="fixed inset-0 z-[60] bg-espresso/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSearchOpen(false)}>
             <motion.div initial={{ y: '-100%' }} animate={{ y: 0 }} exit={{ y: '-100%' }} transition={{ type: 'tween', duration: 0.4 }} className="bg-white py-12" onClick={(e) => e.stopPropagation()}>
               <div className="container-x relative">
                 <button onClick={() => setSearchOpen(false)} className="absolute -top-6 right-6 cursor-pointer" aria-label="Close search"><X /></button>
@@ -235,7 +235,7 @@ export default function Header() {
       <AnimatePresence>
         {mobile && (
           <motion.div className="fixed inset-0 z-[60] min-[1440px]:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="absolute inset-0 bg-black/50" onClick={() => setMobile(false)} />
+            <div className="absolute inset-0 bg-espresso/50" onClick={() => setMobile(false)} />
             <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="relative flex h-full w-[85%] max-w-[550px] flex-col overflow-y-auto bg-white">
               <div className="flex items-center justify-between px-5 py-5">
                 <Logo />

@@ -53,7 +53,7 @@ export function DiningBanner() {
         viewport={{ once: true }}
         transition={{ duration: 2.5, ease: 'easeOut' }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/10 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-espresso/45 via-espresso/10 to-transparent" />
       <div className="container-x relative flex min-h-[420px] items-center py-16 md:min-h-[560px]">
         <Reveal className="max-w-lg text-white">
           <span className="mb-3 block font-medium text-white/85">New Dining Collection</span>

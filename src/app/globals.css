@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #faf7f2;
-  --color-ink: #1f1b16;
-  --color-espresso: #25201a;
+  --color-cream: #faf6ee;
+  --color-ink: #34271f;
+  --color-espresso: #684734;
   --color-terra: #be6b4a;
   --color-terra-dark: #a65a3c;
   --color-peach: #fff1eb;
-  --color-sand: #eae3d8;
-  --color-muted: #6f675d;
+  --color-sand: #ded1bc;
+  --color-muted: #716252;
 
   --font-heading: var(--font-instrument-sans), sans-serif;
   --font-body: var(--font-inter), sans-serif;
@@ -49,6 +49,25 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading font-semibold tracking-[-0.01em];
   }
+}
+
+/* Keep saved account credentials on the same surface as other inputs. */
+.account-field:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-ink);
+  caret-color: var(--color-ink);
+  -webkit-box-shadow: 0 0 0 1000px white inset;
+  box-shadow: 0 0 0 1000px white inset;
+}
+.account-field:autofill {
+  color: var(--color-ink);
+  caret-color: var(--color-ink);
+  box-shadow: 0 0 0 1000px white inset;
+}
+.account-field:-webkit-autofill:focus {
+  box-shadow: 0 0 0 1000px white inset, 0 0 0 2px color-mix(in srgb, var(--color-terra) 10%, transparent);
+}
+.account-field:autofill:focus {
+  box-shadow: 0 0 0 1000px white inset, 0 0 0 2px color-mix(in srgb, var(--color-terra) 10%, transparent);
 }
 
 @utility container-x {

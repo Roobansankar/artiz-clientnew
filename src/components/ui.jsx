@@ -127,7 +127,7 @@ export function ProductCard({ p }) {
               key={s.name}
               title={s.name}
               onClick={() => setSwatch(i)}
-              className={`h-5 w-5 rounded-full border transition-all cursor-pointer ${swatch === i ? 'ring-1 ring-ink ring-offset-2' : 'border-black/10'}`}
+              className={`h-5 w-5 rounded-full border transition-all cursor-pointer ${swatch === i ? 'ring-1 ring-ink ring-offset-2' : 'border-sand/10'}`}
               style={{ background: s.hex }}
             />
           ))}

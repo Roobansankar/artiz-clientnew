@@ -75,7 +75,7 @@ function CheckList({ options, selected, onToggle, counts, swatch }) {
             <label className={`flex cursor-pointer items-center gap-3 text-sm ${n === 0 && !on ? 'opacity-50' : ''}`}>
               <input type="checkbox" className="peer sr-only" checked={on} onChange={() => onToggle(o)} disabled={n === 0 && !on} />
               {swatch ? (
-                <span className={`h-5 w-5 rounded-full border transition-all ${on ? 'ring-1 ring-ink ring-offset-2' : 'border-black/15'}`} style={{ background: (SWATCH[o] || o) }} />
+                <span className={`h-5 w-5 rounded-full border transition-all ${on ? 'ring-1 ring-ink ring-offset-2' : 'border-sand/15'}`} style={{ background: (SWATCH[o] || o) }} />
               ) : (
                 <span className={`grid h-[18px] w-[18px] place-items-center rounded border transition-colors ${on ? 'border-terra bg-terra text-white' : 'border-ink/30 bg-white'}`}>
                   {on && <Check size={12} strokeWidth={3} />}
@@ -175,7 +175,7 @@ function ShopCard({ p, compareMode, compared, onCompare, formatMoney }) {
         <div className="mt-3 flex justify-center gap-2">
           {p.colors.map((c, i) => (
             <button key={c} title={c} onClick={() => setSwatch(i)} aria-label={c}
-              className={`h-4 w-4 rounded-full border transition-all cursor-pointer ${swatch === i ? 'ring-1 ring-ink ring-offset-2' : 'border-black/15'}`} style={{ background: (SWATCH[c] || c) }} />
+              className={`h-4 w-4 rounded-full border transition-all cursor-pointer ${swatch === i ? 'ring-1 ring-ink ring-offset-2' : 'border-sand/15'}`} style={{ background: (SWATCH[c] || c) }} />
           ))}
         </div>
       </div>
@@ -411,7 +411,7 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
       <AnimatePresence>
         {drawer && (
           <motion.div className="fixed inset-0 z-[70] lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="absolute inset-0 bg-black/50" onClick={() => setDrawer(false)} />
+            <div className="absolute inset-0 bg-espresso/50" onClick={() => setDrawer(false)} />
             <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.35 }}
               className="relative flex h-full w-[85%] max-w-sm flex-col bg-white">
               <div className="flex-1 overflow-y-auto p-5"><Filters f={f} setF={setF} counts={counts} options={options} maxPrice={maxPrice} formatMoney={formatMoney} onClose={() => setDrawer(false)} /></div>
@@ -445,7 +445,7 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
       </AnimatePresence>
       <AnimatePresence>
         {compareOpen && (
-          <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-black/50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCompareOpen(false)}>
+          <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-espresso/50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCompareOpen(false)}>
             <motion.div initial={{ y: 30 }} animate={{ y: 0 }} exit={{ y: 30 }} className="max-h-[85vh] w-full max-w-5xl overflow-auto rounded-2xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
               <div className="mb-5 flex items-center justify-between"><h3 className="text-2xl">Compare products</h3><button onClick={() => setCompareOpen(false)} aria-label="Close" className="cursor-pointer"><X /></button></div>
               <table className="w-full min-w-[560px] text-sm">

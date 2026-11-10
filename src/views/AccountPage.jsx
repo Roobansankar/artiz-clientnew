@@ -4,15 +4,17 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { ArrowRight, Check, ChevronRight, Eye, EyeOff, LoaderCircle, LockKeyhole, LogOut, UserRound } from 'lucide-react'
 
-const field = 'h-12 w-full rounded-lg border border-sand bg-white px-4 text-sm outline-none transition-all placeholder:text-muted/60 focus:border-terra focus:ring-2 focus:ring-terra/10'
+const field = 'account-field h-12 w-full rounded-lg border border-sand bg-white px-4 text-sm outline-none transition-all placeholder:text-muted/60 focus:border-terra focus:ring-2 focus:ring-terra/10'
 
-export default function AccountPage({ initialMode }) {
+export default function AccountPage({ initialMode, initialAuthError = '' }) {
   const [mode, setMode] = useState(initialMode)
   const [customer, setCustomer] = useState(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [googleEnabled, setGoogleEnabled] = useState(null)
+  const [oauthError, setOauthError] = useState(initialAuthError)
   const registering = mode === 'register'
 
   async function checkSession(signal) {
@@ -31,11 +33,16 @@ export default function AccountPage({ initialMode }) {
   useEffect(() => {
     const controller = new AbortController()
     void checkSession(controller.signal)
+    fetch('/api/auth/config', { cache: 'no-store', signal: controller.signal })
+      .then(response => { if (!response.ok) throw new Error('Configuration unavailable'); return response.json() })
+      .then(data => setGoogleEnabled(data.googleEnabled === true))
+      .catch(() => { if (!controller.signal.aborted) setGoogleEnabled(false) })
     return () => controller.abort()
   }, [])
 
   async function submit(event) {
     event.preventDefault()
+    setOauthError('')
     setBusy(true)
     setError('')
     try {
@@ -86,7 +93,16 @@ export default function AccountPage({ initialMode }) {
               <div className="mb-7 flex rounded-full bg-cream p-1" aria-label="Account options">{[['login', 'Sign in'], ['register', 'Create account']].map(([value, label]) => <button key={value} type="button" onClick={() => { setMode(value); setError(''); setShowPassword(false) }} disabled={busy} aria-pressed={mode === value} className={`flex-1 rounded-full px-3 py-2.5 text-sm font-medium transition-colors ${mode === value ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-terra'}`}>{label}</button>)}</div>
               <h2 className="font-heading text-[28px] font-semibold leading-tight">{registering ? 'A new beginning.' : 'Welcome back.'}</h2>
               <p className="mt-3 text-sm leading-relaxed text-muted">{registering ? 'Create your Artiz account with a few simple details.' : 'Sign in to your Artiz account.'}</p>
-              <form key={mode} onSubmit={submit} className="mt-7 space-y-5">
+              <div className="mt-6">
+                <button type="button" disabled={busy || !googleEnabled} onClick={() => { window.location.assign('/api/auth/google') }} className="flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-sand bg-white text-sm font-medium transition-colors hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terra disabled:cursor-not-allowed disabled:opacity-60">
+                  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.33 2.98-7.36Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.24-2.51c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.41 13.92a6 6 0 0 1 0-3.84V7.49H3.07a10 10 0 0 0 0 9.02l3.34-2.59Z"/><path fill="#EA4335" d="M12 5.96c1.47 0 2.79.51 3.82 1.51l2.86-2.86A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59A5.99 5.99 0 0 1 12 5.96Z"/></svg>
+                  Continue with Google
+                </button>
+                {googleEnabled === false && <p className="mt-2 text-center text-xs text-muted">Google sign-in will be available once configured.</p>}
+                <div className="my-5 flex items-center gap-4 text-xs text-muted"><span className="h-px flex-1 bg-sand" />or continue with email<span className="h-px flex-1 bg-sand" /></div>
+              </div>
+              {oauthError && <p role="alert" className="mb-5 rounded-lg border border-terra/30 bg-peach px-4 py-3 text-sm">{oauthError}</p>}
+              <form key={mode} onSubmit={submit} className="space-y-5">
                 <fieldset disabled={busy} className="m-0 space-y-5 border-0 p-0">
                   {registering && <div><label htmlFor="account-name" className="mb-2 block text-sm font-medium">Full name</label><input id="account-name" name="name" required minLength={2} maxLength={100} autoComplete="name" placeholder="Your name" className={field} /></div>}
                   <div><label htmlFor="account-email" className="mb-2 block text-sm font-medium">Email address</label><input id="account-email" name="email" type="email" required maxLength={254} autoComplete="email" placeholder="you@example.com" className={field} /></div>
