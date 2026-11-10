@@ -50,7 +50,8 @@ export default function ProductDetail({ product, category, related }) {
   const details = [
     ['Category', category?.name], ['Material', product.material], ['Dimensions', product.dimensions],
     ['Size', option.size], ['Seater', option.seater], ['Fabric', option.fabric],
-  ].filter(([, value]) => value)
+  ].filter(([, value]) => value != null && String(value).trim() !== '')
+  const visibleDetails = details.filter(([label]) => label !== 'Category')
 
   function chooseColor(color) {
     const available = variants.findIndex(variant => variant.color === color && variant.stock > 0)
@@ -112,13 +113,13 @@ export default function ProductDetail({ product, category, related }) {
                 {discount > 0 && <><s className="text-lg text-muted">{formatPrice(option.mrp)}</s><span className="rounded-full bg-peach px-3 py-1 text-xs font-medium text-terra">{discount}% off</span></>}
               </div>
               <p className={`mt-4 flex items-center gap-2 text-sm ${option.stock > 0 ? 'text-[#527254]' : 'text-muted'}`} aria-live="polite"><span className={`h-2 w-2 rounded-full ${option.stock > 0 ? 'bg-[#527254]' : 'bg-muted'}`} />{option.stock > 0 ? `${option.stock} in stock` : 'Currently out of stock'}</p>
-              <p className="mt-5 whitespace-pre-line text-[15px] leading-relaxed text-muted">{product.description}</p>
+              {product.description?.trim() && <p className="mt-5 whitespace-pre-line text-[15px] leading-relaxed text-muted">{product.description}</p>}
 
               {colors.length > 0 && <fieldset className="mt-7 border-0 p-0"><legend className="mb-3 text-sm font-medium">Color <span className="ml-2 font-normal text-muted">{option.color}</span></legend><div className="flex flex-wrap gap-3">
                 {colors.map(color => <button key={color} type="button" onClick={() => chooseColor(color)} aria-label={`Choose color ${color}`} aria-pressed={option.color === color} title={color} className={`relative grid h-9 w-9 place-items-center rounded-full border-4 border-white outline outline-1 outline-offset-1 ${option.color === color ? 'outline-ink' : 'outline-sand hover:outline-terra'}`} style={{ backgroundColor: color }}>{option.color === color && <Check size={14} className="rounded-full bg-white/90 p-0.5 text-ink" />}</button>)}
               </div></fieldset>}
 
-              {details.length > 0 && <dl className="mt-6 grid grid-cols-2 gap-x-5 gap-y-3 rounded-xl bg-cream p-4">{details.filter(([label]) => label !== 'Category').map(([label, value]) => <div key={label}><dt className="text-xs text-muted">{label}</dt><dd className="mt-1 text-sm font-medium">{value}</dd></div>)}</dl>}
+              {visibleDetails.length > 0 && <dl className="mt-6 grid grid-cols-2 gap-x-5 gap-y-3 rounded-xl bg-cream p-4">{visibleDetails.map(([label, value]) => <div key={label}><dt className="text-xs text-muted">{label}</dt><dd className="mt-1 text-sm font-medium">{value}</dd></div>)}</dl>}
 
               <div className="mt-7 border-t border-sand pt-6">
                 <span className="mb-3 block text-sm font-medium">Quantity</span>
