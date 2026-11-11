@@ -12,13 +12,14 @@ export { ADDRESS }
 
 export function Logo({ light = false, className = '' }) {
   return (
-    <Link href="/" className={`inline-flex flex-col leading-none ${className}`} aria-label="Artiz Interior Design Studio">
-      <span className={`font-heading text-[28px] font-bold tracking-tight ${light ? 'text-white' : 'text-ink'}`}>
-        Artiz
-      </span>
-      <span className={`mt-1 text-[9px] font-medium uppercase tracking-[0.28em] ${light ? 'text-white/60' : 'text-muted'}`}>
-        Interior Design Studio
-      </span>
+    <Link href="/" className={`inline-flex shrink-0 items-center ${className}`} aria-label="Artiz Interior Design Studio">
+      <img
+        src="/images/artiz-logo.png"
+        alt="Artiz Interior Design Studio"
+        width={1200}
+        height={368}
+        className={`h-9 w-auto md:h-10 ${light ? 'brightness-0 invert' : ''}`}
+      />
     </Link>
   )
 }

@@ -31,7 +31,7 @@ export function FeaturedCollection({ products: curatedProducts = [] }) {
             </Link>
           </Reveal>
           <Reveal delay={0.1} className="min-w-0">
-            {curatedProducts.length ? <Swiper modules={[Autoplay]} spaceBetween={24} slidesPerView={1.3} autoplay={{ delay: 4000, disableOnInteraction: true, pauseOnMouseEnter: true }} breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}>
+            {curatedProducts.length ? <Swiper spaceBetween={24} slidesPerView={1.3} breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}>
               {curatedProducts.map(product => {
                 const href = `/products/${product.slug || product.id}`
                 const wished = wishlist.includes(product.id)

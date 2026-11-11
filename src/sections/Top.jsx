@@ -145,8 +145,6 @@ export function ShopByCategory() {
           spaceBetween={24}
           slidesPerView={2.4}
           rewind
-          autoplay={{ delay: 3000, pauseOnMouseEnter: true, disableOnInteraction: true }}
-          onScroll={(swiper) => swiper.autoplay.stop()}
           breakpoints={{ 640: { slidesPerView: 4 }, 1024: { slidesPerView: 6 }, 1280: { slidesPerView: 7 } }}>
           {subcategories.map(category => (
             <SwiperSlide key={category.slug}>
