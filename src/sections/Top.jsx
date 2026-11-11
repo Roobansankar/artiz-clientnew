@@ -40,17 +40,17 @@ export function CuratedCollections() {
 
 function CollageItem({ img, title, sub, cta, big, href = '#', className = '' }) {
   return (
-    <a href={href} className={`group relative block overflow-hidden rounded-2xl ${className}`}>
+    <Link href={href} className={`group relative block overflow-hidden rounded-2xl ${className}`}>
       <img src={img} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
       <div className={`absolute inset-0 flex flex-col justify-center p-6 text-white md:p-8 ${big ? 'items-start' : 'items-start'}`}>
         {sub && <span className="mb-2 text-sm font-medium text-white/85">{sub}</span>}
         <h3 className={big ? 'font-heading text-[30px] leading-tight md:text-[40px]' : 'max-w-[60%] text-[20px] leading-snug md:text-[22px]'}>{title}</h3>
         {big && <p className="mt-3 max-w-xs text-white/85">Bring warmth to every corner of your home.</p>}
-        <span className={`mt-5 inline-flex items-center gap-2 ${big ? 'btn-light' : 'border-b border-white pb-0.5 text-sm font-medium'}`}>
+        <span className="mt-5 inline-flex items-center gap-2 border-b border-white pb-0.5 text-sm font-medium">
           {cta} <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:rotate-45" />
         </span>
       </div>
-    </a>
+    </Link>
   )
 }
 
@@ -63,11 +63,11 @@ export function ImageCollage() {
           <Reveal delay={0.1}><CollageItem img="/images/banner4.png" sub="Up to 25% Off" title="Chairs" cta="Shop Chairs" href="/shop/chairs" className="aspect-[418/220]" /></Reveal>
         </div>
         <Reveal delay={0.15} className="h-full">
-          <CollageItem big img="/images/banner3.png" title={<>Where Calm Meets<br />Comfort.</>} cta="Explore Collection" className="h-full min-h-[380px]" />
+          <CollageItem big img="/images/banner3.png" title={<>Where Calm Meets<br />Comfort.</>} cta="Explore Collection" href="/shop/living-room" className="h-full min-h-[380px]" />
         </Reveal>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
-          <Reveal delay={0.2}><CollageItem img="/images/banner2.png" title="Refresh Your Space with Storage Designs" cta="Shop Now" className="aspect-[418/220]" /></Reveal>
-          <Reveal delay={0.3}><CollageItem img="/images/banner5.png" sub="Up to 35% Off" title="Organize in Style" cta="Shop Now" className="aspect-[418/220]" /></Reveal>
+          <Reveal delay={0.2}><CollageItem img="/images/banner2.png" title="Refresh Your Space with Storage Designs" cta="Shop Now" href="/shop/storage-cabinets" className="aspect-[418/220]" /></Reveal>
+          <Reveal delay={0.3}><CollageItem img="/images/banner5.png" sub="Up to 35% Off" title="Organize in Style" cta="Shop Now" href="/shop/decor-storage" className="aspect-[418/220]" /></Reveal>
         </div>
       </div>
     </section>
