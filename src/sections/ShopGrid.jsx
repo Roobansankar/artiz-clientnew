@@ -461,7 +461,7 @@ export default function ShopGrid({ products: initialProducts = shopProducts, cat
                   </div>
                 ))}
               </div>
-              <button onClick={() => setCompare([])} className="text-sm underline hover:text-terra cursor-pointer">Clear</button>
+              <button onClick={() => setCompare([])} className="btn btn-outline text-[13px] px-4 py-2">Clear</button>
               <button onClick={() => setCompareOpen(true)} disabled={compare.length < 2} className="btn-terra px-5 py-2.5 disabled:opacity-50">Compare ({compare.length})</button>
             </div>
           </motion.div>
