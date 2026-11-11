@@ -124,7 +124,9 @@ function Orders() {
 }
 function Wishlist() {
   const { wishlist, toggleWish, wishlistError } = useStore()
-  const resource = useResource('/api/products')
+  const resource = useResource('/api/auth/wishlist/products')
+  // The endpoint already returns only saved pieces; the store filter hides a
+  // removed piece immediately while the server request is in flight.
   const items = (resource.data?.products || []).filter(product => wishlist.includes(product.id))
   return <><ResourceStatus resource={resource} />{wishlistError && <p role="alert" className="mb-4 text-sm text-terra">{wishlistError}</p>}
     {resource.data && !items.length && <Empty icon={Heart} text="Save the pieces you love here." />}

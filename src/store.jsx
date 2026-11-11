@@ -6,7 +6,20 @@ import { firstAvailableVariant, productOption } from './catalog'
 const StoreCtx = createContext(null)
 const CART_KEY = 'artiz-cart-v1'
 const CART_IMPORTED_KEY = 'artiz-cart-imported-v1'
+const WISHLIST_KEY = 'artiz-wishlist-v1'
 const MAX_PER_LINE = 10
+
+// Guests can use the hearts before signing in. Their picks live in this browser
+// and are merged into the account on the next sign-in.
+function readGuestWishlist() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(WISHLIST_KEY) || '[]')
+    return Array.isArray(saved) ? [...new Set(saved.filter(id => typeof id === 'string'))] : []
+  } catch { return [] }
+}
+function saveGuestWishlist(ids) {
+  try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(ids)) } catch {}
+}
 
 // Server cart lines are shaped by the API; the drawer consumes this flat shape.
 function cartLine(item) {
@@ -48,6 +61,7 @@ export function StoreProvider({ children }) {
   const wishRef = useRef([])
   const ownerRef = useRef(null)
   const wishQueue = useRef(Promise.resolve())
+  const wishSeq = useRef(0)
 
   const commit = lines => {
     cartRef.current = lines
@@ -145,18 +159,24 @@ export function StoreProvider({ children }) {
     ownerRef.current = owner
     setWishlistError('')
     if (!owner) {
+      // Signing out clears the account list; a fresh guest keeps this browser's picks.
       if (previousOwner) { wishRef.current = []; setWishlist([]) }
+      else { const guest = readGuestWishlist(); wishRef.current = guest; setWishlist(guest) }
       return
     }
-    const guestIds = previousOwner ? [] : wishRef.current.filter(id => typeof id === 'string')
+    // A guest's saved pieces are merged once, then removed from this browser so a
+    // different account does not inherit them.
+    const guestIds = previousOwner ? [] : readGuestWishlist()
     wishRef.current = []
     setWishlist([])
     wishQueue.current = (async () => {
       try {
-        const response = await fetch('/api/auth/wishlist', { method: guestIds.length ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json' }, ...(guestIds.length ? { body: JSON.stringify({ productIds: guestIds }) } : {}), cache: 'no-store' })
+        const merge = guestIds.length > 0
+        const response = await fetch('/api/auth/wishlist', { method: merge ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json' }, ...(merge ? { body: JSON.stringify({ productIds: guestIds }) } : {}), cache: 'no-store' })
         const data = await response.json()
         if (!response.ok) throw new Error(data.message || 'Could not load your wishlist.')
         if (ownerRef.current === owner) { wishRef.current = data.productIds; setWishlist(data.productIds) }
+        if (merge) saveGuestWishlist([])
       } catch (error) { if (ownerRef.current === owner) setWishlistError(error.message) }
     })()
   }, [customer?.id])
@@ -211,21 +231,35 @@ export function StoreProvider({ children }) {
 
   const toggleWish = id => {
     const owner = ownerRef.current
+    const removing = wishRef.current.includes(id)
+    // The heart flips immediately; the server is the final word.
+    const optimistic = removing ? wishRef.current.filter(value => value !== id) : [...wishRef.current, id]
+    wishRef.current = optimistic
+    setWishlist(optimistic)
     if (!owner) {
-      wishRef.current = wishRef.current.includes(id) ? wishRef.current.filter(value => value !== id) : [...wishRef.current, id]
-      setWishlist(wishRef.current)
+      saveGuestWishlist(optimistic)
       return
     }
+    setWishlistError('')
+    const seq = ++wishSeq.current
     wishQueue.current = wishQueue.current.then(async () => {
       if (ownerRef.current !== owner) return
-      setWishlistError('')
       try {
-        const removing = wishRef.current.includes(id)
         const response = await fetch(`/api/auth/wishlist${removing ? `/${encodeURIComponent(id)}` : ''}`, { method: removing ? 'DELETE' : 'POST', headers: { 'Content-Type': 'application/json' }, body: removing ? undefined : JSON.stringify({ productIds: [String(id)] }) })
         const data = await response.json()
         if (!response.ok) throw new Error(data.message || 'Could not update your wishlist.')
-        if (ownerRef.current === owner) { wishRef.current = data.productIds; setWishlist(data.productIds) }
-      } catch (error) { if (ownerRef.current === owner) setWishlistError(error.message) }
+        // Only the newest toggle may overwrite the list; older replies are stale.
+        if (ownerRef.current === owner && seq === wishSeq.current) { wishRef.current = data.productIds; setWishlist(data.productIds) }
+      } catch (error) {
+        if (ownerRef.current !== owner) return
+        // No newer toggle happened, so the optimistic change can be rolled back.
+        if (seq === wishSeq.current) {
+          const reverted = removing ? [...wishRef.current, id] : wishRef.current.filter(value => value !== id)
+          wishRef.current = reverted
+          setWishlist(reverted)
+        }
+        setWishlistError(error.message)
+      }
     })
   }
 
