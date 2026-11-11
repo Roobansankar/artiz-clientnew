@@ -308,7 +308,7 @@ export default function ShopGrid({ products: initialProducts = shopProducts, cat
               <h2 id="empty-collection-title" className="mt-3 font-heading text-[28px] font-semibold leading-tight md:text-[34px]">Your next favorite<br className="hidden md:block" /> is out there.</h2>
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted md:text-base">There are no pieces in this collection right now. Find a little inspiration in the rest of our shop.</p>
               <Link href="/shop" className="btn-terra mt-7">Explore the shop <ArrowRight size={16} aria-hidden="true" /></Link>
-              <div className="mt-4"><Link href="/" className="text-sm text-muted underline underline-offset-4 transition-colors hover:text-terra">Back to home</Link></div>
+              <div className="mt-4"><Link href="/" className="btn btn-outline text-[13px] px-4 py-2">Back to home</Link></div>
             </div>
           </div>
         </div>
