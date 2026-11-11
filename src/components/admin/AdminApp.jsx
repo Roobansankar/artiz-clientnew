@@ -6,6 +6,7 @@ import AdminOrders from './AdminOrders';
 import AdminOrderDetail from './AdminOrderDetail';
 import AdminCustomers from './AdminCustomers';
 import AdminProducts from './AdminProducts';
+import AdminBulkUpload from './AdminBulkUpload';
 import AdminGallery from './AdminGallery';
 import AdminHero from './AdminHero';
 import './admin.css';
@@ -48,7 +49,7 @@ const nav = [
     { label: 'Home Hero', path: '/admin/home-hero', icon: 'image' },
     { label: 'Contact Messages', path: '/admin/contact-messages', icon: 'message' },
     { label: 'Customers', path: '/admin/customers', icon: 'users' }, { label: 'Orders', path: '/admin/orders', icon: 'cart' },
-    { label: 'Products', path: '/admin/products', icon: 'box' }, { label: 'Gallery', path: '/admin/gallery', icon: 'image' }, { label: 'Analytics', path: '/admin/analytics', icon: 'chart' },
+    { label: 'Products', path: '/admin/products', icon: 'box' }, { label: 'Bulk Upload', path: '/admin/products/bulk', icon: 'download' }, { label: 'Gallery', path: '/admin/gallery', icon: 'image' }, { label: 'Analytics', path: '/admin/analytics', icon: 'chart' },
 ];
 const settingLinks = ['General', 'Members', 'Notifications', 'Security'];
 const colors = [{ name: 'Green', value: '#00a155' }, { name: 'Blue', value: '#2563eb' }, { name: 'Violet', value: '#7c3aed' }, { name: 'Rose', value: '#e11d48' }, { name: 'Orange', value: '#ea580c' }];
@@ -97,7 +98,8 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
     const router = useRouter();
     const isLogin = login || pathname === '/admin/login';
     const isSettings = pathname.startsWith('/admin/settings');
-    const section = isSettings ? 'Settings' : pathname.startsWith('/admin/products/') ? 'Products' : pathname.startsWith('/admin/orders/') ? 'Orders' : nav.find(n => n.path === pathname)?.label || 'Home';
+    const isBulkUpload = pathname === '/admin/products/bulk';
+    const section = isSettings ? 'Settings' : isBulkUpload ? 'Bulk Upload' : pathname.startsWith('/admin/products/') ? 'Products' : pathname.startsWith('/admin/orders/') ? 'Orders' : nav.find(n => n.path === pathname)?.label || 'Home';
     const settingsTab = pathname.split('/')[3] || 'general';
     const [dark, setDark] = useState(false);
     const [accent, setAccent] = useState(colors[0].value);
@@ -158,6 +160,7 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
       {section === 'Contact Messages' && <ContactMessages />}
       {section === 'Orders' && (pathname.startsWith('/admin/orders/') ? <AdminOrderDetail id={pathname.split('/')[3]} /> : <AdminOrders notify={setNotice}/>)}
       {section === 'Customers' && <AdminCustomers />}
+      {section === 'Bulk Upload' && <AdminBulkUpload notify={setNotice} />}
       {section === 'Products' && <AdminProducts />}
       {section === 'Gallery' && <AdminGallery />}
       {section === 'Home Hero' && <AdminHero />}

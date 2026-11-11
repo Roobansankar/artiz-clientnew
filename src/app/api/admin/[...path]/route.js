@@ -9,7 +9,7 @@ async function proxy(request, context) {
     if (orderDetail && request.method !== 'GET') return Response.json({ message: 'Method not allowed.' }, { status: 405 });
     const customerDeletion = /^customers\/[a-z0-9]{20,40}$/.test(endpoint);
     if (customerDeletion && request.method !== 'DELETE') return Response.json({ message: 'Method not allowed.' }, { status: 405 });
-    if (!['auth/login', 'auth/me', 'auth/logout', 'contact-messages', 'notifications', 'dashboard', 'customers', 'orders', 'products', 'categories', 'categories/order', 'gallery', 'hero-slides', 'hero-slides/order'].includes(endpoint) && !/^contact-messages\/[a-z0-9]{20,40}$/.test(endpoint) && !/^products\/[A-Za-z0-9_-]{1,40}$/.test(endpoint) && !/^categories\/[a-z0-9-]{1,140}$/.test(endpoint) && !/^gallery\/[a-z0-9]{20,40}$/.test(endpoint) && !/^hero-slides\/[a-z0-9-]{1,100}$/.test(endpoint))
+    if (!['auth/login', 'auth/me', 'auth/logout', 'contact-messages', 'notifications', 'dashboard', 'customers', 'orders', 'products', 'products/template', 'products/bulk', 'categories', 'categories/order', 'gallery', 'hero-slides', 'hero-slides/order'].includes(endpoint) && !/^contact-messages\/[a-z0-9]{20,40}$/.test(endpoint) && !/^products\/[A-Za-z0-9_-]{1,40}$/.test(endpoint) && !/^categories\/[a-z0-9-]{1,140}$/.test(endpoint) && !/^gallery\/[a-z0-9]{20,40}$/.test(endpoint) && !/^hero-slides\/[a-z0-9-]{1,100}$/.test(endpoint))
         if (!customerDeletion && !orderDetail && !collectCash) return Response.json({ message: 'Endpoint not found.' }, { status: 404 });
     const base = process.env.API_BASE_URL || 'http://127.0.0.1:5000';
     const headers = new Headers({ 'content-type': request.headers.get('content-type') || 'application/json' });
@@ -50,10 +50,15 @@ async function proxy(request, context) {
             redirect: 'error',
             signal: AbortSignal.timeout((endpoint.startsWith('products') || endpoint.startsWith('categories') || endpoint.startsWith('gallery') || endpoint.startsWith('hero-slides')) && request.method !== 'GET' ? 60000 : 8000),
         });
-        const resultHeaders = new Headers({ 'content-type': 'application/json', 'cache-control': 'no-store' });
+        const contentType = response.headers.get('content-type') || 'application/json';
+        const binary = !contentType.includes('application/json');
+        const resultHeaders = new Headers({ 'content-type': contentType, 'cache-control': 'no-store' });
+        const disposition = response.headers.get('content-disposition');
+        if (disposition) resultHeaders.set('content-disposition', disposition);
         for (const cookie of response.headers.getSetCookie())
             resultHeaders.append('set-cookie', cookie);
-        return new Response(response.status === 204 ? null : await response.text(), { status: response.status, headers: resultHeaders });
+        const payload = response.status === 204 ? null : binary ? await response.arrayBuffer() : await response.text();
+        return new Response(payload, { status: response.status, headers: resultHeaders });
     }
     catch {
         return Response.json({ message: 'Cannot reach the admin server. Please try again shortly.' }, { status: 503, headers: { 'cache-control': 'no-store' } });

@@ -77,8 +77,8 @@ function addValue(setup, key, value) {
         return `That would make ${setup.rows.length + added.length} variants. The limit is ${maxVariants}.`;
     return { ...setup, values, rows: [...setup.rows, ...added] };
 }
-// Seater, size and fabric take one value for the whole product; picking another replaces it.
-export const isSingleValue = (key) => key !== 'color';
+// Every value becomes part of the variant combinations (cartesian product).
+const isSingleValue = () => false;
 function setSingle(setup, key, value) {
     return { ...setup, values: { ...setup.values, [key]: [value] }, rows: dedupe(setup.rows.map(row => ({ ...row, [key]: value }))) };
 }
@@ -180,7 +180,7 @@ export default function VariantEditor({ setup, onChange, error, showProblems }) 
     const optionErrors = setupProblems(setup);
     return <fieldset className="ad-variants ad-editor-wide">
     <legend>Variants</legend>
-    <p className="ad-muted">Set the seater, size and fabric of this product (one each, shown in the product&apos;s specifications). Add colours if it comes in several, each with its own price, MRP and stock.</p>
+    <p className="ad-muted">Add every seater, size, colour and fabric this product comes in. Each combination becomes its own variant with its own price, MRP and stock — for example 2 seaters × 3 colours gives 6 variants.</p>
 
     <div className="ad-variant-base">
       <label>Base selling price (INR)<input type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="0.00" value={setup.basePrice} onChange={event => setBase('basePrice', event.target.value)}/></label>
@@ -197,8 +197,8 @@ export default function VariantEditor({ setup, onChange, error, showProblems }) 
     {variantAttributes.filter(key => setup.enabled[key]).map(key => <OptionCard key={key} attribute={key} setup={setup} onChange={onChange}/>)}
     {showProblems && optionErrors.map(message => <small key={message} className="ad-swatch-error" role="alert">{message}</small>)}
 
-    <div className="ad-variant-list-head"><h4>{active.includes('color') ? `Colours, price & stock (${setup.rows.length})` : 'Price & stock'}</h4>{setup.rows.length > 1 && <button type="button" className="ad-option-off" disabled={!setup.basePrice} onClick={applyBaseToAll}>Reset all to base price</button>}</div>
-    <div className="ad-variant-head" aria-hidden="true"><span>{active.includes('color') ? 'Colour' : 'Product'}</span><span>Selling price (INR)</span><span>MRP (INR)</span><span>Stock</span><span /></div>
+    <div className="ad-variant-list-head"><h4>Variants, price &amp; stock ({setup.rows.length})</h4>{setup.rows.length > 1 && <button type="button" className="ad-option-off" disabled={!setup.basePrice} onClick={applyBaseToAll}>Reset all to base price</button>}</div>
+    <div className="ad-variant-head" aria-hidden="true"><span>{active.length ? 'Options' : 'Product'}</span><span>Selling price (INR)</span><span>MRP (INR)</span><span>Stock</span><span /></div>
     <ol>{setup.rows.map((row, index) => {
             const problems = variantProblems(row);
             const messages = showProblems ? Object.values(problems) : [];
@@ -206,7 +206,7 @@ export default function VariantEditor({ setup, onChange, error, showProblems }) 
             const name = active.map(key => row[key]).join(', ') || 'Default';
             return <li key={keyOf(row) || index}>
         <div className="ad-variant-name">
-          {active.includes('color') ? <span className="ad-variant-tag" title="Colour"><i style={{ background: row.color }}/>{row.color}</span> : active.length ? active.map(key => <span key={key} className="ad-variant-tag" title={attributeLabels[key]}>{row[key]}</span>) : <span className="ad-muted">One price for this product</span>}
+          {active.length ? active.map(key => key === 'color' ? <span key={key} className="ad-variant-tag" title="Colour"><i style={{ background: row.color }} />{row.color}</span> : <span key={key} className="ad-variant-tag" title={attributeLabels[key]}>{row[key]}</span>) : <span className="ad-muted">One price for this product</span>}
           {custom && <span className="ad-variant-custom">Custom price</span>}
         </div>
         <label className="ad-variant-field"><span>Selling price (INR)</span><input type="number" inputMode="decimal" aria-label={`${name} selling price in INR`} aria-invalid={showProblems && !!problems.price} min="0.01" max="9999999999.99" step="0.01" placeholder={setup.basePrice || '0.00'} value={row.price} onChange={event => updateRow(index, { price: event.target.value })}/></label>

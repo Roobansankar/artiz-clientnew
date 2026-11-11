@@ -987,3 +987,36 @@
 .ad-hero-slide-meta p { margin: 6px 0 12px; font-size: 13px; }
 .ad-hero-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 700px) { .ad-hero-fields { grid-template-columns: 1fr; } .ad-hero-list > li { flex-direction: column; align-items: stretch; } .ad-hero-thumbnail { width: 100%; } .ad-hero-editor { padding: 16px; } .ad-hero-preview-copy { max-width: 100%; } }
+.ad-bulk-page { display: grid; gap: 20px; align-content: start; min-width: 0; max-width: 1180px; }
+.ad-bulk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ad-bulk-card { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; border: 1px solid var(--ad-line); border-radius: 10px; background: var(--ad-surface); padding: 24px; min-width: 0; }
+.ad-bulk-card h3 { font-size: 17px; font-weight: 600; }
+.ad-bulk-card p { font-size: 13px; color: var(--ad-muted); line-height: 1.6; }
+.ad-bulk-step { display: inline-flex; align-items: center; border-radius: 999px; background: var(--ad-soft); color: var(--ad-muted); padding: 3px 10px; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.ad-bulk-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; color: var(--ad-muted); }
+.ad-bulk-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 148px; padding: 20px; border: 1.5px dashed var(--ad-line); border-radius: 9px; background: var(--ad-soft); cursor: pointer; text-align: center; transition: border-color .15s, background .15s; }
+.ad-bulk-drop:hover, .ad-bulk-drop.dragging { border-color: var(--ad-accent); background: color-mix(in srgb, var(--ad-accent) 7%, var(--ad-soft)); }
+.ad-bulk-drop.has-file { border-style: solid; border-color: var(--ad-accent); }
+.ad-bulk-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ad-bulk-drop strong { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.ad-bulk-drop small { font-size: 12px; color: var(--ad-muted); }
+.ad-bulk-drop-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--ad-surface); border: 1px solid var(--ad-line); color: var(--ad-accent); }
+.ad-bulk-actions { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.ad-bulk-results { display: grid; gap: 18px; border: 1px solid var(--ad-line); border-radius: 10px; background: var(--ad-surface); padding: 24px; }
+.ad-bulk-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ad-bulk-summary > div { display: flex; flex-direction: column; gap: 2px; padding: 16px 18px; border: 1px solid var(--ad-line); border-radius: 8px; background: var(--ad-soft); }
+.ad-bulk-summary strong { font-size: 26px; font-weight: 600; letter-spacing: -.03em; }
+.ad-bulk-summary span { font-size: 12px; color: var(--ad-muted); }
+.ad-bulk-summary .has-failures strong { color: #c2410c; }
+.ad-bulk-created summary { cursor: pointer; font-weight: 500; font-size: 14px; }
+.ad-bulk-created ul { display: grid; gap: 0; margin: 12px 0 0; padding: 0; list-style: none; border: 1px solid var(--ad-line); border-radius: 8px; overflow: hidden; }
+.ad-bulk-created li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; font-size: 13px; border-top: 1px solid var(--ad-line); }
+.ad-bulk-created li:first-child { border-top: 0; }
+.ad-bulk-created a { color: var(--ad-accent); font-weight: 500; }
+.ad-bulk-failures { display: grid; gap: 12px; min-width: 0; }
+.ad-bulk-failures h3 { font-size: 15px; font-weight: 600; color: #c2410c; }
+.ad-bulk-failures .ad-table { min-width: 620px; }
+.ad-bulk-failures .ad-table td:first-child { width: 70px; font-variant-numeric: tabular-nums; color: var(--ad-muted); }
+.ad-bulk-failures .ad-table td:last-child { color: #c2410c; }
+.ad-bulk-done { justify-self: start; }
+@media (max-width: 820px) { .ad-bulk-grid { grid-template-columns: 1fr; } .ad-bulk-summary { grid-template-columns: 1fr; } .ad-bulk-results { padding: 18px; } }

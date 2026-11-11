@@ -146,10 +146,6 @@ export default function AdminProducts() {
             return;
         setFormError('');
         setFieldErrors({});
-        if (!editor.retainedImages.length && !files.length) {
-            setFormError('Please upload at least one product image.');
-            return;
-        }
         if (editor.retainedImages.length + files.length > 6) {
             setFormError('Use at most six images.');
             return;
@@ -311,7 +307,7 @@ export default function AdminProducts() {
           <VariantEditor setup={editor.variants} onChange={value => field('variants', value)} showProblems={showVariantProblems} error={fieldErrors.variants?.join(' ')}/>
         </div>
         <details className="ad-editor-collections"><summary>Additional categories, rooms &amp; collections ({editor.collectionSlugs.length})</summary><p className="ad-muted">Choose rooms and collections where this product should also appear.</p><div>{catalogCategories.filter(c => c.slug !== editor.categorySlug && (c.active || editor.collectionSlugs.includes(c.slug))).map(c => <label key={c.slug}><input type="checkbox" checked={editor.collectionSlugs.includes(c.slug)} onChange={e => field('collectionSlugs', e.target.checked ? [...editor.collectionSlugs, c.slug] : editor.collectionSlugs.filter(slug => slug !== c.slug))}/>{c.name}</label>)}</div></details>
-        <h3>Product images</h3><p className="ad-muted">Recommended image size: 1600 &times; 1500 pixels (16:15 ratio). Keep the entire product centered with a little space around it, and use the same background and framing for all photos. All uploads are resized to exactly 1600 &times; 1500 pixels. Prepare photos in this 16:15 ratio to avoid stretching. Up to 6 JPG, PNG, or WebP images, 8 MB each. Images are converted to WebP automatically. The first image is the cover.</p>
+        <h3>Product images</h3><p className="ad-muted">Optional. Recommended image size: 1600 &times; 1500 pixels (16:15 ratio). Keep the entire product centered with a little space around it, and use the same background and framing for all photos. All uploads are resized to exactly 1600 &times; 1500 pixels. Prepare photos in this 16:15 ratio to avoid stretching. Up to 6 JPG, PNG, or WebP images, 8 MB each. Images are converted to WebP automatically. The first image is the cover. A placeholder is used when no image is uploaded.</p>
         <div className="ad-editor-images">
           {editor.retainedImages.map((url, index) => <div key={url}><Image src={url} alt={`Product image ${index + 1}`} width={130} height={130}/><button type="button" className="ad-secondary" onClick={() => field('retainedImages', editor.retainedImages.filter(u => u !== url))}>Remove</button>{index > 0 && <button type="button" className="ad-secondary" onClick={() => field('retainedImages', [url, ...editor.retainedImages.filter(u => u !== url)])}>Make cover</button>}</div>)}
           {previews.map((url, index) => <div key={url}><Image unoptimized src={url} alt={`New upload ${index + 1}`} width={130} height={130}/><button type="button" className="ad-secondary" onClick={() => setFiles(files.filter((_, i) => i !== index))}>Remove</button></div>)}

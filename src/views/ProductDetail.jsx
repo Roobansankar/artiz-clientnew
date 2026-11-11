@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Check, ChevronRight, Heart, Maximize2, Minus, Pl
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Keyboard } from 'swiper/modules'
 import { firstAvailableVariant, formatPrice, productOption } from '../catalog'
+import { attributeLabels, variantAttributes } from '../lib/variants'
 import { useStore } from '../store'
 import { CartIcon } from '../components/icons'
 
@@ -42,7 +43,11 @@ export default function ProductDetail({ product, category, related }) {
   const images = product.images?.length ? product.images : [product.img]
   const variants = product.variants || []
   const option = productOption(product, selected)
-  const colors = [...new Set(variants.map(variant => variant.color).filter(Boolean))]
+  const selectedVariant = variants[selected] || {}
+  const attributes = variantAttributes
+    .map(key => ({ key, values: [...new Set(variants.map(variant => variant[key]).filter(Boolean))] }))
+    .filter(attribute => attribute.values.length)
+  const colors = attributes.find(attribute => attribute.key === 'color')?.values || []
   const inCart = cart.find(item => item.id === product.id && (item.variantIndex ?? null) === selected)?.qty || 0
   const remaining = Math.max(0, Math.min(10 - inCart, option.stock - inCart))
   const canBuy = remaining > 0
@@ -54,10 +59,15 @@ export default function ProductDetail({ product, category, related }) {
   ].filter(([, value]) => value != null && String(value).trim() !== '')
   const visibleDetails = details.filter(([label]) => label !== 'Category')
 
-  function chooseColor(color) {
-    const available = variants.findIndex(variant => variant.color === color && variant.stock > 0)
-    setSelected(available >= 0 ? available : variants.findIndex(variant => variant.color === color))
-    setQuantity(1)
+  function choose(key, value) {
+    const current = variants[selected] || {}
+    const score = variant => (variantAttributes.filter(other => other !== key).every(other => !current[other] || variant[other] === current[other]) ? 2 : 0) + (Number(variant.stock) > 0 ? 1 : 0)
+    let best = -1
+    variants.forEach((variant, index) => {
+      if (variant[key] !== value) return
+      if (best < 0 || score(variant) > score(variants[best])) best = index
+    })
+    if (best >= 0) { setSelected(best); setQuantity(1) }
   }
 
   function add() {
@@ -116,9 +126,14 @@ export default function ProductDetail({ product, category, related }) {
               <p className={`mt-4 flex items-center gap-2 text-sm ${option.stock > 0 ? 'text-[#527254]' : 'text-muted'}`} aria-live="polite"><span className={`h-2 w-2 rounded-full ${option.stock > 0 ? 'bg-[#527254]' : 'bg-muted'}`} />{option.stock > 0 ? `${option.stock} in stock` : 'Currently out of stock'}</p>
               {product.description?.trim() && <p className="mt-5 whitespace-pre-line text-[15px] leading-relaxed text-muted">{product.description}</p>}
 
-              {colors.length > 0 && <fieldset className="mt-7 border-0 p-0"><legend className="mb-3 text-sm font-medium">Color <span className="ml-2 font-normal text-muted">{option.color}</span></legend><div className="flex flex-wrap gap-3">
-                {colors.map(color => <button key={color} type="button" onClick={() => chooseColor(color)} aria-label={`Choose color ${color}`} aria-pressed={option.color === color} title={color} className={`relative grid h-9 w-9 place-items-center rounded-full border-4 border-white outline outline-1 outline-offset-1 ${option.color === color ? 'outline-ink' : 'outline-sand hover:outline-terra'}`} style={{ backgroundColor: color }}>{option.color === color && <Check size={14} className="rounded-full bg-white/90 p-0.5 text-ink" />}</button>)}
-              </div></fieldset>}
+              {attributes.map(attribute => attribute.key === 'color'
+                ? <fieldset key="color" className="mt-7 border-0 p-0"><legend className="mb-3 text-sm font-medium">Color <span className="ml-2 font-normal text-muted">{selectedVariant.color}</span></legend><div className="flex flex-wrap gap-3">
+                  {colors.map(color => <button key={color} type="button" onClick={() => choose('color', color)} aria-label={`Choose color ${color}`} aria-pressed={selectedVariant.color === color} title={color} className={`relative grid h-9 w-9 place-items-center rounded-full border-4 border-white outline outline-1 outline-offset-1 ${selectedVariant.color === color ? 'outline-ink' : 'outline-sand hover:outline-terra'}`} style={{ backgroundColor: color }}>{selectedVariant.color === color && <Check size={14} className="rounded-full bg-white/90 p-0.5 text-ink" />}</button>)}
+                </div></fieldset>
+                : <fieldset key={attribute.key} className="mt-5 border-0 p-0"><legend className="mb-3 text-sm font-medium">{attributeLabels[attribute.key]} <span className="ml-2 font-normal text-muted">{selectedVariant[attribute.key]}</span></legend><div className="flex flex-wrap gap-2">
+                  {attribute.values.map(value => <button key={value} type="button" onClick={() => choose(attribute.key, value)} aria-pressed={selectedVariant[attribute.key] === value} className={`rounded-full border px-4 py-2 text-sm transition-colors ${selectedVariant[attribute.key] === value ? 'border-ink bg-ink text-white' : 'border-sand bg-white hover:border-terra'}`}>{value}</button>)}
+                </div></fieldset>
+              )}
 
               {visibleDetails.length > 0 && <dl className="mt-6 grid grid-cols-2 gap-x-5 gap-y-3 rounded-xl bg-cream p-4">{visibleDetails.map(([label, value]) => <div key={label}><dt className="text-xs text-muted">{label}</dt><dd className="mt-1 text-sm font-medium">{value}</dd></div>)}</dl>}
 
