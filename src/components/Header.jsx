@@ -4,11 +4,15 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ImageIcon, MapPin, Menu, User, X } from 'lucide-react'
 import { CartIcon, HeartIcon, SearchIcon, UserIcon } from './icons'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStore } from '../store'
 import { ADDRESS, Logo, Socials } from './ui'
 import AccountMenu from './AccountMenu'
+import { useCategories } from './useCategories'
+
+const ProductSearch = dynamic(() => import('./ProductSearch'), { loading: () => <p role="status" className="text-center text-muted">Loading search…</p> })
 
 const extraLinks = [
   { label: 'New Arrivals', href: '/new-arrivals', children: [] },
@@ -111,30 +115,7 @@ function Dropdown({ item }) {
 }
 
 export default function Header() {
-  const [categories, setCategories] = useState([])
-  const [categoryError, setCategoryError] = useState(false)
-  const refreshCategories = useCallback(async () => {
-    try {
-      const response = await fetch('/api/categories', { cache: 'no-store' })
-      if (!response.ok) throw new Error('Categories unavailable')
-      const data = await response.json()
-      if (!Array.isArray(data.categories)) throw new Error('Invalid categories')
-      setCategories(data.categories)
-      setCategoryError(false)
-    } catch {
-      setCategoryError(true)
-    }
-  }, [])
-  useEffect(() => {
-    void refreshCategories()
-    const refresh = () => { if (document.visibilityState === 'visible') void refreshCategories() }
-    window.addEventListener('focus', refresh)
-    document.addEventListener('visibilitychange', refresh)
-    return () => {
-      window.removeEventListener('focus', refresh)
-      document.removeEventListener('visibilitychange', refresh)
-    }
-  }, [refreshCategories])
+  const { categories, error: categoryError, refresh: refreshCategories } = useCategories()
   const nav = categoryItems(categories)
   const mobileNav = [...nav, ...extraLinks, { label: 'Discover', children: discoverLinks }]
   const { cart, setCartOpen, wishlist } = useStore()
@@ -222,10 +203,7 @@ export default function Header() {
               <div className="container-x relative">
                 <button onClick={() => setSearchOpen(false)} className="absolute -top-6 right-6 cursor-pointer" aria-label="Close search"><X /></button>
                 <h3 className="mb-6 text-center text-2xl">What are you looking for?</h3>
-                <div className="mx-auto flex max-w-2xl items-center rounded-full border border-sand px-6">
-                  <input autoFocus placeholder="Search our store" className="h-14 flex-1 bg-transparent outline-none" />
-                  <SearchIcon size={20} />
-                </div>
+                <ProductSearch onSelect={() => setSearchOpen(false)} />
               </div>
             </motion.div>
           </motion.div>

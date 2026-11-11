@@ -1,17 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { fetchPublicCategories } from '../lib/public-categories'
 
 export function useCategories() {
   const [categories, setCategories] = useState([])
   const [error, setError] = useState(false)
   const refresh = useCallback(async () => {
     try {
-      const response = await fetch('/api/categories', { cache: 'no-store' })
-      if (!response.ok) throw new Error('Categories unavailable')
-      const data = await response.json()
-      if (!Array.isArray(data.categories)) throw new Error('Invalid categories')
-      setCategories(data.categories)
+      setCategories(await fetchPublicCategories())
       setError(false)
     } catch { setError(true) }
   }, [])

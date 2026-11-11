@@ -4,8 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Heart, Phone, Plus } from 'lucide-react'
 import Link from 'next/link'
 import ProductPrice from '../components/ProductPrice'
-import { categoryProducts, formatPrice, productOption, shopProduct } from '../catalog'
-import { useState } from 'react'
+import { formatPrice, productOption, shopProduct } from '../catalog'
+import { useEffect, useState } from 'react'
+import Image from '../components/ProductImage'
 import { Autoplay, EffectFade } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { ArrowBtn, Price, Reveal, SectionHeading, ViewAll } from '../components/ui'
@@ -38,8 +39,8 @@ export function FeaturedCollection({ products: curatedProducts = [] }) {
                 return <SwiperSlide key={product.id}>
                   <article className="group/curated relative">
                     <Link href={href} className="relative block aspect-square overflow-hidden rounded-2xl bg-white">
-                      <img src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} loading="lazy" className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover/curated:scale-105 ${product.images?.[1] ? 'group-hover/curated:opacity-0 group-focus-within/curated:opacity-0' : ''}`} />
-                      {product.images?.[1] && <img src={product.images[1]} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover/curated:scale-105 group-hover/curated:opacity-100 group-focus-within/curated:opacity-100" />}
+                      <Image fill sizes="(max-width: 639px) 80vw, (max-width: 1023px) 45vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover/curated:scale-105 ${product.images?.[1] ? 'group-hover/curated:opacity-0 group-focus-within/curated:opacity-0' : ''}`} />
+                      {product.images?.[1] && <Image fill sizes="(max-width: 639px) 80vw, (max-width: 1023px) 45vw, 25vw" src={product.images[1]} alt="" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover/curated:scale-105 group-hover/curated:opacity-100 group-focus-within/curated:opacity-100" />}
                     </Link>
                     <button type="button" onClick={() => toggleWish(product.id)} aria-label={`${wished ? 'Remove' : 'Save'} ${product.name} ${wished ? 'from' : 'to'} wishlist`} aria-pressed={wished} className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white opacity-0 transition-opacity group-hover/curated:opacity-100 focus:opacity-100"><Heart size={18} className={wished ? 'fill-terra text-terra' : ''} /></button>
                     <Link href={href} className="mt-4 block font-heading text-base font-medium hover:text-terra">{product.name}</Link>
@@ -206,7 +207,7 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
               <Reveal key={product.id} delay={index * 0.08}>
                 <div className={`group/featured relative rounded-2xl border-2 p-3 transition-colors ${selected ? 'border-terra' : 'border-transparent'}`}>
                   <Link href={href} className="group block overflow-hidden rounded-xl bg-cream">
-                    <img src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <Image width={600} height={600} sizes="(max-width: 767px) 50vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </Link>
                   <button type="button" onClick={() => toggleWish(product.id)} aria-label={`Save ${product.name} to wishlist`} aria-pressed={wished} className="pointer-events-none absolute right-5 top-5 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-0 transition-opacity duration-200 hover:bg-peach group-hover/featured:pointer-events-auto group-hover/featured:opacity-100 focus:pointer-events-auto focus:opacity-100 group-focus-within/featured:pointer-events-auto group-focus-within/featured:opacity-100">
                     <Heart size={18} className={wished ? 'fill-terra text-terra' : ''} />
@@ -246,11 +247,26 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
 }
 export function TabbedCollection({ products: catalogProducts = [], categories = [], loadError = false }) {
   const [tab, setTab] = useState(null)
+  const [results, setResults] = useState({ slug: null, products: catalogProducts })
+  const [error, setError] = useState(false)
   const { addToCart, wishlist, toggleWish } = useStore()
   const furniture = categories.find(category => category.kind === 'category' && !category.parentSlug && category.slug === 'furniture')
   const tabs = categories.filter(category => category.parentSlug === furniture?.slug && category.kind === 'category' && category.showInMenu)
   const selected = tabs.some(category => category.slug === tab) ? tab : null
-  const list = furniture ? categoryProducts(selected || furniture.slug, categories, catalogProducts).slice(0, 8) : []
+  useEffect(() => {
+    setError(false)
+    if (!selected) return
+    const controller = new AbortController()
+    fetch(`/api/products?${new URLSearchParams({ category: selected, pageSize: '8' })}`, { cache: 'no-store', signal: controller.signal })
+      .then(async response => {
+        if (!response.ok) throw new Error('Collection unavailable')
+        const data = await response.json()
+        if (!controller.signal.aborted) setResults({ slug: selected, products: data.products })
+      }).catch(() => { if (!controller.signal.aborted) setError(true) })
+    return () => controller.abort()
+  }, [selected])
+  const loading = Boolean(selected && results.slug !== selected && !error)
+  const list = furniture ? (selected ? results.slug === selected ? results.products : [] : catalogProducts) : []
   return (
     <section className="section-py">
       <div className="container-x">
@@ -269,8 +285,8 @@ export function TabbedCollection({ products: catalogProducts = [], categories = 
               <motion.div key={p.id} layout initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }} exit={{ opacity: 0, scale: 0.95 }}>
                 <article className="group/collection relative">
                   <Link href={`/products/${p.slug || p.id}`} className="relative block aspect-square overflow-hidden rounded-2xl bg-white">
-                    <img src={p.images?.[0] || p.image || '/images/categories/decor.jpg'} alt={p.name} loading="lazy" className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover/collection:scale-105 ${p.images?.[1] ? 'group-hover/collection:opacity-0' : ''}`} />
-                    {p.images?.[1] && <img src={p.images[1]} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover/collection:opacity-100" />}
+                    <Image src={p.images?.[0] || p.image || '/images/categories/decor.jpg'} alt={p.name} fill sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className={`object-cover transition-all duration-500 group-hover/collection:scale-105 ${p.images?.[1] ? 'group-hover/collection:opacity-0' : ''}`} />
+                    {p.images?.[1] && <Image src={p.images[1]} alt="" fill sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover opacity-0 transition-all duration-500 group-hover/collection:opacity-100" />}
                   </Link>
                   <button type="button" onClick={() => toggleWish(p.id)} aria-label={`${wishlist.includes(p.id) ? 'Remove' : 'Save'} ${p.name} ${wishlist.includes(p.id) ? 'from' : 'to'} wishlist`} aria-pressed={wishlist.includes(p.id)} className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white"><Heart size={18} className={wishlist.includes(p.id) ? 'fill-terra text-terra' : ''} /></button>
                   <p className="mt-4 text-xs uppercase tracking-wider text-muted">{categories.find(category => category.slug === p.categorySlug)?.name || 'Furniture'}</p>
@@ -282,7 +298,8 @@ export function TabbedCollection({ products: catalogProducts = [], categories = 
             ))}
           </AnimatePresence>
         </motion.div>
-        {!list.length && <p role="status" className="py-10 text-center text-muted">{loadError ? 'The collection is temporarily unavailable. Please try again soon.' : 'No products in this category yet.'}</p>}
+        {loading && <div role="status" aria-label="Loading collection" className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className="aspect-square animate-pulse rounded-2xl bg-sand/50" />)}</div>}
+        {!list.length && !loading && <p role="status" className="py-10 text-center text-muted">{loadError || error ? 'The collection is temporarily unavailable. Please try again soon.' : 'No products in this category yet.'}</p>}
         {furniture && list.length > 0 && <div className="mt-10 flex justify-center"><ViewAll href={`/shop/${encodeURIComponent(selected || furniture.slug)}`} /></div>}
       </div>
     </section>

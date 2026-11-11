@@ -273,13 +273,13 @@ function Letter() {
   )
 }
 
-export default function ShopPage({ category, collection, categoryCollections = [], categoryProducts, initialSort }) {
+export default function ShopPage({ category, collection, categoryCollections = [], categoryProducts, initialSort, remoteCatalog }) {
   const currentCollection = category || collection
   return (
     <>
       <PageBanner title={currentCollection?.name} description={currentCollection?.description} />
       {(!currentCollection || categoryCollections.length > 0) && <ShopByCollection items={currentCollection ? categoryCollections : collections} category={Boolean(currentCollection)} />}
-      <ShopGrid key={currentCollection?.slug || 'all'} products={categoryProducts} catalogMode={Boolean(currentCollection)} currency={currentCollection ? 'INR' : 'USD'} initialSort={initialSort} />
+      <ShopGrid key={currentCollection?.slug || 'all'} products={categoryProducts} catalogMode={Boolean(currentCollection) || Boolean(remoteCatalog)} currency={currentCollection || remoteCatalog ? 'INR' : 'USD'} initialSort={initialSort} remoteCatalog={remoteCatalog} />
       {!collection && <NewArrivals />}
       {!currentCollection && <><LatestNine /><YouMayAlsoLike /><Feedback /></>}
       <Promises />

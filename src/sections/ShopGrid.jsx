@@ -3,10 +3,13 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeftRight, ArrowRight, Check, ChevronDown, Eye, Filter, Heart, ListFilter, Plus, X } from 'lucide-react'
 import Link from 'next/link'
+import Image from '../components/ProductImage'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { money } from '../data'
 import { shopProducts } from '../shopData'
 import { useStore } from '../store'
+import { useProductListing } from '../components/useProductListing'
+import { listingParams } from '../lib/listing-params'
 
 const SWATCH = {
   Brown: '#7b5a3c', Black: '#2b2b2b', Gray: '#8a8a8a', 'Light Gray': '#d6d3cf', Yellow: '#f2c500',
@@ -64,7 +67,7 @@ function Group({ title, count, children, defaultOpen = true }) {
   )
 }
 
-function CheckList({ options, selected, onToggle, counts, swatch }) {
+function CheckList({ options, selected, onToggle, counts, swatch, labels = {} }) {
   return (
     <ul className="space-y-3">
       {options.map((o) => {
@@ -81,7 +84,7 @@ function CheckList({ options, selected, onToggle, counts, swatch }) {
                   {on && <Check size={12} strokeWidth={3} />}
                 </span>
               )}
-              <span className="flex-1">{o}</span>
+              <span className="flex-1">{labels[o] || o}</span>
               <span className="text-muted">{n}</span>
             </label>
           </li>
@@ -109,7 +112,7 @@ function PriceRange({ value, onChange, maxPrice, formatMoney }) {
   )
 }
 
-function Filters({ f, setF, counts, onClose, options, maxPrice, formatMoney }) {
+function Filters({ f, setF, counts, onClose, options, maxPrice, formatMoney, categoryNames }) {
   const toggle = (key) => (v) => setF((s) => ({ ...s, [key]: s[key].includes(v) ? s[key].filter((x) => x !== v) : [...s[key], v] }))
   return (
     <div>
@@ -123,7 +126,7 @@ function Filters({ f, setF, counts, onClose, options, maxPrice, formatMoney }) {
       <Group title="Price"><PriceRange value={f.price} maxPrice={maxPrice} formatMoney={formatMoney} onChange={(price) => setF((s) => ({ ...s, price }))} /></Group>
       {Object.entries(options).filter(([, values]) => values.length > 0).map(([key, values]) => (
         <Group key={key} title={{ size: 'Size', spec: 'Specifications', color: 'Color', fabric: 'Fabric', brand: 'Category' }[key]} count={f[key].length} defaultOpen={key === 'size'}>
-          <CheckList swatch={key === 'color'} options={values} selected={f[key]} onToggle={toggle(key)} counts={counts[key]} />
+          <CheckList labels={key === 'brand' ? categoryNames : undefined} swatch={key === 'color'} options={values} selected={f[key]} onToggle={toggle(key)} counts={counts[key]} />
         </Group>
       ))}
     </div>
@@ -139,8 +142,8 @@ function ShopCard({ p, compareMode, compared, onCompare, formatMoney }) {
     <div className="group/card text-center">
       <div className="relative overflow-hidden rounded-xl bg-[#f6efe9]">
         <Link href={p.slug ? `/products/${p.slug}` : '#'} onClick={event => { if (!p.slug) event.preventDefault() }} className="relative block aspect-square">
-          <img src={p.img} alt={p.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover/card:scale-[1.03] group-hover/card:opacity-0" />
-          <img src={p.hover} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-700 group-hover/card:scale-[1.03] group-hover/card:opacity-100" />
+          <Image src={p.img} alt={p.title} fill sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover transition-all duration-700 group-hover/card:scale-[1.03] group-hover/card:opacity-0" />
+          <Image src={p.hover} alt="" fill sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover opacity-0 transition-all duration-700 group-hover/card:scale-[1.03] group-hover/card:opacity-100" />
         </Link>
         {p.compare > 0 && <span className="absolute left-3 top-3 rounded bg-ink px-2 py-0.5 text-xs text-white">Sale</span>}
         <div className="absolute right-3 top-3 flex flex-col gap-2">
@@ -187,11 +190,14 @@ const ViewIcon = ({ n }) => (
   <span className="flex gap-[3px]">{Array.from({ length: n }, (_, i) => <span key={i} className="h-3.5 w-[2px] bg-current" />)}</span>
 )
 
-export default function ShopGrid({ products = shopProducts, catalogMode = false, currency = 'USD', initialSort = 'title-ascending' }) {
-  const maxPrice = Math.max(10, Math.ceil(Math.max(0, ...products.map(product => product.price))))
+export default function ShopGrid({ products: initialProducts = shopProducts, catalogMode = false, currency = 'USD', initialSort = 'title-ascending', remoteCatalog }) {
+  const maxPrice = remoteCatalog?.initial.facets.maxPrice || Math.max(10, Math.ceil(Math.max(0, ...initialProducts.map(product => product.price))))
+  const categoryNames = useMemo(() => Object.fromEntries((remoteCatalog?.categories || []).map(category => [category.slug, category.name])), [remoteCatalog])
   const formatMoney = currency === 'INR' ? value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(value) : money
   const empty = useMemo(() => ({ availability: [], size: [], spec: [], color: [], fabric: [], brand: [], price: [0, maxPrice] }), [maxPrice])
   const options = useMemo(() => {
+    if (remoteCatalog) return Object.fromEntries(['size', 'spec', 'color', 'fabric', 'brand'].map(key => [key, Object.keys(remoteCatalog.initial.facets.counts[key]).sort()]))
+    const products = initialProducts
     const unique = values => [...new Set(values.filter(Boolean))]
     return catalogMode ? {
       size: unique(products.flatMap(p => p.sizes || [])),
@@ -200,9 +206,15 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
       fabric: unique(products.flatMap(p => p.fabrics || [])),
       brand: unique(products.map(p => p.vendor)),
     } : { size: SIZES, spec: SPECS, color: Object.keys(SWATCH), fabric: FABRICS, brand: ['Bed', 'Furniture', 'Tables'] }
-  }, [products, catalogMode])
+  }, [initialProducts, catalogMode, remoteCatalog])
   const [f, setF] = useState(empty)
   const [sort, setSort] = useState(initialSort)
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  useEffect(() => { const timer = setTimeout(() => setDebouncedSearch(search), 250); return () => clearTimeout(timer) }, [search])
+  const query = remoteCatalog ? listingParams({ category: remoteCatalog.category, flag: remoteCatalog.flag, filters: f, sort, search: debouncedSearch, maxPrice }) : ''
+  const remote = useProductListing(remoteCatalog, initialProducts, query)
+  const products = remoteCatalog ? remote.products : initialProducts
   const [cols, setCols] = useState(3)
   const [showFilters, setShowFilters] = useState(true)
   const [drawer, setDrawer] = useState(false)
@@ -210,10 +222,14 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
   const [compare, setCompare] = useState([])
   const [compareOpen, setCompareOpen] = useState(false)
   const [visible, setVisible] = useState(PAGE)
-  const [loading, setLoading] = useState(false)
   const [sortOpen, setSortOpen] = useState(false)
   const sentinel = useRef(null)
   const top = useRef(null)
+  const previousQuery = useRef(query)
+  useEffect(() => {
+    if (remoteCatalog && previousQuery.current !== query) top.current?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    previousQuery.current = query
+  }, [query, remoteCatalog])
 
   // Live products match only attributes present in their variants.
   const matches = (p, s, skip) =>
@@ -223,9 +239,10 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
     (!catalogMode || ['size', 'spec', 'fabric'].every(key => skip === key || !s[key].length || s[key].some(value => (p[{ size: 'sizes', spec: 'specs', fabric: 'fabrics' }[key]] || []).includes(value)))) &&
     p.price >= s.price[0] && p.price <= s.price[1]
 
-  const filtered = useMemo(() => sortProducts(products.filter((p) => matches(p, f)), sort), [products, f, sort, catalogMode])
+  const filtered = useMemo(() => remoteCatalog ? products : sortProducts(products.filter((p) => matches(p, f)), sort), [products, f, sort, catalogMode, remoteCatalog])
 
   const counts = useMemo(() => {
+    if (remoteCatalog) return remote.meta.facets.counts
     const count = (skip, fn) => {
       const out = {}
       products.filter((p) => matches(p, f, skip)).forEach((p) => fn(p).forEach((k) => { out[k] = (out[k] || 0) + 1 }))
@@ -239,22 +256,21 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
       brand: count('brand', (p) => [p.vendor]),
       ...Object.fromEntries(['size', 'spec', 'fabric'].map(key => [key, catalogMode ? count(key, p => p[{ size: 'sizes', spec: 'specs', fabric: 'fabrics' }[key]] || []) : all(options[key])])),
     }
-  }, [products, f, catalogMode, options])
+  }, [products, f, catalogMode, options, remoteCatalog, remote.meta])
 
   // Reset paging whenever the result set changes
-  const key = JSON.stringify([products, f, sort, catalogMode])
-  const [lastKey, setLastKey] = useState(key)
-  if (key !== lastKey) { setLastKey(key); setVisible(PAGE) }
+  useEffect(() => { setVisible(PAGE) }, [products, f, sort, catalogMode])
 
-  const hasMore = visible < filtered.length
+  const hasMore = remoteCatalog ? remote.meta.hasMore : visible < filtered.length
   const loadMore = () => {
-    if (loading || !hasMore) return
-    setLoading(true)
-    setTimeout(() => { setVisible((v) => v + PAGE); setLoading(false) }, 600)
+    if (remoteCatalog) return remote.loadMore()
+    if (!hasMore) return
+    setVisible((v) => v + PAGE)
   }
 
   // Infinite load: fetch the next page when the sentinel scrolls into view
   useEffect(() => {
+    if (remoteCatalog && (remote.loading || remote.error)) return
     const el = sentinel.current
     if (!el) return
     const io = new IntersectionObserver((e) => e[0].isIntersecting && loadMore(), { rootMargin: '200px' })
@@ -263,7 +279,7 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
   })
 
   const chips = [
-    ...['availability', 'size', 'spec', 'color', 'fabric', 'brand'].flatMap((k) => f[k].map((v) => ({ k, v, label: v }))),
+    ...['availability', 'size', 'spec', 'color', 'fabric', 'brand'].flatMap((k) => f[k].map((v) => ({ k, v, label: k === 'brand' ? categoryNames[v] || v : v }))),
     ...(f.price[0] > 0 || f.price[1] < maxPrice ? [{ k: 'price', label: `${formatMoney(f.price[0])} - ${formatMoney(f.price[1])}` }] : []),
   ]
   const removeChip = (c) => setF((s) => (c.k === 'price' ? { ...s, price: [0, maxPrice] } : { ...s, [c.k]: s[c.k].filter((x) => x !== c.v) }))
@@ -272,9 +288,14 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
     setCompareMode(true)
   }
   const gridCols = { 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4' }[showFilters ? cols : Math.min(cols + 1, 4)]
-  const comparedItems = products.filter((p) => compare.includes(p.id))
+  const knownProducts = useRef(new Map())
+  const currentIds = new Set(products.map(product => product.id))
+  for (const product of products) knownProducts.current.set(product.id, product)
+  // Retain selected comparisons across server-side filter changes, not the full catalog.
+  for (const id of knownProducts.current.keys()) if (!compare.includes(id) && !currentIds.has(id)) knownProducts.current.delete(id)
+  const comparedItems = compare.map(id => knownProducts.current.get(id)).filter(Boolean)
 
-  if (products.length === 0) {
+  if ((!remoteCatalog && products.length === 0) || (remoteCatalog && remote.meta.total === 0 && !remote.loading && !remote.error && !search.trim() && !chips.length)) {
     return (
       <section className="bg-cream py-10 md:py-14" aria-labelledby="empty-collection-title">
         <div className="container-x">
@@ -314,7 +335,7 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
             </label>
           </div>
           <div className="flex items-center gap-5">
-            <p className="hidden text-sm font-medium sm:block">{filtered.length} products</p>
+            <p className="hidden text-sm font-medium sm:block">{remoteCatalog ? remote.meta.total : filtered.length} products</p>
             <div className="relative">
               <button onClick={() => setSortOpen((o) => !o)} className="flex items-center gap-2 rounded-lg border border-ink/15 bg-white px-4 py-2.5 text-sm cursor-pointer">
                 <ListFilter size={15} /> <b className="hidden sm:inline">SORT BY</b> {SORTS.find((s) => s[0] === sort)[1]}
@@ -346,6 +367,8 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
           </div>
         </div>
 
+        {remoteCatalog && <div className="mb-6"><label htmlFor="collection-search" className="sr-only">Search this collection</label><input id="collection-search" type="search" value={search} maxLength={100} onChange={event => setSearch(event.target.value)} placeholder="Search this collection" className="h-12 w-full max-w-md rounded-lg border border-sand bg-white px-4 text-sm outline-none focus:border-terra" /></div>}
+
         <div className="flex gap-8">
           {/* Desktop sidebar: sticky, slides away when hidden */}
           <AnimatePresence initial={false}>
@@ -353,7 +376,7 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
               <motion.aside initial={{ width: 0, opacity: 0 }} animate={{ width: 260, opacity: 1 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.35 }}
                 className="hidden shrink-0 overflow-hidden lg:block">
                 <div className="sticky top-28 w-[260px] pr-2">
-                  <Filters f={f} setF={setF} counts={counts} options={options} maxPrice={maxPrice} formatMoney={formatMoney} />
+                  <Filters categoryNames={categoryNames} f={f} setF={setF} counts={counts} options={options} maxPrice={maxPrice} formatMoney={formatMoney} />
                 </div>
               </motion.aside>
             )}
@@ -371,15 +394,16 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
               </div>
             )}
 
-            {filtered.length === 0 ? (
+            {remoteCatalog && remote.error && <div role="alert" className="mb-6 rounded-xl border border-sand bg-white p-5"><p>{remote.error}</p><button type="button" onClick={remote.retry} className="btn-outline mt-3">Retry loading products</button></div>}
+            {remoteCatalog && remote.loading && !products.length ? <div role="status" aria-label="Loading products" className="grid grid-cols-2 gap-5 md:grid-cols-3">{Array.from({ length: 6 }, (_, index) => <div key={index} className="aspect-square animate-pulse rounded-xl bg-sand/50" />)}</div> : filtered.length === 0 ? (
               <div className="py-24 text-center">
-                <p className="text-lg">{products.length ? 'No products match your filters' : 'No products in this category yet'}</p>
-                {products.length > 0 && <button onClick={() => setF(empty)} className="btn-dark mt-5">Clear all filters</button>}
+                {!remote.error && <p className="text-lg">{remoteCatalog || products.length ? 'No products match your filters' : 'No products in this category yet'}</p>}
+                {(remoteCatalog || products.length > 0) && <button onClick={() => { setF(empty); setSearch('') }} className="btn-dark mt-5">Clear all filters</button>}
               </div>
             ) : (
               <motion.div layout className={`grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 ${gridCols}`}>
                 <AnimatePresence mode="popLayout">
-                  {filtered.slice(0, visible).map((p, i) => (
+                  {(remoteCatalog ? filtered : filtered.slice(0, visible)).map((p, i) => (
                     <motion.div key={p.id} layout initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0, transition: { delay: (i % PAGE) * 0.05 } }} exit={{ opacity: 0, scale: 0.95 }}>
                       <ShopCard p={p} compareMode={compareMode} compared={compare.includes(p.id)} onCompare={toggleCompare} formatMoney={formatMoney} />
                     </motion.div>
@@ -394,8 +418,8 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
                 {hasMore ? (
                   <>
                     <div ref={sentinel} />
-                    <button onClick={loadMore} disabled={loading} className="btn-outline min-w-44">
-                      {loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-l-transparent" /> : 'Load more'}
+                    <button onClick={loadMore} disabled={remoteCatalog && (remote.loading || Boolean(remote.error))} className="btn-outline min-w-44 disabled:opacity-50">
+                      {remoteCatalog && remote.loading ? 'Loading products…' : 'Load more'}
                     </button>
                   </>
                 ) : (
@@ -414,10 +438,10 @@ export default function ShopGrid({ products = shopProducts, catalogMode = false,
             <div className="absolute inset-0 bg-espresso/50" onClick={() => setDrawer(false)} />
             <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.35 }}
               className="relative flex h-full w-[85%] max-w-sm flex-col bg-white">
-              <div className="flex-1 overflow-y-auto p-5"><Filters f={f} setF={setF} counts={counts} options={options} maxPrice={maxPrice} formatMoney={formatMoney} onClose={() => setDrawer(false)} /></div>
+              <div className="flex-1 overflow-y-auto p-5"><Filters categoryNames={categoryNames} f={f} setF={setF} counts={counts} options={options} maxPrice={maxPrice} formatMoney={formatMoney} onClose={() => setDrawer(false)} /></div>
               <div className="flex gap-3 border-t border-ink/10 p-4">
                 <button onClick={() => setF(empty)} className="btn-outline flex-1">Clear all</button>
-                <button onClick={() => setDrawer(false)} className="btn-dark flex-1">Show {filtered.length}</button>
+                <button onClick={() => setDrawer(false)} className="btn-dark flex-1">Show {remoteCatalog ? remote.meta.total : filtered.length}</button>
               </div>
             </motion.aside>
           </motion.div>

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import Image from '../ProductImage';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { useCategories } from '@/components/CategoryProvider';

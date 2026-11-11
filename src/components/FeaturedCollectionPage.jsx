@@ -1,23 +1,21 @@
 import ShopPage from '../views/ShopPage'
-import { categoryProducts, featuredProducts, shopProduct } from '../catalog'
+import { shopProduct } from '../catalog'
+import { catalogData } from '../lib/server-catalog'
 
 export default async function FeaturedCollectionPage({ name, slug, description, flag }) {
-  const base = process.env.API_BASE_URL || 'http://127.0.0.1:5000'
-  const responses = await Promise.all(['categories', 'products'].map(resource => fetch(`${base}/api/${resource}`, {
-    cache: 'no-store', signal: AbortSignal.timeout(10000),
-  })))
-  if (responses.some(response => !response.ok)) throw new Error('The collection is temporarily unavailable. Please try again.')
-  const [{ categories }, { products }] = await Promise.all(responses.map(response => response.json()))
-  const selected = featuredProducts(products, flag)
+  const [{ categories }, listing] = await Promise.all([
+    catalogData('categories'), catalogData('products', new URLSearchParams({ flag, pageSize: '12', sort: 'newest', facets: 'true' }).toString()),
+  ])
+  const { products, ...initial } = listing
   const collections = categories.filter(category => category.kind === 'category' && !category.parentSlug && category.showInMenu)
     .map(category => ({
       title: category.name,
       img: category.image || '/images/categories/decor.jpg',
       href: `/shop/${encodeURIComponent(category.slug)}`,
-      count: categoryProducts(category.slug, categories, selected).length,
+      count: initial.facets.categoryCounts[category.slug] || 0,
     })).filter(category => category.count > 0)
   return <ShopPage collection={{ name, slug, description }} categoryCollections={collections}
-    categoryProducts={selected.map(product => shopProduct(product, categories))}
-    initialSort={flag === 'isNewArrival' ? 'created-descending' : 'manual'} />
+    categoryProducts={products.map(product => shopProduct(product, categories))}
+    remoteCatalog={{ initial, categories, flag }} initialSort={flag === 'isNewArrival' ? 'created-descending' : 'manual'} />
 }
 

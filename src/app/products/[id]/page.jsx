@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 import ProductDetail from '../../../views/ProductDetail'
-import { descendantSlugs, shopProduct } from '../../../catalog'
+import { shopProduct } from '../../../catalog'
+import { catalogData } from '../../../lib/server-catalog'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,10 +21,7 @@ export async function generateMetadata({ params }) {
 export default async function ProductPage({ params }) {
   const product = await getProduct((await params).id)
   if (!product) notFound()
-  const base = process.env.API_BASE_URL || 'http://127.0.0.1:5000'
-  const responses = await Promise.all(['categories', 'products'].map(resource => fetch(`${base}/api/${resource}`, { cache: 'no-store', signal: AbortSignal.timeout(10000) })))
-  if (responses.some(response => !response.ok)) throw new Error('The catalog is temporarily unavailable. Please try again.')
-  const [{ categories }, { products }] = await Promise.all(responses.map(response => response.json()))
+  const { categories } = await catalogData('categories')
   const category = categories.find(item => item.slug === product.categorySlug)
   let root = category
   const seen = new Set()
@@ -31,7 +29,6 @@ export default async function ProductPage({ params }) {
     seen.add(root.slug)
     root = categories.find(item => item.slug === root.parentSlug)
   }
-  const family = root ? descendantSlugs(root.slug, categories) : new Set([product.categorySlug])
-  const related = products.filter(item => item.id !== product.id && [item.categorySlug, ...(item.collectionSlugs || [])].some(slug => family.has(slug))).slice(0, 4)
+  const { products: related } = await catalogData('products', new URLSearchParams({ category: root?.slug || product.categorySlug, exclude: product.id, pageSize: '4' }).toString())
   return <ProductDetail key={product.id} product={shopProduct(product, categories)} category={category || null} related={related.map(item => shopProduct(item, categories))} />
 }
