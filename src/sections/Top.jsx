@@ -38,9 +38,9 @@ export function CuratedCollections() {
   )
 }
 
-function CollageItem({ img, title, sub, cta, big, className = '' }) {
+function CollageItem({ img, title, sub, cta, big, href = '#', className = '' }) {
   return (
-    <a href="#" className={`group relative block overflow-hidden rounded-2xl ${className}`}>
+    <a href={href} className={`group relative block overflow-hidden rounded-2xl ${className}`}>
       <img src={img} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
       <div className={`absolute inset-0 flex flex-col justify-center p-6 text-white md:p-8 ${big ? 'items-start' : 'items-start'}`}>
         {sub && <span className="mb-2 text-sm font-medium text-white/85">{sub}</span>}
@@ -59,8 +59,8 @@ export function ImageCollage() {
     <section className="pb-[60px] lg:pb-[90px]">
       <div className="container-x grid gap-5 lg:grid-cols-[1fr_1.4fr_1fr]">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
-          <Reveal><CollageItem img="/images/banner1.png" title="Modern Accent Stool for Corners" cta="Shop Dining" className="aspect-[418/220]" /></Reveal>
-          <Reveal delay={0.1}><CollageItem img="/images/banner4.png" sub="Up to 25% Off" title="Contemporary Sofa" cta="Shop Living Room" className="aspect-[418/220]" /></Reveal>
+          <Reveal><CollageItem img="/images/banner1.png" title="Modern Accent Stool for Corners" cta="Shop Sofas" href="/shop/sofas" className="aspect-[418/220]" /></Reveal>
+          <Reveal delay={0.1}><CollageItem img="/images/banner4.png" sub="Up to 25% Off" title="Chairs" cta="Shop Chairs" href="/shop/chairs" className="aspect-[418/220]" /></Reveal>
         </div>
         <Reveal delay={0.15} className="h-full">
           <CollageItem big img="/images/banner3.png" title={<>Where Calm Meets<br />Comfort.</>} cta="Explore Collection" className="h-full min-h-[380px]" />
