@@ -101,6 +101,7 @@ export function CartDrawer() {
               <div className="flex-1">
                 <p className="font-medium">{i.title}</p>
                 <Price price={i.price} compare={i.compare} currency={i.currency} className="text-sm" />
+                {i.priceChanged && <p className="mt-1 text-xs text-terra">Price updated since you added this.</p>}
                 {i.selectedColor && <p className="mt-1 text-xs text-muted">Color: {i.selectedColor}</p>}
                 <div className="mt-2 inline-flex items-center rounded-full border border-sand">
                   <button onClick={() => updateQty(i.lineKey || i.id, i.qty - 1)} className="p-2 cursor-pointer" aria-label="Decrease"><Minus size={12} /></button>
