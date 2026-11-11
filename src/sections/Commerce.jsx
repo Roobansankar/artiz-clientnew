@@ -204,17 +204,17 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
             const selected = picked.includes(product.id)
             const option = productOption(product)
             return (
-              <Reveal key={product.id} delay={index * 0.08}>
-                <div className={`group/featured relative rounded-2xl border-2 p-3 transition-colors ${selected ? 'border-terra' : 'border-transparent'}`}>
+              <Reveal key={product.id} delay={index * 0.08} className="h-full">
+                <div className={`group/featured relative flex h-full flex-col rounded-2xl border-2 p-3 transition-colors ${selected ? 'border-terra' : 'border-transparent'}`}>
                   <Link href={href} className="group block overflow-hidden rounded-xl bg-cream">
                     <Image width={600} height={600} sizes="(max-width: 767px) 50vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </Link>
                   <button type="button" onClick={() => toggleWish(product.id)} aria-label={`Save ${product.name} to wishlist`} aria-pressed={wished} className="pointer-events-none absolute right-5 top-5 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-0 transition-opacity duration-200 hover:bg-peach group-hover/featured:pointer-events-auto group-hover/featured:opacity-100 focus:pointer-events-auto focus:opacity-100 group-focus-within/featured:pointer-events-auto group-focus-within/featured:opacity-100">
                     <Heart size={18} className={wished ? 'fill-terra text-terra' : ''} />
                   </button>
-                  <Link href={href} className="mt-4 block font-heading text-base font-medium hover:text-terra">{product.name}</Link>
-                  <div className="mt-2 text-sm"><ProductPrice product={product} option={option} /></div>
-                  <button type="button" disabled={option.stock <= 0} aria-pressed={selected} onClick={() => toggle(product.id)} className={`mt-4 w-full cursor-pointer rounded-full py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'bg-terra text-white' : 'border border-ink hover:bg-ink hover:text-white'}`}>
+                  <Link href={href} className="mt-4 block min-h-12 font-heading text-base font-medium leading-6 hover:text-terra">{product.name}</Link>
+                  <div className="mt-2 min-h-6 text-sm"><ProductPrice product={product} option={option} /></div>
+                  <button type="button" disabled={option.stock <= 0} aria-pressed={selected} onClick={() => toggle(product.id)} className={`mt-auto w-full cursor-pointer rounded-full py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'bg-terra text-white' : 'border border-ink hover:bg-ink hover:text-white'}`}>
                     {option.stock <= 0 ? 'Out of stock' : selected ? 'Selected' : 'Select Option'}
                   </button>
                 </div>
