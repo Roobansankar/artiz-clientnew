@@ -1,10 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUp, Home, MapPin, Minus, Plus, Search, ShoppingBag, Store, User, X } from 'lucide-react'
+import { ArrowUp, CircleUserRound, House, LayoutGrid, MapPin, Minus, Plus, Search, ShoppingCart, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { formatPrice } from '../catalog'
 import { money } from '../data'
 import { useStore } from '../store'
@@ -200,24 +200,31 @@ export function EmailPopup() {
 }
 
 export function MobileBar() {
-  const router = useRouter()
-  const { cart, setCartOpen } = useStore()
+  const pathname = usePathname()
+  const { cart, cartOpen, setCartOpen, searchOpen, setSearchOpen } = useStore()
+  const count = cart.reduce((n, i) => n + i.qty, 0)
   const items = [
-    { icon: Home, label: 'Home' },
-    { icon: Search, label: 'Search' },
-    { icon: Store, label: 'Shop' },
-    { icon: ShoppingBag, label: 'cart', on: () => setCartOpen(true), badge: cart.reduce((n, i) => n + i.qty, 0) },
-    { icon: User, label: 'account', on: () => router.push('/account') },
+    { icon: House, label: 'Home', href: '/', active: pathname === '/' },
+    { icon: Search, label: 'Search', on: () => setSearchOpen(true), active: searchOpen },
+    { icon: LayoutGrid, label: 'Shop', href: '/shop', active: pathname.startsWith('/shop') },
+    { icon: ShoppingCart, label: 'Cart', on: () => setCartOpen(true), active: cartOpen, badge: count },
+    { icon: CircleUserRound, label: 'Account', href: '/account', active: pathname.startsWith('/account') },
   ]
+  const itemClass = active => `relative flex flex-col items-center gap-1 text-[11px] font-medium transition-colors ${active ? 'text-terra' : 'text-ink/70 hover:text-terra'}`
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-sand bg-white py-2 md:hidden">
-      {items.map(({ icon: Icon, label, on, badge }) => (
-        <button key={label} onClick={on} className="relative flex flex-col items-center gap-1 text-xs capitalize cursor-pointer">
-          <Icon size={20} />
-          {label}
-          {badge !== undefined && <span className="absolute right-1/4 -top-1 grid h-4 w-4 place-items-center rounded-full bg-terra text-[9px] text-white">{badge}</span>}
-        </button>
-      ))}
+    <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-sand bg-white py-2 md:hidden">
+      {items.map(({ icon: Icon, label, href, on, active, badge }) => href
+        ? <Link key={label} href={href} aria-current={active ? 'page' : undefined} className={itemClass(active)}>
+            <Icon size={20} />
+            {label}
+            {badge > 0 && <span className="absolute right-1/4 -top-1 grid h-4 w-4 place-items-center rounded-full bg-terra text-[9px] text-white">{badge}</span>}
+          </Link>
+        : <button key={label} onClick={on} aria-label={label} className={`${itemClass(active)} cursor-pointer`}>
+            <Icon size={20} />
+            {label}
+            {badge > 0 && <span className="absolute right-1/4 -top-1 grid h-4 w-4 place-items-center rounded-full bg-terra text-[9px] text-white">{badge}</span>}
+          </button>
+      )}
     </nav>
   )
 }

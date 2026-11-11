@@ -53,6 +53,7 @@ export function StoreProvider({ children }) {
   const [cartError, setCartError] = useState('')
   const [wishlist, setWishlist] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [quickView, setQuickView] = useState(null)
   const [customer, setCustomer] = useState(null)
   const [wishlistError, setWishlistError] = useState('')
@@ -265,7 +266,7 @@ export function StoreProvider({ children }) {
 
   return (
     <StoreCtx.Provider
-      value={{ cart, cartLoaded, cartError, clearCart, addToCart, updateQty, cartOpen, setCartOpen, wishlist, toggleWish, quickView, setQuickView, customer, setCustomer, wishlistError }}
+      value={{ cart, cartLoaded, cartError, clearCart, addToCart, updateQty, cartOpen, setCartOpen, searchOpen, setSearchOpen, wishlist, toggleWish, quickView, setQuickView, customer, setCustomer, wishlistError }}
     >
       {children}
     </StoreCtx.Provider>
