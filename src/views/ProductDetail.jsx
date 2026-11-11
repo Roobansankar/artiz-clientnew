@@ -10,6 +10,7 @@ import { firstAvailableVariant, formatPrice, productOption } from '../catalog'
 import { attributeLabels, variantAttributes } from '../lib/variants'
 import { useStore } from '../store'
 import { CartIcon } from '../components/icons'
+import { directCheckoutUrl } from '../lib/direct-checkout'
 
 function ProductAccordion({ title, children }) {
   const [open, setOpen] = useState(false)
@@ -32,7 +33,7 @@ function ProductAccordion({ title, children }) {
 }
 
 export default function ProductDetail({ product, category, related }) {
-  const { cart, addToCart, wishlist, toggleWish } = useStore()
+  const { cart, cartLoaded, addToCart, setCartOpen, wishlist, toggleWish } = useStore()
   const [selected, setSelected] = useState(() => firstAvailableVariant(product))
   const [quantity, setQuantity] = useState(1)
   const [photo, setPhoto] = useState(0)
@@ -50,7 +51,9 @@ export default function ProductDetail({ product, category, related }) {
   const colors = attributes.find(attribute => attribute.key === 'color')?.values || []
   const inCart = cart.find(item => item.id === product.id && (item.variantIndex ?? null) === selected)?.qty || 0
   const remaining = Math.max(0, Math.min(10 - inCart, option.stock - inCart))
-  const canBuy = remaining > 0
+  const purchaseLimit = Math.max(0, Math.min(10, option.stock))
+  const canBuy = purchaseLimit > 0
+  const canAdd = remaining > 0 && quantity <= remaining
   const discount = option.mrp > option.price ? Math.round((1 - option.price / option.mrp) * 100) : 0
   const wished = wishlist.includes(product.id)
   const details = [
@@ -71,7 +74,7 @@ export default function ProductDetail({ product, category, related }) {
   }
 
   function add() {
-    if (!canBuy) return
+    if (!canAdd) return
     addToCart({ ...product, variantIndex: selected, price: option.price, compare: option.mrp || 0, stock: option.stock, selectedColor: option.color, img: images[0] }, Math.min(quantity, remaining))
   }
 
@@ -142,11 +145,12 @@ export default function ProductDetail({ product, category, related }) {
                 <div className="flex gap-3">
                   <div className="inline-flex h-13 shrink-0 items-center rounded-full border border-sand">
                     <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={quantity <= 1 || !canBuy} aria-label="Decrease quantity" className="p-3 disabled:opacity-30"><Minus size={16} /></button>
-                    <output className="w-8 text-center text-sm" aria-label="Quantity">{Math.min(quantity, Math.max(1, remaining))}</output>
-                    <button onClick={() => setQuantity(q => Math.min(remaining, q + 1))} disabled={!canBuy || quantity >= remaining} aria-label="Increase quantity" className="p-3 disabled:opacity-30"><Plus size={16} /></button>
+                    <output className="w-8 text-center text-sm" aria-label="Quantity">{Math.min(quantity, Math.max(1, purchaseLimit))}</output>
+                    <button onClick={() => setQuantity(q => Math.min(purchaseLimit, q + 1))} disabled={!canBuy || quantity >= purchaseLimit} aria-label="Increase quantity" className="p-3 disabled:opacity-30"><Plus size={16} /></button>
                   </div>
-                  <button onClick={add} disabled={!canBuy} className="btn-dark min-w-0 flex-1 px-4 disabled:cursor-not-allowed disabled:bg-sand disabled:text-muted"><CartIcon size={19} />{canBuy ? 'Add to cart' : option.stock > 0 ? 'Cart limit reached' : 'Out of stock'}</button>
+                  <button type="button" onClick={add} disabled={!cartLoaded || !canAdd} className="btn-dark min-w-0 flex-1 px-4 disabled:cursor-not-allowed disabled:bg-sand disabled:text-muted"><CartIcon size={19} />{canAdd ? 'Add to cart' : option.stock > 0 ? 'Cart quantity limit' : 'Out of stock'}</button>
                 </div>
+                {canBuy ? <Link href={directCheckoutUrl({ id: product.id, variantIndex: selected, quantity: Math.min(quantity, purchaseLimit) })} prefetch={false} onClick={() => setCartOpen(false)} className="btn-terra mt-3 w-full">Buy Now</Link> : <button type="button" disabled className="btn-terra mt-3 w-full cursor-not-allowed opacity-50">Buy Now</button>}
                 <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
                   <button onClick={() => toggleWish(product.id)} aria-pressed={wished} className={`flex items-center gap-2 text-sm transition-colors hover:text-terra ${wished ? 'text-terra' : 'text-muted'}`}><Heart size={17} fill={wished ? 'currentColor' : 'none'} />{wished ? 'Saved to wishlist' : 'Add to wishlist'}</button>
                   <button onClick={share} className="flex items-center gap-2 text-sm text-muted hover:text-terra"><Share2 size={16} />Share</button>

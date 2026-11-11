@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowRight, Check, ChevronRight, Eye, EyeOff, LoaderCircle, LockKeyhole } from 'lucide-react'
 import AccountDashboard from '../components/AccountDashboard'
 import { useStore } from '../store'
+import { checkoutReturnPath } from '../lib/direct-checkout'
 
 const field = 'account-field h-12 w-full rounded-lg border border-sand bg-white px-4 text-sm outline-none transition-all placeholder:text-muted/60 focus:border-terra focus:ring-2 focus:ring-terra/10'
 
@@ -23,8 +24,8 @@ export default function AccountPage({ initialMode, initialAuthError = '', return
   const registering = mode === 'register'
   useEffect(() => {
     if (!customer) return
-    const destination = returnTo || sessionStorage.getItem('artiz-auth-return')
-    if (destination === '/checkout') { sessionStorage.removeItem('artiz-auth-return'); router.replace('/checkout') }
+    const destination = checkoutReturnPath(returnTo || sessionStorage.getItem('artiz-auth-return'))
+    if (destination) { sessionStorage.removeItem('artiz-auth-return'); router.replace(destination) }
   }, [customer, returnTo, router])
 
   async function checkSession(signal) {

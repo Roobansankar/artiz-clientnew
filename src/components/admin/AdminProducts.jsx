@@ -312,7 +312,8 @@ export default function AdminProducts() {
           {editor.retainedImages.map((url, index) => <div key={url}><Image src={url} alt={`Product image ${index + 1}`} width={130} height={130}/><button type="button" className="ad-secondary" onClick={() => field('retainedImages', editor.retainedImages.filter(u => u !== url))}>Remove</button>{index > 0 && <button type="button" className="ad-secondary" onClick={() => field('retainedImages', [url, ...editor.retainedImages.filter(u => u !== url)])}>Make cover</button>}</div>)}
           {previews.map((url, index) => <div key={url}><Image unoptimized src={url} alt={`New upload ${index + 1}`} width={130} height={130}/><button type="button" className="ad-secondary" onClick={() => setFiles(files.filter((_, i) => i !== index))}>Remove</button></div>)}
         </div>
-        <label className="ad-upload-label">Upload images<input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={e => {
+        <p id="product-image-background-note" className="ad-upload-background-note"><strong>Photo background: Warm ivory — #F6F0EC.</strong> Use this pale beige with a slight pink tint as the background for all product photos.</p>
+        <label className="ad-upload-label">Upload images<input type="file" aria-describedby="product-image-background-note" multiple accept="image/jpeg,image/png,image/webp" onChange={e => {
                 const incoming = Array.from(e.target.files || []);
                 e.target.value = '';
                 if (incoming.some(f => f.size > 8 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(f.type))) {

@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { Check, CreditCard, LoaderCircle, MapPin, Package, Plus, ShieldCheck, Truck } from 'lucide-react'
 import { useStore } from '../store'
-import { formatPrice, productOption } from '../catalog'
+import { formatPrice, productOption, shopProduct } from '../catalog'
+import { directCheckoutUrl } from '../lib/direct-checkout'
 
 const field = 'account-field mt-2 h-11 w-full rounded-lg border border-sand bg-white px-3 text-sm outline-none focus:border-terra'
 const addressFields = [['fullName', 'Full name', 'name'], ['phone', 'Phone number', 'tel'], ['line1', 'Address line 1', 'address-line1'], ['line2', 'Address line 2 (optional)', 'address-line2'], ['city', 'City', 'address-level2'], ['state', 'State', 'address-level1'], ['postalCode', 'Postal code', 'postal-code'], ['country', 'Country', 'country-name']]
@@ -29,7 +30,7 @@ function loadRazorpay() {
   return razorpayScript
 }
 
-export default function CheckoutPage() {
+export default function CheckoutPage({ directSelection = null, directError = '' }) {
   const { cart, cartLoaded, clearCart, updateQty, setCustomer } = useStore()
   const [account, setAccount] = useState(undefined)
   const [addresses, setAddresses] = useState([])
@@ -46,18 +47,22 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState(null)
   const [verification, setVerification] = useState(null)
   const locked = useRef(false)
+  const checkoutScope = directSelection ? directCheckoutUrl(directSelection) : '/checkout'
+  const attemptStorageKey = directSelection ? `artiz-direct-attempt:${checkoutScope}` : 'artiz-checkout-attempt'
+  const verificationStorageKey = directSelection ? `artiz-direct-verification:${checkoutScope}` : 'artiz-payment-verification'
 
   async function load() {
+    if (directError) { setLoading(false); return }
     setLoading(true); setLoadError('')
     try {
-      const [me, catalog, payment] = await Promise.all([api('/api/auth/me'), api('/api/products'), api('/api/auth/checkout/config')])
-      setAccount(me.customer); setCustomer(me.customer); setProducts(catalog.products); setConfig(payment)
+      const [me, catalog, payment] = await Promise.all([api('/api/auth/me'), api(directSelection ? `/api/products/${encodeURIComponent(directSelection.id)}` : '/api/products'), api('/api/auth/checkout/config')])
+      setAccount(me.customer); setCustomer(me.customer); setProducts(directSelection ? [catalog.product] : catalog.products); setConfig(payment)
       if (me.customer) {
         const saved = await api('/api/auth/addresses')
         setAddresses(saved.addresses); setAddressId(saved.addresses.find(address => address.isDefault)?.id || saved.addresses[0]?.id || '')
         setAddingAddress(!saved.addresses.length)
       }
-      try { const pending = JSON.parse(sessionStorage.getItem('artiz-payment-verification') || 'null'); if (pending?.customerId === me.customer?.id) setVerification(pending.result) } catch {}
+      try { const pending = JSON.parse(sessionStorage.getItem(verificationStorageKey) || 'null'); if (pending?.customerId === me.customer?.id) setVerification(pending.result) } catch {}
     } catch (reason) { setLoadError(reason.message) } finally { setLoading(false) }
   }
   useEffect(() => { void load() }, [])
@@ -66,7 +71,9 @@ export default function CheckoutPage() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
     document.getElementById('checkout-confirmation-title')?.focus({ preventScroll: true })
   }, [success])
-  const lines = cart.map(item => {
+  const directProduct = directSelection && products.find(product => product.id === directSelection.id)
+  const checkoutItems = directSelection ? directProduct ? [{ ...shopProduct(directProduct, []), qty: directSelection.quantity, variantIndex: directSelection.variantIndex, selectedColor: productOption(directProduct, directSelection.variantIndex).color, lineKey: `direct:${directProduct.id}:${directSelection.variantIndex}` }] : [] : cart
+  const lines = checkoutItems.map(item => {
     const product = products.find(product => product.id === item.id)
     const option = product && productOption(product, item.variantIndex ?? null)
     return { item, product, option, valid: !!product && Number.isInteger(item.qty) && item.qty > 0 && item.qty <= Math.min(10, option.stock) }
@@ -74,12 +81,12 @@ export default function CheckoutPage() {
   const invalid = lines.some(line => !line.valid)
   const total = lines.reduce((sum, line) => sum + (line.option?.price || 0) * line.item.qty, 0)
   function completed(order) {
-    setSuccess(order); clearCart(); setVerification(null)
-    sessionStorage.removeItem('artiz-checkout-attempt'); sessionStorage.removeItem('artiz-payment-verification')
+    setSuccess(order); if (!directSelection) clearCart(); setVerification(null)
+    sessionStorage.removeItem(attemptStorageKey); sessionStorage.removeItem(verificationStorageKey)
   }
   async function verify(result) {
     setBusy(true); setError(''); setVerification(result)
-    sessionStorage.setItem('artiz-payment-verification', JSON.stringify({ customerId: account.id, result }))
+    sessionStorage.setItem(verificationStorageKey, JSON.stringify({ customerId: account.id, result }))
     try {
       const data = await api('/api/auth/checkout/verify', 'POST', result)
       if (data.order.status === 'PAID') completed(data.order)
@@ -87,20 +94,21 @@ export default function CheckoutPage() {
     } catch (reason) { setError(reason.message) } finally { locked.current = false; setBusy(false) }
   }
   async function pay() {
-    if (locked.current || invalid || !addressId || !cart.length) return
+    if (locked.current || invalid || !addressId || !checkoutItems.length) return
     locked.current = true; setBusy(true); setError('')
     try {
-      const items = cart.map(item => ({ id: item.id, color: item.variantIndex ?? null, quantity: item.qty }))
+      const items = checkoutItems.map(item => ({ id: item.id, color: item.variantIndex ?? null, quantity: item.qty }))
       const fingerprint = JSON.stringify({ items, addressId, paymentMethod: method })
       let attempt
-      try { attempt = JSON.parse(sessionStorage.getItem('artiz-checkout-attempt') || 'null') } catch {}
+      try { attempt = JSON.parse(sessionStorage.getItem(attemptStorageKey) || 'null') } catch {}
       if (!attempt || attempt.fingerprint !== fingerprint || attempt.customerId !== account.id) {
         attempt = { fingerprint, customerId: account.id, key: crypto.randomUUID() }
-        sessionStorage.setItem('artiz-checkout-attempt', JSON.stringify(attempt))
+        sessionStorage.setItem(attemptStorageKey, JSON.stringify(attempt))
       }
       if (method !== 'COD') await loadRazorpay()
-      // The server cart is the source of truth; only the address and payment choice are sent.
-      const data = await api('/api/auth/checkout/order', 'POST', { addressId, paymentMethod: method, checkoutKey: attempt.key })
+      // Direct checkout submits only this selection. The backend validates live
+      // prices/stock; ordinary checkout still uses the saved server cart.
+      const data = await api('/api/auth/checkout/order', 'POST', { addressId, paymentMethod: method, checkoutKey: attempt.key, ...(directSelection ? { items } : {}) })
       if (data.order.status === 'CONFIRMED' || data.order.status === 'PAID') { completed(data.order); locked.current = false; setBusy(false); return }
       const checkout = new window.Razorpay({
         key: data.razorpay.keyId, order_id: data.razorpay.orderId, amount: data.razorpay.amount, currency: 'INR',
@@ -123,11 +131,12 @@ export default function CheckoutPage() {
     } catch (reason) { setError(reason.message) } finally { setSavingAddress(false) }
   }
 
-  if (loading || !cartLoaded) return <div role="status" className="flex min-h-[60vh] items-center justify-center gap-3 text-muted"><LoaderCircle className="animate-spin" size={23} />Loading checkout…</div>
+  if (directError) return <section className="container-x py-20 text-center"><p role="alert" className="text-muted">{directError}</p><Link href="/shop" className="btn-dark mt-6">Choose a product</Link></section>
+  if (loading || (!directSelection && !cartLoaded)) return <div role="status" className="flex min-h-[60vh] items-center justify-center gap-3 text-muted"><LoaderCircle className="animate-spin" size={23} />Loading checkout…</div>
   if (loadError) return <div className="container-x py-20 text-center"><p role="alert" className="mb-5 text-muted">{loadError}</p><button onClick={load} className="btn-outline">Try again</button></div>
   if (success) return <section className="container-x py-16"><div className="mx-auto max-w-xl rounded-3xl border border-sand bg-white p-8 text-center"><span className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-full bg-peach text-terra"><Check size={30} /></span><h1 id="checkout-confirmation-title" tabIndex={-1} className="h2-title outline-none">Order confirmed</h1><p className="mt-4 font-medium">{success.number}</p><p className="mt-3 text-sm text-muted">{success.paymentMethod === 'COD' ? `Pay ${formatPrice(success.amount)} on delivery.` : `Payment received: ${formatPrice(success.amount)}.`}</p><Link href="/account?section=orders" className="btn-dark mt-7">View my orders</Link><Link href="/shop" className="mt-5 block text-sm text-muted hover:text-terra">Continue shopping</Link></div></section>
-  if (!account) return <section className="container-x py-20 text-center"><h1 className="h2-title">Sign in to checkout</h1><p className="mt-4 text-muted">Your cart will be waiting for you.</p><Link href="/account?next=checkout" className="btn-dark mt-7">Sign in / Create account</Link></section>
-  if (!cart.length && !verification) return <section className="container-x py-20 text-center"><Package size={36} className="mx-auto mb-5 text-terra" /><h1 className="h2-title">Your cart is empty</h1><Link href="/shop" className="btn-dark mt-7">Explore collection</Link></section>
+  if (!account) return <section className="container-x py-20 text-center"><h1 className="h2-title">Sign in to checkout</h1><p className="mt-4 text-muted">{directSelection ? 'Your selected product will be waiting for you.' : 'Your cart will be waiting for you.'}</p><Link href={`/account?${new URLSearchParams({ next: checkoutScope })}`} className="btn-dark mt-7">Sign in / Create account</Link></section>
+  if (!checkoutItems.length && !verification) return <section className="container-x py-20 text-center"><Package size={36} className="mx-auto mb-5 text-terra" /><h1 className="h2-title">{directSelection ? 'This product is unavailable' : 'Your cart is empty'}</h1><Link href="/shop" className="btn-dark mt-7">Explore collection</Link></section>
   return <section className="bg-cream py-8 md:py-12"><div className="container-x max-w-[1240px]">
     <div className="mb-8 flex items-center justify-between gap-4"><h1 className="h2-title">Checkout</h1><span className="flex items-center gap-2 text-xs text-muted"><ShieldCheck size={17} />Secure checkout</span></div>
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)]">
@@ -138,9 +147,9 @@ export default function CheckoutPage() {
         </section>
         <section className="rounded-2xl border border-sand bg-white p-5 md:p-7"><h2 className="mb-5 flex items-center gap-2 text-xl"><CreditCard size={20} />Payment method</h2><fieldset disabled={busy || !!verification} className="space-y-3 border-0 p-0">{[['COD', 'Cash on Delivery', 'Pay when your order arrives.', Truck], ['ONLINE', 'Pay online', 'UPI, cards, net banking and more.', CreditCard], ['EMI', 'Pay with EMI', 'Available for eligible cards and banks in Razorpay.', CreditCard]].map(([value, label, description, Icon]) => <label key={value} className={`flex items-start gap-3 rounded-xl border p-4 ${method === value ? 'border-terra bg-peach/40' : 'border-sand'} ${value !== 'COD' && !config.onlineEnabled ? 'opacity-50' : 'cursor-pointer'}`}><input type="radio" name="payment-method" value={value} checked={method === value} disabled={value !== 'COD' && !config.onlineEnabled} onChange={() => setMethod(value)} className="mt-1 accent-terra" /><Icon size={20} className="mt-0.5 text-terra" /><span><span className="text-sm font-medium">{label}</span><span className="mt-1 block text-xs leading-relaxed text-muted">{description}</span></span></label>)}</fieldset>{!config.onlineEnabled && <p className="mt-4 text-xs text-muted">Online payments are currently unavailable. You can place a Cash on Delivery order.</p>}</section>
       </div>
-      <aside className="min-w-0 rounded-2xl border border-sand bg-white p-5 md:p-7 lg:sticky lg:top-24"><h2 className="mb-5 text-xl">Order summary</h2><ul className="max-h-[420px] space-y-5 overflow-y-auto">{lines.map(({ item, product, option, valid }) => <li key={item.lineKey || item.id} className="flex gap-3"><img src={product?.images?.[0] || item.img} alt="" className="h-20 w-20 shrink-0 rounded-lg bg-cream object-cover" /><div className="min-w-0 flex-1"><p className="text-sm font-medium">{product?.name || item.title}</p>{item.selectedColor && <p className="mt-1 text-xs text-muted">{item.selectedColor}</p>}{item.priceChanged && <p className="mt-1 text-xs text-terra">Price updated since you added this.</p>}<p className="mt-2 text-sm">{formatPrice(option?.price || 0)} × {item.qty}</p>{!valid && <p className="mt-1 text-xs text-terra">Unavailable or not enough stock.</p>}<button disabled={busy || !!verification} onClick={() => updateQty(item.lineKey || item.id, 0)} className="mt-2 text-xs text-muted underline hover:text-terra">Remove</button></div></li>)}</ul><div className="mt-6 flex items-center justify-between border-t border-sand pt-5 font-semibold"><span>Total</span><span>{formatPrice(total)}</span></div>
+      <aside className="min-w-0 rounded-2xl border border-sand bg-white p-5 md:p-7 lg:sticky lg:top-24"><h2 className="mb-5 text-xl">Order summary</h2><ul className="max-h-[420px] space-y-5 overflow-y-auto">{lines.map(({ item, product, option, valid }) => <li key={item.lineKey || item.id} className="flex gap-3"><img src={product?.images?.[0] || item.img} alt="" className="h-20 w-20 shrink-0 rounded-lg bg-cream object-cover" /><div className="min-w-0 flex-1"><p className="text-sm font-medium">{product?.name || item.title}</p>{item.selectedColor && <p className="mt-1 text-xs text-muted">{item.selectedColor}</p>}{item.priceChanged && <p className="mt-1 text-xs text-terra">Price updated since you added this.</p>}<p className="mt-2 text-sm">{formatPrice(option?.price || 0)} × {item.qty}</p>{!valid && <p className="mt-1 text-xs text-terra">Unavailable or not enough stock.</p>}{directSelection ? <Link href={`/products/${product?.slug || item.id}`} className="mt-2 block text-xs text-muted underline hover:text-terra">Change selection</Link> : <button disabled={busy || !!verification} onClick={() => updateQty(item.lineKey || item.id, 0)} className="mt-2 text-xs text-muted underline hover:text-terra">Remove</button>}</div></li>)}</ul><div className="mt-6 flex items-center justify-between border-t border-sand pt-5 font-semibold"><span>Total</span><span>{formatPrice(total)}</span></div>
         {error && <p role="alert" className="mt-5 rounded-xl bg-peach p-4 text-sm leading-relaxed">{error}</p>}
-        {verification ? <button disabled={busy} onClick={() => verify(verification)} className="btn-dark mt-6 w-full disabled:opacity-50">{busy ? 'Checking payment…' : 'Check payment status'}</button> : <button disabled={busy || invalid || !addressId || addingAddress || !cart.length} onClick={pay} className="btn-dark mt-6 w-full disabled:cursor-not-allowed disabled:opacity-50">{busy ? <><LoaderCircle size={17} className="animate-spin" />Processing…</> : method === 'COD' ? 'Place order · Cash on Delivery' : method === 'EMI' ? 'Continue to EMI' : `Pay ${formatPrice(total)}`}</button>}
+        {verification ? <button disabled={busy} onClick={() => verify(verification)} className="btn-dark mt-6 w-full disabled:opacity-50">{busy ? 'Checking payment…' : 'Check payment status'}</button> : <button disabled={busy || invalid || !addressId || addingAddress || !checkoutItems.length} onClick={pay} className="btn-dark mt-6 w-full disabled:cursor-not-allowed disabled:opacity-50">{busy ? <><LoaderCircle size={17} className="animate-spin" />Processing…</> : method === 'COD' ? 'Place order · Cash on Delivery' : method === 'EMI' ? 'Continue to EMI' : `Pay ${formatPrice(total)}`}</button>}
         <p className="mt-4 text-center text-xs leading-relaxed text-muted">{verification ? 'Do not pay again while your payment is being confirmed.' : method === 'COD' ? 'Your order is confirmed when you place it.' : 'Payments are processed securely by Razorpay.'}</p>
       </aside>
     </div>

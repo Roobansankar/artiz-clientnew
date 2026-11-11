@@ -1,4 +1,5 @@
 import AccountPage from '../../views/AccountPage'
+import { checkoutReturnPath } from '../../lib/direct-checkout'
 
 export const metadata = { title: 'My Account | Artiz', description: 'Sign in or create your Artiz account.' }
 
@@ -12,5 +13,5 @@ export default async function Page({ searchParams }) {
     account_exists: 'This email already has an account. Please sign in with your email and password.',
     google_failed: 'Google sign-in could not be completed. Please try again.',
   }
-  return <AccountPage key={`${initialMode}:${auth_error || ''}`} initialMode={initialMode} initialAuthError={authErrors[auth_error] || ''} returnTo={next === 'checkout' ? '/checkout' : null} />
+  return <AccountPage key={`${initialMode}:${auth_error || ''}`} initialMode={initialMode} initialAuthError={authErrors[auth_error] || ''} returnTo={checkoutReturnPath(next)} />
 }

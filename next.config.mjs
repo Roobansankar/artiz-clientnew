@@ -10,6 +10,7 @@ const nextConfig = {
       { source: '/api/categories', destination: `${apiBaseUrl}/api/categories` },
       { source: '/api/hero-slides', destination: `${apiBaseUrl}/api/hero-slides` },
       { source: '/api/products', destination: `${apiBaseUrl}/api/products` },
+      { source: '/api/products/:id', destination: `${apiBaseUrl}/api/products/:id` },
       { source: '/api/media/:path*', destination: `${apiBaseUrl}/api/media/:path*` },
       { source: '/api/contact', destination: `${apiBaseUrl}/api/contact` },
     ]

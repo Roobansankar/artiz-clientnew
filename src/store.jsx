@@ -120,9 +120,11 @@ export function StoreProvider({ children }) {
       if (!response.ok) throw new Error(data.message || 'Could not update your cart.')
       applyServerCart(data.cart)
       setCartError('')
+      return true
     } catch (error) {
-      setCartError(error.message || 'Could not update your cart.')
       await loadCart()
+      setCartError(error.message || 'Could not update your cart.')
+      return false
     }
   }
 
@@ -182,13 +184,13 @@ export function StoreProvider({ children }) {
     })()
   }, [customer?.id])
 
-  const addToCart = (product, qty = 1) => {
+  const addToCart = (product, qty = 1, { openDrawer = true } = {}) => {
     const live = product.currency === 'INR'
     const variantIndex = live ? (product.variantIndex === undefined ? firstAvailableVariant(product) : product.variantIndex) : null
     const option = live ? productOption(product, variantIndex) : null
     const stock = live ? option.stock : product.stock ?? (product.available === false ? 0 : Infinity)
     const limit = live ? Math.min(MAX_PER_LINE, stock) : stock
-    if (limit <= 0) return
+    if (limit <= 0) return false
     const lineKey = variantIndex == null ? product.id : `${product.id}:variant-${variantIndex}`
     const item = { ...product, lineKey, variantIndex, stock, ...(option && { price: option.price, compare: option.mrp || 0, selectedColor: option.color }) }
     const amount = Math.max(1, Math.floor(Number(qty) || 1))
@@ -197,8 +199,9 @@ export function StoreProvider({ children }) {
     if (found >= 0) next[found] = { ...next[found], ...item, qty: Math.min(limit, next[found].qty + amount) }
     else next.push({ ...item, qty: Math.min(limit, amount) })
     commit(next)
-    setCartOpen(true)
-    if (live) enqueue(() => syncCart(() => cartApi('/items', 'POST', { productId: product.id, variantIndex: variantIndex ?? null, quantity: amount })))
+    if (openDrawer) setCartOpen(true)
+    if (live) return enqueue(() => syncCart(() => cartApi('/items', 'POST', { productId: product.id, variantIndex: variantIndex ?? null, quantity: amount })))
+    return true
   }
 
   const updateQty = (id, qty) => {
