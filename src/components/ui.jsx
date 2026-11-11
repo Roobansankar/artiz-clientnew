@@ -14,7 +14,7 @@ export function Logo({ light = false, className = '' }) {
   return (
     <Link href="/" className={`inline-flex flex-col leading-none ${className}`} aria-label="Artiz Interior Design Studio">
       <span className={`font-heading text-[28px] font-bold tracking-tight ${light ? 'text-white' : 'text-ink'}`}>
-        Artiz<span className="text-terra">.</span>
+        Artiz
       </span>
       <span className={`mt-1 text-[9px] font-medium uppercase tracking-[0.28em] ${light ? 'text-white/60' : 'text-muted'}`}>
         Interior Design Studio

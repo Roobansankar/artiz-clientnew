@@ -7,6 +7,7 @@ import AdminOrderDetail from './AdminOrderDetail';
 import AdminCustomers from './AdminCustomers';
 import AdminProducts from './AdminProducts';
 import AdminGallery from './AdminGallery';
+import AdminHero from './AdminHero';
 import './admin.css';
 import AdminDashboard from './AdminDashboard';
 import ContactMessages from './ContactMessages';
@@ -44,6 +45,7 @@ const paths = {
 function Icon({ name, size = 18 }) { return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>; }
 const nav = [
     { label: 'Home', path: '/admin', icon: 'home' },
+    { label: 'Home Hero', path: '/admin/home-hero', icon: 'image' },
     { label: 'Contact Messages', path: '/admin/contact-messages', icon: 'message' },
     { label: 'Customers', path: '/admin/customers', icon: 'users' }, { label: 'Orders', path: '/admin/orders', icon: 'cart' },
     { label: 'Products', path: '/admin/products', icon: 'box' }, { label: 'Gallery', path: '/admin/gallery', icon: 'image' }, { label: 'Analytics', path: '/admin/analytics', icon: 'chart' },
@@ -158,6 +160,7 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
       {section === 'Customers' && <AdminCustomers />}
       {section === 'Products' && <AdminProducts />}
       {section === 'Gallery' && <AdminGallery />}
+      {section === 'Home Hero' && <AdminHero />}
       {isSettings && settingsTab === 'general' && <><div className="ad-settings-heading"><div><h2>Profile</h2><p>Manage your profile and store details.</p></div><button className="ad-neutral-button" type="submit" form="ad-profile-settings">Save changes</button></div><form id="ad-profile-settings" className="ad-settings-card" onSubmit={e => { e.preventDefault(); localStorage.setItem('artiz-admin-settings', JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))); setNotice('Profile updated in this browser.'); }}><ProfileFields admin={admin}/></form><div className="ad-settings-heading"><div><h2>Appearance</h2><p>Customize the look and feel of your workspace.</p></div></div><div className="ad-settings-card"><div className="ad-setting-row"><div><strong>Color mode</strong><p>Choose light or dark mode.</p></div><div className="ad-mode-options"><button className={!dark ? 'selected' : ''} onClick={() => chooseMode(false)}><Icon name="sun" size={16}/>Light</button><button className={dark ? 'selected' : ''} onClick={() => chooseMode(true)}><Icon name="moon" size={16}/>Dark</button></div></div><div className="ad-setting-row"><div><strong>Primary color</strong><p>Your accent color across the admin area.</p></div><div className="ad-color-options">{colors.map(c => <button key={c.name} aria-pressed={accent === c.value} className={accent === c.value ? 'selected' : ''} onClick={() => chooseColor(c.value)}><i style={{ background: c.value }}/>{c.name}</button>)}</div></div></div></>}
       {isSettings && settingsTab === 'members' && <><div className="ad-settings-heading"><div><h2>Team members</h2><p>Manage the people who have access to your workspace.</p></div></div><div className="ad-settings-card">{[{ name: 'Admin', email: 'admin@artiz.com', role: 'Owner' }, { name: 'Priya Verma', email: 'priya@example.com', role: 'Editor' }, { name: 'Arjun Rao', email: 'arjun@example.com', role: 'Viewer' }].map(m => <div key={m.email} className="ad-member"><span className="ad-avatar">{m.name.slice(0, 2).toUpperCase()}</span><div><strong>{m.name}</strong><small>{m.email}</small></div><span className="ad-status neutral">{m.role}</span></div>)}</div></>}
       {isSettings && settingsTab === 'notifications' && <NotificationSettings notify={setNotice}/>}

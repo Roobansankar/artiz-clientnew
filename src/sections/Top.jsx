@@ -5,47 +5,47 @@ import { Autoplay, EffectFade, FreeMode, Mousewheel, Navigation, Pagination } fr
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Rail, RailArrows, RailBar, useScrollRail } from '../components/ScrollRail'
 import { ArrowBtn, Reveal, SectionHeading, ViewAll } from '../components/ui'
-import { heroSlides } from '../data'
+import Image from '../components/ProductImage'
 import Link from 'next/link'
 import { useCategories } from '../components/useCategories'
 
-export function Hero() {
+export function Hero({ slides = [] }) {
+  if (!slides.length) return null
   return (
-    <section className="relative">
+    <section className="relative bg-cream" aria-label="Featured collections">
       <Swiper
+        key={slides.map(slide => `${slide.id}:${slide.updatedAt}`).join('|')}
         className="hero-swiper"
         modules={[EffectFade, Autoplay, Pagination, Navigation]}
         effect="fade"
         fadeEffect={{ crossFade: true }}
-        speed={1000}
-        loop
-        autoplay={{ delay: 5000, disableOnInteraction: false }}
-        pagination={{ clickable: true, el: '.hero-pagination' }}
-        navigation={{ nextEl: '.hero-next', prevEl: '.hero-prev' }}
+        speed={700}
+        loop={slides.length > 1}
+        autoplay={slides.length > 1 ? { delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true } : false}
+        pagination={slides.length > 1 ? { clickable: true, el: '.hero-pagination' } : false}
+        navigation={slides.length > 1 ? { nextEl: '.hero-next', prevEl: '.hero-prev' } : false}
       >
-        {heroSlides.map((s, i) => (
-          <SwiperSlide key={i}>
+        {slides.map((slide, index) => (
+          <SwiperSlide key={slide.id}>
             <div className="relative h-[440px] overflow-hidden md:h-[420px] lg:h-[460px] xl:h-[500px]">
-              <div className="slide-media absolute inset-0">
-                <img src={s.img} alt="" className="h-full w-full object-cover" />
-              </div>
-              <div className="container-x absolute inset-0 flex items-center justify-center">
-                <div className="max-w-2xl text-center">
-                  <h2 className="slide-anim d1 font-heading text-[40px] font-semibold leading-[1.1] md:text-[64px] xl:text-[80px]">
-                    {s.pre} <span className="text-terra">{s.accent}</span> {s.post}
+              <Image src={slide.image} alt={slide.alt || slide.name} fill sizes="100vw" preload={index === 0} className={slide.imageFit === 'contain' ? 'object-contain' : 'object-cover'} />
+              {slide.mode === 'image' ? slide.buttonHref && <Link href={slide.buttonHref} className="absolute inset-0" aria-label={slide.alt || slide.name} /> : <div className={`container-x absolute inset-0 flex items-center ${slide.alignment === 'left' ? 'justify-start' : slide.alignment === 'right' ? 'justify-end' : 'justify-center'}`}>
+                <div className={`max-w-2xl ${slide.alignment === 'left' ? 'text-left' : slide.alignment === 'right' ? 'text-right' : 'text-center'} ${slide.textTone === 'light' ? 'text-white' : 'text-ink'}`}>
+                  <h2 className={`${index ? 'slide-anim d1' : ''} font-heading text-[40px] font-semibold leading-[1.1] md:text-[64px] xl:text-[80px]`}>
+                    {slide.titleBefore} <span className="text-terra">{slide.titleAccent}</span> {slide.titleAfter}
                   </h2>
-                  <p className="slide-anim d2 mx-auto mt-5 max-w-md text-[16px] text-muted md:text-[18px]">{s.desc}</p>
-                  <div className="slide-anim d3 mt-8">
-                    <ArrowBtn />
-                  </div>
+                  {slide.description && <p className={`${index ? 'slide-anim d2' : ''} mt-5 max-w-md text-[16px] md:text-[18px] ${slide.alignment === 'center' ? 'mx-auto' : slide.alignment === 'right' ? 'ml-auto' : ''} ${slide.textTone === 'light' ? 'text-white/90' : 'text-muted'}`}>{slide.description}</p>}
+                  {slide.buttonText && slide.buttonHref && <div className={`${index ? 'slide-anim d3' : ''} mt-8`}><Link href={slide.buttonHref} className={slide.textTone === 'light' ? 'btn-light' : 'btn-dark'}>{slide.buttonText}<ArrowRight size={16} /></Link></div>}
                 </div>
-              </div>
+              </div>}
             </div>
           </SwiperSlide>
         ))}
-        <div className="hero-pagination absolute bottom-6 left-0 right-0 z-10 flex justify-center gap-2" />
-        <button className="hero-prev nav-circle absolute left-6 top-1/2 z-10 -translate-y-1/2 max-md:hidden!" aria-label="Previous slide"><ArrowLeft size={18} /></button>
-        <button className="hero-next nav-circle absolute right-6 top-1/2 z-10 -translate-y-1/2 max-md:hidden!" aria-label="Next slide"><ArrowRight size={18} /></button>
+        {slides.length > 1 && <>
+          <div className="hero-pagination absolute bottom-6 left-0 right-0 z-10 flex justify-center gap-2" />
+          <button className="hero-prev nav-circle absolute left-6 top-1/2 z-10 -translate-y-1/2 max-md:hidden!" aria-label="Previous slide"><ArrowLeft size={18} /></button>
+          <button className="hero-next nav-circle absolute right-6 top-1/2 z-10 -translate-y-1/2 max-md:hidden!" aria-label="Next slide"><ArrowRight size={18} /></button>
+        </>}
       </Swiper>
     </section>
   )

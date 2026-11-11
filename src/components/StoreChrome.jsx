@@ -6,6 +6,7 @@ import HomeScrollReset from './HomeScrollReset'
 import { BackToTop, CartDrawer, EmailPopup, Footer, MobileBar, QuickView } from './Chrome'
 import AdminToaster from './AdminToaster'
 import PageProgress from './PageProgress'
+import HeroImageWarmup from './HeroImageWarmup'
 
 export default function StoreChrome({ children }) {
   const pathname = usePathname() || ''
@@ -18,6 +19,7 @@ export default function StoreChrome({ children }) {
   return (
     <>
       <HomeScrollReset />
+      <HeroImageWarmup />
       <Header />
       <main className="overflow-x-clip">{children}</main>
       <Footer />
