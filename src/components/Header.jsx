@@ -215,30 +215,29 @@ export default function Header() {
         {mobile && (
           <motion.div className="fixed inset-0 z-[60] min-[1440px]:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="absolute inset-0 bg-espresso/50" onClick={() => setMobile(false)} />
-            <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="relative flex h-full w-[85%] max-w-[550px] flex-col overflow-y-auto bg-cream">
-              <div className="flex items-center justify-between px-5 py-5">
+            <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="relative flex h-full w-full flex-col bg-cream">
+              <div className="flex shrink-0 items-center justify-between border-b border-ink/10 py-5 pl-5 pr-3">
                 <Logo />
                 <button onClick={() => setMobile(false)} aria-label="Close menu" className="relative h-8 w-8 cursor-pointer transition-transform duration-300 hover:rotate-90 before:absolute before:left-1/2 before:top-1/2 before:h-0.5 before:w-5 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-45 before:bg-ink after:absolute after:left-1/2 after:top-1/2 after:h-0.5 after:w-5 after:-translate-x-1/2 after:-translate-y-1/2 after:-rotate-45 after:bg-ink" />
               </div>
-              <ul className="border-t border-ink/20">
-                {categoryError && <li><button onClick={refreshCategories} className="px-5 py-4 text-terra">Retry categories</button></li>}
-                {mobileNav.map((item) => <MobileItem key={item.label} item={item} />)}
-                <li className="border-b border-ink/20">
-                  <a href="#" className="flex items-center gap-2.5 px-5 py-[15px] leading-none">
-                    <HeartIcon size={20} /> Wishlist
-                    <span className="grid h-[18px] w-[18px] place-items-center rounded-full bg-terra text-[10px] text-white">{wishlist.length}</span>
-                  </a>
-                </li>
-              </ul>
-              <div className="my-12 grid gap-4 px-5">
-                <h4 className="text-lg">My account</h4>
-                <Link href="/account" onClick={() => setMobile(false)} className="btn-dark w-full"><User size={16} /> Log in</Link>
-                <Link href="/account?mode=register" onClick={() => setMobile(false)} className="btn-outline w-full">Register</Link>
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                <ul className="border-t border-ink/20">
+                  {categoryError && <li><button onClick={refreshCategories} className="px-5 py-4 text-terra">Retry categories</button></li>}
+                  {mobileNav.map((item) => <MobileItem key={item.label} item={item} />)}
+                  <li className="border-b border-ink/20">
+                    <Link href="/account?section=wishlist" onClick={() => setMobile(false)} className="flex items-center gap-2.5 px-5 py-[15px] leading-none">
+                      <HeartIcon size={20} /> Wishlist
+                      <span className="grid h-[18px] w-[18px] place-items-center rounded-full bg-terra text-[10px] text-white">{wishlist.length}</span>
+                    </Link>
+                  </li>
+                </ul>
               </div>
-              <div className="mt-auto px-5 pb-8">
-                <p className="flex items-center gap-2 text-sm text-muted">
-                  <MapPin size={16} className="text-terra" /> {ADDRESS}
-                </p>
+              <div className="shrink-0 border-t border-ink/10 px-5 py-5">
+                <div className="grid gap-3">
+                  <h4 className="text-lg">My account</h4>
+                  <Link href="/account" onClick={() => setMobile(false)} className="btn-dark w-full"><User size={16} /> Log in</Link>
+                  <Link href="/account?mode=register" onClick={() => setMobile(false)} className="btn-outline w-full">Register</Link>
+                </div>
               </div>
             </motion.aside>
           </motion.div>

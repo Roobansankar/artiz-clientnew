@@ -302,7 +302,7 @@ export function Blog() {
 
 export function Promotions() {
   return (
-    <section className="py-[50px]">
+    <section className="bg-white py-[50px]">
       <div className="container-x grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {promos.map((p, i) => (
           <Reveal key={p.title} delay={i * 0.08}>

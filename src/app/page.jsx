@@ -1,5 +1,5 @@
 import { BundleBuilder, DiningBanner, FeaturedCollection, TabbedCollection } from '../sections/Commerce'
-import { BeforeAfter, Blog, Faq, Lookbook, Marquee, Promotions, RoomStories, TrustedBy, VideoHero } from '../sections/Story'
+import { BeforeAfter, Faq, Lookbook, Marquee, Promotions, RoomStories, TrustedBy, VideoHero } from '../sections/Story'
 import { CuratedCollections, Hero, ImageCollage, ShopByCategory } from '../sections/Top'
 import { catalogData } from '../lib/server-catalog'
 import { Suspense } from 'react'
@@ -60,7 +60,6 @@ async function HomeContent() {
       <RoomStories />
       <BeforeAfter />
       <Faq />
-      <Blog />
       <Promotions />
     </>
   )
