@@ -18,7 +18,7 @@ export function FeaturedCollection({ products: curatedProducts = [] }) {
   return (
     <section className="pb-[60px] lg:pb-[90px]">
       <div className="container-x">
-        <SectionHeading sub="Curated Selection" title="Designed for Modern Homes" right={<ViewAll href="/curated-collection" />} />
+        <SectionHeading sub="Curated Selection" title="Designed for Modern Homes" right={<ViewAll variant="button" href="/curated-collection" />} />
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
           <Reveal>
             <Link href="/curated-collection" className="group relative block h-full min-h-[460px] overflow-hidden rounded-2xl">
@@ -195,7 +195,7 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
   return (
     <section className="section-py bg-white" aria-label="Featured collection">
       <div className="container-x">
-        <SectionHeading sub="Featured collection" title="Styled by Artiz" right={<ViewAll href="/shop/furniture" />} />
+        <SectionHeading sub="Featured collection" title="Styled by Artiz" right={<ViewAll variant="button" href="/shop/furniture" />} />
         <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
           {items.map((product, index) => {
@@ -270,7 +270,10 @@ export function TabbedCollection({ products: catalogProducts = [], categories = 
   return (
     <section className="section-py">
       <div className="container-x">
-        <SectionHeading align="center" sub="The Collection" title="Handpicked, Every One." />
+        <div className={`relative ${furniture ? 'pt-12 lg:px-28 lg:pt-0' : ''}`}>
+          <SectionHeading align="center" sub="The Collection" title="Handpicked, Every One." />
+          {furniture && <div className="absolute right-0 top-0"><ViewAll variant="button" href={`/shop/${encodeURIComponent(selected || furniture.slug)}`} /></div>}
+        </div>
         <div className="mb-10 flex flex-wrap justify-center gap-2">
           {[{ slug: null, name: 'All' }, ...tabs].map((t) => (
             <button type="button" key={t.slug || 'all'} aria-pressed={selected === t.slug} onClick={() => setTab(t.slug)} className={`relative rounded-full px-5 py-2 text-sm font-medium transition-colors cursor-pointer ${selected === t.slug ? 'text-white' : 'hover:text-terra'}`}>
@@ -300,7 +303,6 @@ export function TabbedCollection({ products: catalogProducts = [], categories = 
         </motion.div>
         {loading && <div role="status" aria-label="Loading collection" className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className="aspect-square animate-pulse rounded-2xl bg-sand/50" />)}</div>}
         {!list.length && !loading && <p role="status" className="py-10 text-center text-muted">{loadError || error ? 'The collection is temporarily unavailable. Please try again soon.' : 'No products in this category yet.'}</p>}
-        {furniture && list.length > 0 && <div className="mt-10 flex justify-center"><ViewAll href={`/shop/${encodeURIComponent(selected || furniture.slug)}`} /></div>}
       </div>
     </section>
   )

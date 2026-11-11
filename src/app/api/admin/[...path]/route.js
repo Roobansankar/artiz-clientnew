@@ -1,3 +1,5 @@
+import { revalidateTag } from 'next/cache';
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 async function proxy(request, context) {
@@ -50,6 +52,9 @@ async function proxy(request, context) {
             redirect: 'error',
             signal: AbortSignal.timeout((endpoint.startsWith('products') || endpoint.startsWith('categories') || endpoint.startsWith('gallery') || endpoint.startsWith('hero-slides')) && request.method !== 'GET' ? 60000 : 8000),
         });
+        if (response.ok && request.method !== 'GET' && (endpoint === 'hero-slides' || endpoint.startsWith('hero-slides/'))) {
+            revalidateTag('home-hero', { expire: 0 });
+        }
         const contentType = response.headers.get('content-type') || 'application/json';
         const binary = !contentType.includes('application/json');
         const resultHeaders = new Headers({ 'content-type': contentType, 'cache-control': 'no-store' });

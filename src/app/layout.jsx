@@ -15,12 +15,18 @@ export const metadata = {
   icons: { icon: '/favicon.svg' },
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  let heroSlides = null
+  try {
+    const base = process.env.API_BASE_URL || 'http://127.0.0.1:5000'
+    const response = await fetch(`${base}/api/hero-slides`, { next: { revalidate: 60, tags: ['home-hero'] }, signal: AbortSignal.timeout(3000) })
+    if (response.ok) heroSlides = (await response.json()).slides || []
+  } catch { /* Store pages remain available if the banner service is down. */ }
   return (
     <html lang="en" className={`${instrumentSans.variable} ${inter.variable}`}>
       <body>
         <StoreProvider>
-          <StoreChrome>{children}</StoreChrome>
+          <StoreChrome heroSlides={heroSlides}>{children}</StoreChrome>
         </StoreProvider>
       </body>
     </html>

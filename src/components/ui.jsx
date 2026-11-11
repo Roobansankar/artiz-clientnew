@@ -51,9 +51,11 @@ export function SectionHeading({ sub, title, desc, align = 'left', right }) {
   )
 }
 
-export function ViewAll({ href = '#' }) {
+export function ViewAll({ href = '#', variant = 'link' }) {
   return (
-    <a href={href} className="group inline-flex items-center gap-2 border-b border-ink pb-0.5 font-medium transition-colors hover:border-terra hover:text-terra">
+    <a href={href} className={variant === 'button'
+      ? 'group inline-flex min-h-11 shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-full border border-espresso bg-espresso px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:border-terra hover:bg-terra focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-terra motion-reduce:transition-none'
+      : 'group inline-flex items-center gap-2 border-b border-ink pb-0.5 font-medium transition-colors hover:border-terra hover:text-terra'}>
       View All <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:rotate-45" />
     </a>
   )
