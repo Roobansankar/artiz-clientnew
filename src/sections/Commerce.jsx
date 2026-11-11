@@ -4,12 +4,12 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Heart, Phone, Plus } from 'lucide-react'
 import Link from 'next/link'
 import ProductPrice from '../components/ProductPrice'
-import { formatPrice, productOption, shopProduct } from '../catalog'
+import { categoryProducts, formatPrice, productOption, shopProduct } from '../catalog'
 import { useState } from 'react'
 import { Autoplay, EffectFade } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { ArrowBtn, Price, ProductCard, Reveal, SectionHeading, ViewAll } from '../components/ui'
-import { featuredSlides, money, products, tabs } from '../data'
+import { ArrowBtn, Price, Reveal, SectionHeading, ViewAll } from '../components/ui'
+import { featuredSlides, products } from '../data'
 import { useStore } from '../store'
 
 export function FeaturedCollection({ products: curatedProducts = [] }) {
@@ -244,18 +244,22 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
     </section>
   )
 }
-export function TabbedCollection() {
-  const [tab, setTab] = useState('All')
-  const list = (tab === 'All' ? products : products.filter((p) => p.cat === tab)).slice(0, 8)
+export function TabbedCollection({ products: catalogProducts = [], categories = [], loadError = false }) {
+  const [tab, setTab] = useState(null)
+  const { addToCart, wishlist, toggleWish } = useStore()
+  const furniture = categories.find(category => category.kind === 'category' && !category.parentSlug && category.slug === 'furniture')
+  const tabs = categories.filter(category => category.parentSlug === furniture?.slug && category.kind === 'category' && category.showInMenu)
+  const selected = tabs.some(category => category.slug === tab) ? tab : null
+  const list = furniture ? categoryProducts(selected || furniture.slug, categories, catalogProducts).slice(0, 8) : []
   return (
     <section className="section-py">
       <div className="container-x">
         <SectionHeading align="center" sub="The Collection" title="Handpicked, Every One." />
         <div className="mb-10 flex flex-wrap justify-center gap-2">
-          {tabs.map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`relative rounded-full px-5 py-2 text-sm font-medium transition-colors cursor-pointer ${tab === t ? 'text-white' : 'hover:text-terra'}`}>
-              {tab === t && <motion.span layoutId="tab-pill" className="absolute inset-0 rounded-full bg-espresso" transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }} />}
-              <span className="relative">{t}</span>
+          {[{ slug: null, name: 'All' }, ...tabs].map((t) => (
+            <button type="button" key={t.slug || 'all'} aria-pressed={selected === t.slug} onClick={() => setTab(t.slug)} className={`relative rounded-full px-5 py-2 text-sm font-medium transition-colors cursor-pointer ${selected === t.slug ? 'text-white' : 'hover:text-terra'}`}>
+              {selected === t.slug && <motion.span layoutId="tab-pill" className="absolute inset-0 rounded-full bg-espresso" transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }} />}
+              <span className="relative">{t.name}</span>
             </button>
           ))}
         </div>
@@ -263,11 +267,23 @@ export function TabbedCollection() {
           <AnimatePresence mode="popLayout">
             {list.map((p, i) => (
               <motion.div key={p.id} layout initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }} exit={{ opacity: 0, scale: 0.95 }}>
-                <ProductCard p={p} />
+                <article className="group/collection relative">
+                  <Link href={`/products/${p.slug || p.id}`} className="relative block aspect-square overflow-hidden rounded-2xl bg-white">
+                    <img src={p.images?.[0] || p.image || '/images/categories/decor.jpg'} alt={p.name} loading="lazy" className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover/collection:scale-105 ${p.images?.[1] ? 'group-hover/collection:opacity-0' : ''}`} />
+                    {p.images?.[1] && <img src={p.images[1]} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover/collection:opacity-100" />}
+                  </Link>
+                  <button type="button" onClick={() => toggleWish(p.id)} aria-label={`${wishlist.includes(p.id) ? 'Remove' : 'Save'} ${p.name} ${wishlist.includes(p.id) ? 'from' : 'to'} wishlist`} aria-pressed={wishlist.includes(p.id)} className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white"><Heart size={18} className={wishlist.includes(p.id) ? 'fill-terra text-terra' : ''} /></button>
+                  <p className="mt-4 text-xs uppercase tracking-wider text-muted">{categories.find(category => category.slug === p.categorySlug)?.name || 'Furniture'}</p>
+                  <Link href={`/products/${p.slug || p.id}`} className="mt-1 block font-heading text-base font-medium hover:text-terra">{p.name}</Link>
+                  <div className="mt-2 text-sm"><ProductPrice product={p} /></div>
+                  <button type="button" disabled={productOption(p).stock <= 0} onClick={() => addToCart(shopProduct(p, categories))} className="btn-dark mt-4 w-full disabled:cursor-not-allowed disabled:opacity-50">{productOption(p).stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
+                </article>
               </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>
+        {!list.length && <p role="status" className="py-10 text-center text-muted">{loadError ? 'The collection is temporarily unavailable. Please try again soon.' : 'No products in this category yet.'}</p>}
+        {furniture && list.length > 0 && <div className="mt-10 flex justify-center"><ViewAll href={`/shop/${encodeURIComponent(selected || furniture.slug)}`} /></div>}
       </div>
     </section>
   )
