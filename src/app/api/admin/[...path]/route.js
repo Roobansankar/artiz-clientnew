@@ -8,7 +8,7 @@ async function proxy(request, context) {
     const collectCash = /^orders\/[a-z0-9]{20,40}\/collect$/.test(endpoint);
     if (collectCash && request.method !== 'POST') return Response.json({ message: 'Method not allowed.' }, { status: 405 });
     const orderDetail = /^orders\/[a-z0-9]{20,40}$/.test(endpoint);
-    if (orderDetail && request.method !== 'GET') return Response.json({ message: 'Method not allowed.' }, { status: 405 });
+    if (orderDetail && !['GET', 'DELETE'].includes(request.method)) return Response.json({ message: 'Method not allowed.' }, { status: 405 });
     const customerDeletion = /^customers\/[a-z0-9]{20,40}$/.test(endpoint);
     if (customerDeletion && request.method !== 'DELETE') return Response.json({ message: 'Method not allowed.' }, { status: 405 });
     if (!['auth/login', 'auth/me', 'auth/logout', 'contact-messages', 'notifications', 'dashboard', 'customers', 'orders', 'products', 'products/template', 'products/bulk', 'categories', 'categories/order', 'gallery', 'hero-slides', 'hero-slides/order'].includes(endpoint) && !/^contact-messages\/[a-z0-9]{20,40}$/.test(endpoint) && !/^products\/[A-Za-z0-9_-]{1,40}$/.test(endpoint) && !/^categories\/[a-z0-9-]{1,140}$/.test(endpoint) && !/^gallery\/[a-z0-9]{20,40}$/.test(endpoint) && !/^hero-slides\/[a-z0-9-]{1,100}$/.test(endpoint))

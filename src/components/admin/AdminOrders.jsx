@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { TableSkeleton } from './AdminContentSkeleton';
@@ -14,11 +14,20 @@ export default function AdminOrders({ notify }) {
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState('PLACED');
     const [page, setPage] = useState(1);
-    const [result, setResult] = useState({ orders: [], total: 0, page: 1, pageSize: 20, summary: { paidOrders: 0, revenue: 0 } });
+    const [result, setResult] = useState({ orders: [], total: 0, page: 1, pageSize: 10, summary: { paidOrders: 0, revenue: 0 } });
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
     const [error, setError] = useState('');
     const [reload, setReload] = useState(0);
+    const [deleting, setDeleting] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+    const deleteDialog = useRef(null);
+
+    useEffect(() => {
+        if (deleting) deleteDialog.current?.showModal();
+        else deleteDialog.current?.close();
+    }, [deleting]);
 
     const fetchOrders = useCallback(async (params, signal) => {
         const response = await fetch(`/api/admin/orders?${new URLSearchParams({ search, status, ...params })}`, { cache: 'no-store', signal });
@@ -37,7 +46,7 @@ export default function AdminOrders({ notify }) {
             setLoading(true);
             setError('');
             try {
-                const data = await fetchOrders({ page: String(page) }, controller.signal);
+                const data = await fetchOrders({ page: String(page), pageSize: '10' }, controller.signal);
                 if (data)
                     setResult(data);
             }
@@ -75,6 +84,32 @@ export default function AdminOrders({ notify }) {
             setExporting(false);
         }
     }
+    async function removeOrder() {
+        if (!deleting || saving) return;
+        setSaving(true);
+        setDeleteError('');
+        try {
+            const response = await fetch(`/api/admin/orders/${deleting.id}`, { method: 'DELETE' });
+            if (response.status === 401) {
+                router.replace('/admin/login');
+                return;
+            }
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || 'Could not delete order.');
+            }
+            setDeleting(null);
+            if (result.orders.length === 1 && page > 1) setPage(value => value - 1);
+            else setReload(value => value + 1);
+            notify(`Order ${deleting.number} deleted.`);
+        }
+        catch (e) {
+            setDeleteError(e instanceof Error ? e.message : 'Could not delete order.');
+        }
+        finally {
+            setSaving(false);
+        }
+    }
     const pages = Math.max(1, Math.ceil(result.total / result.pageSize));
     return <>
     <div className="ad-page-actions">
@@ -87,8 +122,8 @@ export default function AdminOrders({ notify }) {
     <p className="ad-muted ad-small ad-orders-summary">{result.summary.paidOrders} paid order{result.summary.paidOrders === 1 ? '' : 's'} · {money(result.summary.revenue)} received in total</p>
     {error && <p className="ad-auth-error" role="alert">{error} <button className="ad-inline-button" onClick={() => setReload(r => r + 1)}>Try again</button></p>}
     {loading && !result.orders.length ? <TableSkeleton /> : <div className="ad-table-scroll"><table className="ad-orders-table">
-      <thead><tr><th>S.No</th><th>Order</th><th>Date</th><th>Customer</th><th>Items</th><th>Payment</th><th>Status</th><th className="ad-align-right">Amount</th></tr></thead>
-      <tbody>{result.orders.map((o, index) => <tr key={o.id} className="ad-order-row" tabIndex={0} aria-label={`View order ${o.number}`} onClick={event => { if (!event.target.closest('a')) router.push(`/admin/orders/${o.id}`); }} onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); router.push(`/admin/orders/${o.id}`); } }}>
+      <thead><tr><th>S.No</th><th>Order</th><th>Date</th><th>Customer</th><th>Items</th><th>Payment</th><th>Status</th><th className="ad-align-right">Amount</th><th>Actions</th></tr></thead>
+      <tbody>{result.orders.map((o, index) => <tr key={o.id} className="ad-order-row" tabIndex={0} aria-label={`View order ${o.number}`} onClick={event => { if (!event.target.closest('a, button')) router.push(`/admin/orders/${o.id}`); }} onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); router.push(`/admin/orders/${o.id}`); } }}>
             <td className="ad-muted">{(result.page - 1) * result.pageSize + index + 1}</td>
             <td className="ad-medium"><Link href={`/admin/orders/${o.id}`} className="ad-inline-button">{o.number}</Link></td>
             <td className="ad-muted">{when(o.paidAt ?? o.createdAt)}</td>
@@ -97,8 +132,15 @@ export default function AdminOrders({ notify }) {
             <td className="ad-muted">{o.paymentMethod === 'COD' ? 'Cash on Delivery' : o.paymentMethod === 'EMI' || o.paymentChannel === 'emi' ? 'Razorpay EMI' : 'Razorpay online'}</td>
             <td><span className={`ad-status ${statusClass[o.status]}`}><i />{statusLabels[o.status]}</span></td>
             <td className="ad-align-right ad-medium">{money(o.amount)}</td>
+            <td><button className="ad-secondary ad-danger" disabled={saving} aria-label={`Delete order ${o.number}`} onClick={event => { event.stopPropagation(); setDeleteError(''); setDeleting(o); }}>Delete</button></td>
           </tr>)}</tbody>
     </table>{!result.orders.length && !error && <div className="ad-empty">{search ? 'No orders match your search.' : status === 'PAID' ? 'No paid orders yet. They appear here as soon as a customer completes payment.' : 'No orders found.'}</div>}</div>}
     <div className="ad-table-footer"><span>{result.total} order{result.total === 1 ? '' : 's'} · Page {page} of {pages}</span><span className="ad-pagination"><button disabled={page <= 1} aria-label="Previous page" onClick={() => setPage(p => p - 1)}>‹</button><button className="active" aria-current="page">{page}</button><button disabled={page >= pages} aria-label="Next page" onClick={() => setPage(p => p + 1)}>›</button></span></div>
+    <dialog ref={deleteDialog} aria-labelledby="delete-order-title" onCancel={event => { if (saving) event.preventDefault(); else setDeleting(null); }} className="fixed inset-0 m-auto w-[min(92vw,460px)] rounded-2xl border border-sand bg-white p-6 text-ink shadow-xl backdrop:bg-espresso/50">
+      <h2 id="delete-order-title" className="text-xl font-semibold">Delete order?</h2>
+      <p className="mt-4 text-sm leading-relaxed text-muted">Permanently delete order <strong>{deleting?.number}</strong> and its item records? This cannot be undone. This will not refund a payment or restore inventory.</p>
+      {deleteError && <p className="ad-auth-error" role="alert">{deleteError}</p>}
+      <div className="mt-6 flex justify-end gap-3"><button type="button" autoFocus disabled={saving} className="ad-secondary" onClick={() => setDeleting(null)}>Cancel</button><button type="button" disabled={saving} className="ad-primary ad-danger" onClick={removeOrder}>{saving ? 'Deleting...' : 'Delete order'}</button></div>
+    </dialog>
   </>;
 }
