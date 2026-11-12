@@ -1379,3 +1379,22 @@
 .ad-dash-kpi-value { font-size: 22px; line-height: 1.25; }
 .ad-dash-kpi-foot { margin-top: 4px; font-size: 10.5px; }
 .ad-dash-spark { height: 22px; margin-top: 6px; }
+
+/* Staff */
+.ad-staff { display: grid; gap: 18px; min-width: 0; }
+.ad-staff-title { font-size: 18px; font-weight: 600; }
+.ad-staff-pages { white-space: normal; max-width: 380px; }
+.ad-staff-chip { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: var(--ad-soft); color: var(--ad-text); }
+.ad-staff-dialog { width: min(94vw, 640px); max-height: 92vh; overflow-y: auto; }
+.ad-staff-perms { margin: 0 0 16px; padding: 0; border: 0; min-width: 0; }
+.ad-staff-perms legend { margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+.ad-staff-perm-actions { display: flex; gap: 14px; margin-bottom: 10px; font-size: 12px; }
+.ad-staff-perm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ad-staff-perm-grid label { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--ad-line); border-radius: 9px; cursor: pointer; transition: border-color .15s, background .15s; }
+.ad-staff-perm-grid label:hover { background: var(--ad-hover); }
+.ad-staff-perm-grid label.is-on { border-color: color-mix(in srgb, var(--ad-accent) 55%, var(--ad-line)); background: color-mix(in srgb, var(--ad-accent) 7%, var(--ad-surface)); }
+.ad-staff-perm-grid input { margin-top: 2px; }
+.ad-staff-perm-grid strong { display: block; font-size: 13px; font-weight: 500; }
+.ad-staff-perm-grid small { display: block; font-size: 11px; color: var(--ad-muted); }
+.ad-staff-active { margin-bottom: 18px; }
+@media (max-width: 560px) { .ad-staff-perm-grid { grid-template-columns: 1fr; } }

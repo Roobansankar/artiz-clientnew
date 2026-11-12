@@ -7,6 +7,7 @@ import AdminOrderDetail from './AdminOrderDetail';
 import AdminBilling from './AdminBilling';
 import AdminReports from './AdminReports';
 import AdminExpenses from './AdminExpenses';
+import AdminStaff from './AdminStaff';
 import AdminCustomers from './AdminCustomers';
 import AdminNewsletter from './AdminNewsletter';
 import AdminProducts from './AdminProducts';
@@ -20,12 +21,14 @@ import AdminNotifications from './AdminNotifications';
 import AdminContentSkeleton from './AdminContentSkeleton';
 import AdminLoginForm from './AdminLoginForm';
 import { startPageProgress } from '@/components/PageProgress';
+import { toast } from 'sonner';
 const paths = {
     home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 21v-8h6v8"/></>,
     mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></>,
     receipt: <><path d="M5 3h14v18l-2.5-1.5L14 21l-2-1.5-2 1.5-2.5-1.5L5 21Z"/><path d="M9 8h6M9 12h6M9 16h3"/></>,
     report: <><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8Z"/><path d="M14 3v5h5M9 17v-3m3 3v-6m3 6v-4"/></>,
     expense: <><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4M16 3v3M8 3v3"/></>,
+    staff: <><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a5 5 0 0 1 9-3"/><circle cx="17.5" cy="16.5" r="2.5"/><path d="M17.5 12v1.5m0 6V21m4.5-4.5H20.5m-6 0H13m7.7-3.2-1 1m-4.4 4.4-1 1m6.4 0-1-1m-4.4-4.4-1-1"/></>,
     users: <><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v3"/></>,
     settings: <><path d="m10 3-1 3-3 1-3 1 1 4-1 4 3 1 3 1 1 3h4l1-3 3-1 3-1-1-4 1-4-3-1-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></>,
     search: <><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></>,
@@ -53,15 +56,24 @@ const paths = {
 };
 function Icon({ name, size = 18 }) { return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>; }
 const nav = [
-    { label: 'Home', path: '/admin', icon: 'home' },
-    { label: 'Home Hero', path: '/admin/home-hero', icon: 'image' },
-    { label: 'Contact Messages', path: '/admin/contact-messages', icon: 'message' },
-    { label: 'Customers', path: '/admin/customers', icon: 'users' }, { label: 'Newsletter', path: '/admin/newsletter', icon: 'mail' }, { label: 'Orders', path: '/admin/orders', icon: 'cart' },
-    { label: 'Offline Billing', path: '/admin/billing', icon: 'receipt' },
-    { label: 'Expenses', path: '/admin/expenses', icon: 'expense' },
-    { label: 'Products', path: '/admin/products', icon: 'box' }, { label: 'Bulk Upload', path: '/admin/products/bulk', icon: 'download' }, { label: 'Gallery', path: '/admin/gallery', icon: 'image' }, { label: 'Analytics', path: '/admin/analytics', icon: 'chart' }, { label: 'Reports', path: '/admin/reports', icon: 'report' },
+    { label: 'Home', path: '/admin', icon: 'home', page: 'dashboard' },
+    { label: 'Home Hero', path: '/admin/home-hero', icon: 'image', page: 'hero' },
+    { label: 'Contact Messages', path: '/admin/contact-messages', icon: 'message', page: 'contact' },
+    { label: 'Customers', path: '/admin/customers', icon: 'users', page: 'customers' },
+    { label: 'Newsletter', path: '/admin/newsletter', icon: 'mail', page: 'newsletter' },
+    { label: 'Orders', path: '/admin/orders', icon: 'cart', page: 'orders' },
+    { label: 'Offline Billing', path: '/admin/billing', icon: 'receipt', page: 'billing' },
+    { label: 'Expenses', path: '/admin/expenses', icon: 'expense', page: 'expenses' },
+    { label: 'Products', path: '/admin/products', icon: 'box', page: 'products' },
+    { label: 'Bulk Upload', path: '/admin/products/bulk', icon: 'download', page: 'products' },
+    { label: 'Gallery', path: '/admin/gallery', icon: 'image', page: 'gallery' },
+    { label: 'Analytics', path: '/admin/analytics', icon: 'chart', page: 'dashboard' },
+    { label: 'Reports', path: '/admin/reports', icon: 'report', page: 'reports' },
+    { label: 'Staff', path: '/admin/staff', icon: 'staff', page: 'OWNER' },
 ];
-const settingLinks = ['General', 'Members', 'Notifications', 'Security'];
+// Owners see everything; staff see the pages the owner ticked for them. Settings (own account) is always available.
+const canSee = (admin, page) => !!admin && (admin.role === 'OWNER' || (page !== 'OWNER' && (admin.permissions || []).includes(page)));
+const settingLinks = ['General', 'Security'];
 const colors = [{ name: 'Green', value: '#00a155' }, { name: 'Blue', value: '#2563eb' }, { name: 'Violet', value: '#7c3aed' }, { name: 'Rose', value: '#e11d48' }, { name: 'Orange', value: '#ea580c' }];
 export default function AdminApp({ login = false }) {
     const pathname = usePathname();
@@ -101,9 +113,9 @@ export default function AdminApp({ login = false }) {
         router.replace('/admin/login');
         router.refresh();
     }
-    return <AdminWorkspace login={isLogin} admin={admin} contentLoading={!isLogin && !admin} authError={isLogin ? '' : error} onRetry={() => setRetry(r => r + 1)} onAuthenticated={account => { setAdmin(account); startPageProgress(); router.push('/admin'); }} onLogout={logout}/>;
+    return <AdminWorkspace login={isLogin} admin={admin} contentLoading={!isLogin && !admin} authError={isLogin ? '' : error} onRetry={() => setRetry(r => r + 1)} onAuthenticated={account => { setAdmin(account); startPageProgress(); router.push('/admin'); }} onLogout={logout} onAdminChange={setAdmin}/>;
 }
-function AdminWorkspace({ login = false, admin, contentLoading, authError, onRetry, onAuthenticated, onLogout }) {
+function AdminWorkspace({ login = false, admin, contentLoading, authError, onRetry, onAuthenticated, onLogout, onAdminChange }) {
     const pathname = usePathname();
     const router = useRouter();
     const isLogin = login || pathname === '/admin/login';
@@ -111,6 +123,11 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
     const isBulkUpload = pathname === '/admin/products/bulk';
     const section = isSettings ? 'Settings' : isBulkUpload ? 'Bulk Upload' : pathname.startsWith('/admin/products/') ? 'Products' : pathname.startsWith('/admin/orders/') ? 'Orders' : nav.find(n => n.path === pathname)?.label || 'Home';
     const settingsTab = pathname.split('/')[3] || 'general';
+    const visibleNav = nav.filter(n => canSee(admin, n.page));
+    const sectionPage = section === 'Settings' ? null : (nav.find(n => n.label === section)?.page ?? 'OWNER');
+    const blocked = !!admin && sectionPage !== null && !canSee(admin, sectionPage);
+    // Staff landing on a page they cannot open are sent to their first allowed page.
+    useEffect(() => { if (blocked && visibleNav.length) router.replace(visibleNav[0].path); }, [blocked, visibleNav, router]);
     const [dark, setDark] = useState(false);
     const [accent, setAccent] = useState(colors[0].value);
     const [menu, setMenu] = useState(false);
@@ -149,23 +166,23 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
     return <div className={`ad-root ${dark ? 'ad-dark' : ''} ${collapsed ? 'ad-collapsed' : ''}`} style={{ '--ad-accent': accent }}>
     {isLogin ? <main className="ad-login"><Link href="/" className="ad-login-brand"><img className="ad-logo-image" src="/images/logo.png" alt="" width={34} height={31}/>Artiz <span>Admin</span></Link><div className="ad-login-tools">{appearance}</div><section className="ad-login-card"><div className="ad-login-symbol"><Icon name="lock" size={25}/></div><h1>Log in to your account</h1><p>Welcome back! Enter your details to continue.</p><AdminLoginForm onAuthenticated={onAuthenticated}/><div className="ad-login-divider"><span>Admin access</span></div><p className="ad-login-demo">Sign in with your Artiz administrator account.</p><Link href="/" className="ad-back">← Back to Artiz storefront</Link></section><footer className="ad-login-footer">© 2026 Artiz. All rights reserved.</footer></main> : <>
       {menu && <button className="ad-overlay" aria-label="Close navigation" onClick={() => setMenu(false)}/>}
-      <aside className={`ad-sidebar ${menu ? 'open' : ''}`}><Link href="/admin" className="ad-team" aria-label="Artiz admin home"><img className="ad-logo-image" src="/images/logo.png" alt="Artiz Interior Design Studio" width={44} height={40}/><span className="ad-team-tag ad-sidebar-text">Workspace</span></Link><div className="ad-sidebar-body"><button className="ad-sidebar-search" onClick={() => setSearchOpen(true)} title="Search navigation"><Icon name="search" size={17}/><span className="ad-sidebar-text">Search...</span><kbd className="ad-sidebar-text">Ctrl K</kbd></button><nav aria-label="Admin navigation">{nav.map(n => <Link key={n.path} href={n.path} title={n.label} className={section === n.label ? 'active' : ''}><Icon name={n.icon}/><span className="ad-sidebar-text">{n.label}</span>{n.badge && <span className="ad-count ad-sidebar-text">{n.badge}</span>}</Link>)}<button type="button" title="Settings" className={`ad-settings-trigger ${isSettings ? 'active' : ''}`} aria-expanded={settingsOpen} aria-controls="ad-settings-submenu" onClick={() => { if (collapsed) {
+      <aside className={`ad-sidebar ${menu ? 'open' : ''}`}><Link href="/admin" className="ad-team" aria-label="Artiz admin home"><img className="ad-logo-image" src="/images/logo.png" alt="Artiz Interior Design Studio" width={44} height={40}/><span className="ad-team-tag ad-sidebar-text">Workspace</span></Link><div className="ad-sidebar-body"><button className="ad-sidebar-search" onClick={() => setSearchOpen(true)} title="Search navigation"><Icon name="search" size={17}/><span className="ad-sidebar-text">Search...</span><kbd className="ad-sidebar-text">Ctrl K</kbd></button><nav aria-label="Admin navigation">{visibleNav.map(n => <Link key={n.path} href={n.path} title={n.label} className={section === n.label ? 'active' : ''}><Icon name={n.icon}/><span className="ad-sidebar-text">{n.label}</span>{n.badge && <span className="ad-count ad-sidebar-text">{n.badge}</span>}</Link>)}<button type="button" title="Settings" className={`ad-settings-trigger ${isSettings ? 'active' : ''}`} aria-expanded={settingsOpen} aria-controls="ad-settings-submenu" onClick={() => { if (collapsed) {
             setCollapsed(false);
             setSettingsOpen(true);
         }
         else {
             setSettingsOpen(!settingsOpen);
-        } }}><Icon name="settings"/><span className="ad-sidebar-text">Settings</span><span className={`ad-settings-chevron ad-sidebar-text ${settingsOpen ? 'open' : ''}`}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button><div id="ad-settings-submenu" className="ad-subnav ad-sidebar-text" hidden={!settingsOpen}>{settingLinks.map(n => <Link key={n} href={n === 'General' ? '/admin/settings' : '/admin/settings/' + n.toLowerCase()} className={isSettings && settingsTab === n.toLowerCase() ? 'active' : ''}>{n}</Link>)}</div></nav><div className="ad-sidebar-links"><button title="Feedback" onClick={() => setNotice('This is a frontend preview. Feedback integration will be available when the backend is connected.')}><Icon name="message"/><span className="ad-sidebar-text">Feedback</span><span className="ad-sidebar-text ad-link-arrow">↗</span></button><button title="Help & Support" onClick={() => setNotice('Demo help: use the sidebar to explore pages. Customize colors with the palette button and switch modes with the sun or moon.')}><Icon name="help"/><span className="ad-sidebar-text">Help & Support</span><span className="ad-sidebar-text ad-link-arrow">↗</span></button></div></div><div className="ad-sidebar-footer">{profileOpen && <div className="ad-profile-menu"><strong>{admin?.name}</strong><span>{admin?.email}</span><Link href="/admin/settings"><Icon name="settings" size={16}/>Settings</Link><button onClick={() => chooseMode(!dark)}><Icon name={dark ? 'sun' : 'moon'} size={16}/>{dark ? 'Light mode' : 'Dark mode'}</button><button onClick={async () => { try {
+        } }}><Icon name="settings"/><span className="ad-sidebar-text">Settings</span><span className={`ad-settings-chevron ad-sidebar-text ${settingsOpen ? 'open' : ''}`}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button><div id="ad-settings-submenu" className="ad-subnav ad-sidebar-text" hidden={!settingsOpen}>{settingLinks.map(n => <Link key={n} href={n === 'General' ? '/admin/settings' : '/admin/settings/' + n.toLowerCase()} className={isSettings && settingsTab === n.toLowerCase() ? 'active' : ''}>{n}</Link>)}</div></nav><div className="ad-sidebar-links"><button title="Feedback" onClick={() => setNotice('This is a frontend preview. Feedback integration will be available when the backend is connected.')}><Icon name="message"/><span className="ad-sidebar-text">Feedback</span><span className="ad-sidebar-text ad-link-arrow">↗</span></button><button title="Help & Support" onClick={() => setNotice('Demo help: use the sidebar to explore pages. Customize colors with the palette button and switch modes with the sun or moon.')}><Icon name="help"/><span className="ad-sidebar-text">Help & Support</span><span className="ad-sidebar-text ad-link-arrow">↗</span></button></div></div><div className="ad-sidebar-footer">{profileOpen && <div className="ad-profile-menu"><strong>{admin?.name}</strong><span>{admin?.email || (admin?.username ? `@${admin.username}` : "")}</span><Link href="/admin/settings"><Icon name="settings" size={16}/>Settings</Link><button onClick={() => chooseMode(!dark)}><Icon name={dark ? 'sun' : 'moon'} size={16}/>{dark ? 'Light mode' : 'Dark mode'}</button><button onClick={async () => { try {
             await onLogout();
         }
         catch {
             setNotice('Could not sign out. Please try again.');
         } }}><Icon name="logout" size={16}/>Log out</button></div>}<button className="ad-profile" title="Account menu" onClick={() => setProfileOpen(!profileOpen)} aria-expanded={profileOpen}><span className="ad-avatar">AD</span><span className="ad-sidebar-text">{admin?.name || 'Admin'}</span><span className="ad-sidebar-text ad-team-chevron"><Icon name="chevron" size={15}/></span></button></div></aside>
-      <div className="ad-workarea"><header className="ad-topbar"><div className="ad-topbar-title"><button className="ad-icon-button ad-desktop-collapse" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} onClick={() => setCollapsed(!collapsed)}><Icon name="panel"/></button><button className="ad-icon-button ad-mobile-menu" aria-label="Open navigation" onClick={() => setMenu(true)}><Icon name="panel"/></button><h1>{section}</h1></div><div className="ad-topbar-actions">{appearance}<AdminNotifications enabled={!!admin && !isLogin}/></div></header>
+      <div className="ad-workarea"><header className="ad-topbar"><div className="ad-topbar-title"><button className="ad-icon-button ad-desktop-collapse" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} onClick={() => setCollapsed(!collapsed)}><Icon name="panel"/></button><button className="ad-icon-button ad-mobile-menu" aria-label="Open navigation" onClick={() => setMenu(true)}><Icon name="panel"/></button><h1>{section}</h1></div><div className="ad-topbar-actions">{appearance}<AdminNotifications enabled={!isLogin && canSee(admin, 'contact')}/></div></header>
       {(section === 'Home' || section === 'Analytics') && <div className="ad-toolbar"><div className="ad-date-select"><Icon name="calendar" size={16}/><select aria-label="Date range" value={range} onChange={e => setRange(e.target.value)}><option>Last 14 days</option><option>Last 7 days</option><option>Last 30 days</option></select></div><span className="ad-toolbar-separator"/><select className="ad-period" aria-label="Chart interval" value={period} onChange={e => setPeriod(e.target.value)}><option>Daily</option><option>Weekly</option><option>Monthly</option></select><span className="ad-muted ad-small">India time</span></div>}
       {isSettings && <nav className="ad-settings-tabs" aria-label="Settings tabs">{settingLinks.map(n => <Link key={n} href={n === 'General' ? '/admin/settings' : '/admin/settings/' + n.toLowerCase()} className={settingsTab === n.toLowerCase() ? 'active' : ''}>{n}</Link>)}</nav>}
       <main className="ad-main" aria-busy={contentLoading}>
-      {authError ? <section className="ad-workspace-error" role="alert"><h2>Could not load this page</h2><p>{authError}</p><button className="ad-primary" onClick={onRetry}>Try again</button><Link href="/admin/login">Back to login</Link></section> : contentLoading ? <AdminContentSkeleton section={section}/> : <>
+      {authError ? <section className="ad-workspace-error" role="alert"><h2>Could not load this page</h2><p>{authError}</p><button className="ad-primary" onClick={onRetry}>Try again</button><Link href="/admin/login">Back to login</Link></section> : contentLoading ? <AdminContentSkeleton section={section}/> : blocked ? <section className="ad-workspace-error" role="alert"><h2>No access to this page</h2><p>{visibleNav.length ? 'Taking you to a page you can open…' : 'Your account has not been given access to any pages yet. Ask the owner to update your access.'}</p><Link href="/admin/settings">Go to your account settings</Link></section> : <>
       {(section === 'Home' || section === 'Analytics') && <AdminDashboard range={range} period={period} adminName={admin?.name}/>} 
       {section === 'Contact Messages' && <ContactMessages />}
       {section === 'Orders' && (pathname.startsWith('/admin/orders/') ? <AdminOrderDetail id={pathname.split('/')[3]} /> : <AdminOrders notify={setNotice}/>)}
@@ -173,44 +190,64 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
       {section === 'Offline Billing' && <AdminBilling />}
       {section === 'Reports' && <AdminReports />}
       {section === 'Expenses' && <AdminExpenses />}
+      {section === 'Staff' && <AdminStaff />}
       {section === 'Newsletter' && <AdminNewsletter notify={setNotice} />}
       {section === 'Bulk Upload' && <AdminBulkUpload notify={setNotice} />}
       {section === 'Products' && <AdminProducts />}
       {section === 'Gallery' && <AdminGallery />}
       {section === 'Home Hero' && <AdminHero />}
-      {isSettings && settingsTab === 'general' && <><div className="ad-settings-heading"><div><h2>Profile</h2><p>Manage your profile and store details.</p></div><button className="ad-neutral-button" type="submit" form="ad-profile-settings">Save changes</button></div><form id="ad-profile-settings" className="ad-settings-card" onSubmit={e => { e.preventDefault(); localStorage.setItem('artiz-admin-settings', JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))); setNotice('Profile updated in this browser.'); }}><ProfileFields admin={admin}/></form><div className="ad-settings-heading"><div><h2>Appearance</h2><p>Customize the look and feel of your workspace.</p></div></div><div className="ad-settings-card"><div className="ad-setting-row"><div><strong>Color mode</strong><p>Choose light or dark mode.</p></div><div className="ad-mode-options"><button className={!dark ? 'selected' : ''} onClick={() => chooseMode(false)}><Icon name="sun" size={16}/>Light</button><button className={dark ? 'selected' : ''} onClick={() => chooseMode(true)}><Icon name="moon" size={16}/>Dark</button></div></div><div className="ad-setting-row"><div><strong>Primary color</strong><p>Your accent color across the admin area.</p></div><div className="ad-color-options">{colors.map(c => <button key={c.name} aria-pressed={accent === c.value} className={accent === c.value ? 'selected' : ''} onClick={() => chooseColor(c.value)}><i style={{ background: c.value }}/>{c.name}</button>)}</div></div></div></>}
-      {isSettings && settingsTab === 'members' && <><div className="ad-settings-heading"><div><h2>Team members</h2><p>Manage the people who have access to your workspace.</p></div></div><div className="ad-settings-card">{[{ name: 'Admin', email: 'admin@artiz.com', role: 'Owner' }, { name: 'Priya Verma', email: 'priya@example.com', role: 'Editor' }, { name: 'Arjun Rao', email: 'arjun@example.com', role: 'Viewer' }].map(m => <div key={m.email} className="ad-member"><span className="ad-avatar">{m.name.slice(0, 2).toUpperCase()}</span><div><strong>{m.name}</strong><small>{m.email}</small></div><span className="ad-status neutral">{m.role}</span></div>)}</div></>}
-      {isSettings && settingsTab === 'notifications' && <NotificationSettings notify={setNotice}/>}
-      {isSettings && settingsTab === 'security' && <><div className="ad-settings-heading"><div><h2>Password</h2><p>Update the password associated with your account.</p></div></div><form className="ad-settings-card ad-security-form" onSubmit={e => { e.preventDefault(); const f = new FormData(e.currentTarget); if (f.get('new') !== f.get('confirm')) {
-                setNotice('The new passwords do not match.');
-                return;
-            } setNotice('Password form validated. This demo does not change your account.'); e.currentTarget.reset(); }}><label>Current password<input type="password" name="current" autoComplete="current-password" required/></label><label>New password<input type="password" name="new" autoComplete="new-password" minLength={8} required/></label><label>Confirm new password<input type="password" name="confirm" autoComplete="new-password" minLength={8} required/></label><button className="ad-primary">Update password</button><p className="ad-muted ad-small">UI preview only. No password is stored or changed.</p></form></>}
+      {isSettings && settingsTab === 'general' && <><ProfileSettings admin={admin} onSaved={onAdminChange}/><div className="ad-settings-heading"><div><h2>Appearance</h2><p>Customize the look and feel of your workspace.</p></div></div><div className="ad-settings-card"><div className="ad-setting-row"><div><strong>Color mode</strong><p>Choose light or dark mode.</p></div><div className="ad-mode-options"><button className={!dark ? 'selected' : ''} onClick={() => chooseMode(false)}><Icon name="sun" size={16}/>Light</button><button className={dark ? 'selected' : ''} onClick={() => chooseMode(true)}><Icon name="moon" size={16}/>Dark</button></div></div><div className="ad-setting-row"><div><strong>Primary color</strong><p>Your accent color across the admin area.</p></div><div className="ad-color-options">{colors.map(c => <button key={c.name} aria-pressed={accent === c.value} className={accent === c.value ? 'selected' : ''} onClick={() => chooseColor(c.value)}><i style={{ background: c.value }}/>{c.name}</button>)}</div></div></div></>}
+      {isSettings && settingsTab === 'security' && <PasswordSettings/>}
       </>}</main></div>
     </>}
     {notice && <div className="ad-toast" role="status"><span className="ad-toast-check"><Icon name="check" size={18}/></span><div><strong>Workspace update</strong><p>{notice}</p></div><button className="ad-icon-button" aria-label="Dismiss notification" onClick={() => setNotice('')}><Icon name="close" size={15}/></button></div>}
-    {searchOpen && <div className="ad-modal-backdrop" onClick={() => setSearchOpen(false)}><section className="ad-search-dialog" role="dialog" aria-modal="true" aria-label="Search pages" onClick={e => e.stopPropagation()}><div className="ad-command-input"><Icon name="search"/><input ref={searchRef} value={navQuery} onChange={e => setNavQuery(e.target.value)} placeholder="Search pages..." aria-label="Search admin pages"/><button className="ad-icon-button" aria-label="Close search" onClick={() => setSearchOpen(false)}><Icon name="close" size={16}/></button></div><p>Go to</p>{[...nav, { label: 'Settings', path: '/admin/settings', icon: 'settings' }].filter(n => n.label.toLowerCase().includes(navQuery.toLowerCase())).map(n => <Link key={n.path} href={n.path} onClick={() => { setSearchOpen(false); setNavQuery(''); }}><Icon name={n.icon}/>{n.label}<span>↵</span></Link>)}{![...nav.map(n => n.label), 'Settings'].some(n => n.toLowerCase().includes(navQuery.toLowerCase())) && <div className="ad-empty">No pages found.</div>}</section></div>}
+    {searchOpen && <div className="ad-modal-backdrop" onClick={() => setSearchOpen(false)}><section className="ad-search-dialog" role="dialog" aria-modal="true" aria-label="Search pages" onClick={e => e.stopPropagation()}><div className="ad-command-input"><Icon name="search"/><input ref={searchRef} value={navQuery} onChange={e => setNavQuery(e.target.value)} placeholder="Search pages..." aria-label="Search admin pages"/><button className="ad-icon-button" aria-label="Close search" onClick={() => setSearchOpen(false)}><Icon name="close" size={16}/></button></div><p>Go to</p>{[...visibleNav, { label: 'Settings', path: '/admin/settings', icon: 'settings' }].filter(n => n.label.toLowerCase().includes(navQuery.toLowerCase())).map(n => <Link key={n.path} href={n.path} onClick={() => { setSearchOpen(false); setNavQuery(''); }}><Icon name={n.icon}/>{n.label}<span>↵</span></Link>)}{![...visibleNav.map(n => n.label), 'Settings'].some(n => n.toLowerCase().includes(navQuery.toLowerCase())) && <div className="ad-empty">No pages found.</div>}</section></div>}
   </div>;
 }
-function ProfileFields({ admin }) {
-    const [values, setValues] = useState({ name: admin?.name || 'Admin', email: admin?.email || '', username: 'artizadmin', store: 'Artiz Home & Living', bio: '' });
-    useEffect(() => { try {
-        const saved = localStorage.getItem('artiz-admin-settings');
-        if (saved) {
-            const data = JSON.parse(saved);
-            setValues(v => ({ ...v, ...Object.fromEntries(Object.entries(data).filter(([k, value]) => k in v && typeof value === 'string')) }));
-        }
+const roleLabel = admin => admin?.role === 'OWNER' ? 'Owner · full access' : `Staff · ${(admin?.permissions || []).length} page${(admin?.permissions || []).length === 1 ? '' : 's'}`;
+function ProfileSettings({ admin, onSaved }) {
+    const [name, setName] = useState(admin?.name || '');
+    const [saving, setSaving] = useState(false);
+    useEffect(() => { setName(admin?.name || ''); }, [admin?.name]);
+    async function save(event) {
+        event.preventDefault();
+        setSaving(true);
+        try {
+            const response = await fetch('/api/admin/auth/me', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Could not save your profile.');
+            onSaved?.(data.admin);
+            toast.success('Profile saved');
+        } catch (e) { toast.error(e.message); } finally { setSaving(false); }
     }
-    catch { /* Retain defaults if local settings are invalid. */ } }, []);
-    const descriptions = { name: 'Will appear on receipts and other communication.', email: 'Used for account updates and store communication.', username: 'Your unique username in this workspace.', store: 'The name displayed for your store.', bio: 'A brief description of your profile or store.' };
-    return <>{Object.entries(values).map(([name, value]) => <label className="ad-setting-row" key={name}><span><strong>{name === 'store' ? 'Store name' : name.charAt(0).toUpperCase() + name.slice(1)}{name !== 'bio' && <em>*</em>}</strong><span className="ad-field-description">{descriptions[name]}</span></span>{name === 'bio' ? <textarea name={name} rows={4} value={value} onChange={e => setValues({ ...values, [name]: e.target.value })} placeholder="Tell us a little about your store..."/> : <input name={name} type={name === 'email' ? 'email' : 'text'} value={value} onChange={e => setValues({ ...values, [name]: e.target.value })} required/>}</label>)}</>;
+    return <><div className="ad-settings-heading"><div><h2>Profile</h2><p>Your name as shown in the admin panel.</p></div><button className="ad-neutral-button" type="submit" form="ad-profile-settings" disabled={saving || name.trim().length < 2 || name === admin?.name}>{saving ? 'Saving…' : 'Save changes'}</button></div>
+      <form id="ad-profile-settings" className="ad-settings-card" onSubmit={save}>
+        <label className="ad-setting-row"><span><strong>Name<em>*</em></strong><span className="ad-field-description">Shown in the sidebar and on activity.</span></span><input value={name} onChange={e => setName(e.target.value)} minLength={2} maxLength={120} required/></label>
+        <div className="ad-setting-row"><span><strong>{admin?.username ? 'Username' : 'Email'}</strong><span className="ad-field-description">{admin?.role === 'OWNER' ? 'Used to sign in.' : 'Used to sign in. Ask the owner to change it.'}</span></span><input value={admin?.username || admin?.email || ''} readOnly disabled/></div>
+        <div className="ad-setting-row"><span><strong>Access</strong><span className="ad-field-description">What this account can open.</span></span><span className="ad-status neutral">{roleLabel(admin)}</span></div>
+      </form></>;
 }
-function NotificationSettings({ notify }) {
-    const [preferences, setPreferences] = useState({ 'New orders': true, 'Customer messages': true, 'Low stock alerts': true, 'Weekly summary': false });
-    useEffect(() => { try {
-        const saved = localStorage.getItem('artiz-admin-notifications');
-        if (saved)
-            setPreferences(p => ({ ...p, ...JSON.parse(saved) }));
+function PasswordSettings() {
+    const [saving, setSaving] = useState(false);
+    async function submit(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const f = new FormData(form);
+        if (f.get('new') !== f.get('confirm')) { toast.error('The new passwords do not match.'); return; }
+        setSaving(true);
+        try {
+            const response = await fetch('/api/admin/auth/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword: f.get('current'), newPassword: f.get('new') }) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Could not change your password.');
+            form.reset();
+            toast.success('Password updated', { description: 'Other devices have been signed out.' });
+        } catch (e) { toast.error(e.message); } finally { setSaving(false); }
     }
-    catch { /* Retain defaults. */ } }, []);
-    return <><div className="ad-settings-heading"><div><h2>Notifications</h2><p>Choose the updates you would like to receive.</p></div></div><div className="ad-settings-card">{Object.entries(preferences).map(([name, enabled]) => <div className="ad-setting-row" key={name}><div><strong>{name}</strong><p>Receive updates about {name.toLowerCase()}.</p></div><button role="switch" aria-checked={enabled} aria-label={name} className={`ad-switch ${enabled ? 'on' : ''}`} onClick={() => { const next = { ...preferences, [name]: !enabled }; setPreferences(next); localStorage.setItem('artiz-admin-notifications', JSON.stringify(next)); notify('Notification preference saved on this device.'); }}><span /></button></div>)}</div></>;
+    return <><div className="ad-settings-heading"><div><h2>Password</h2><p>Change the password you use to sign in. Other devices will be signed out.</p></div></div>
+      <form className="ad-settings-card ad-security-form" onSubmit={submit}>
+        <label>Current password<input type="password" name="current" autoComplete="current-password" required/></label>
+        <label>New password<input type="password" name="new" autoComplete="new-password" minLength={8} maxLength={72} required/></label>
+        <label>Confirm new password<input type="password" name="confirm" autoComplete="new-password" minLength={8} maxLength={72} required/></label>
+        <button className="ad-primary" disabled={saving}>{saving ? 'Updating…' : 'Update password'}</button>
+      </form></>;
 }
