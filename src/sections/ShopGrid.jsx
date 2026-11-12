@@ -451,7 +451,7 @@ export default function ShopGrid({ products: initialProducts = shopProducts, cat
       {/* Compare bar + modal */}
       <AnimatePresence>
         {compareMode && compare.length > 0 && (
-          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-14 z-50 border-t border-ink/10 bg-white shadow-[0_-8px_30px_rgba(0,0,0,0.08)] md:bottom-0">
+          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-0 z-50 border-t border-ink/10 bg-white shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
             <div className="container-x flex items-center gap-4 py-3">
               <div className="flex flex-1 gap-3 overflow-x-auto">
                 {comparedItems.map((p) => (

@@ -210,9 +210,8 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-4">
-            {/* Phones use the fixed bottom bar for search and account. */}
-            <button onClick={() => setSearchOpen(true)} aria-label="Search" className="max-md:hidden hover:text-terra cursor-pointer"><SearchIcon size={22} /></button>
-            <div className="max-md:hidden"><AccountMenu /></div>
+            <button onClick={() => setSearchOpen(true)} aria-label="Search" className="hover:text-terra cursor-pointer"><SearchIcon size={22} /></button>
+            <AccountMenu />
             <Link href="/account?section=wishlist" aria-label="Wishlist" className="relative hidden hover:text-terra sm:block">
               <HeartIcon size={24} />
               <span className="absolute -right-2 -top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-terra text-[10px] text-white">{wishlist.length}</span>

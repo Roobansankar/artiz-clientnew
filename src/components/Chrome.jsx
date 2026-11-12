@@ -1,10 +1,9 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUp, CircleUserRound, House, LayoutGrid, MapPin, Minus, Plus, Search, ShoppingCart, X } from 'lucide-react'
+import { ArrowUp, MapPin, Minus, Plus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { formatPrice } from '../catalog'
 import { money } from '../data'
 import { useStore } from '../store'
@@ -16,7 +15,7 @@ export function Footer() {
     { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '/account?section=wishlist' }, { label: 'My account', href: '/account' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
   ]
   return (
-    <footer className="bg-espresso pb-24 pt-[60px] text-white/75 md:pb-[35px] lg:pt-[80px]">
+    <footer className="bg-espresso pb-[35px] pt-[60px] text-white/75 lg:pt-[80px]">
       <div className="container-x grid gap-10 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.5fr]">
         <div>
           <Logo light />
@@ -199,36 +198,6 @@ export function EmailPopup() {
   )
 }
 
-export function MobileBar() {
-  const pathname = usePathname()
-  const { cart, cartOpen, setCartOpen, searchOpen, setSearchOpen } = useStore()
-  const count = cart.reduce((n, i) => n + i.qty, 0)
-  const items = [
-    { icon: House, label: 'Home', href: '/', active: pathname === '/' },
-    { icon: Search, label: 'Search', on: () => setSearchOpen(true), active: searchOpen },
-    { icon: LayoutGrid, label: 'Shop', href: '/shop', active: pathname.startsWith('/shop') },
-    { icon: ShoppingCart, label: 'Cart', on: () => setCartOpen(true), active: cartOpen, badge: count },
-    { icon: CircleUserRound, label: 'Account', href: '/account', active: pathname.startsWith('/account') },
-  ]
-  const itemClass = active => `relative flex flex-col items-center gap-1 text-[11px] font-medium transition-colors ${active ? 'text-terra' : 'text-ink/70 hover:text-terra'}`
-  return (
-    <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-sand bg-white py-2 md:hidden">
-      {items.map(({ icon: Icon, label, href, on, active, badge }) => href
-        ? <Link key={label} href={href} aria-current={active ? 'page' : undefined} className={itemClass(active)}>
-            <Icon size={20} />
-            {label}
-            {badge > 0 && <span className="absolute right-1/4 -top-1 grid h-4 w-4 place-items-center rounded-full bg-terra text-[9px] text-white">{badge}</span>}
-          </Link>
-        : <button key={label} onClick={on} aria-label={label} className={`${itemClass(active)} cursor-pointer`}>
-            <Icon size={20} />
-            {label}
-            {badge > 0 && <span className="absolute right-1/4 -top-1 grid h-4 w-4 place-items-center rounded-full bg-terra text-[9px] text-white">{badge}</span>}
-          </button>
-      )}
-    </nav>
-  )
-}
-
 export function BackToTop() {
   const [show, setShow] = useState(false)
   useEffect(() => {
@@ -245,7 +214,7 @@ export function BackToTop() {
           exit={{ opacity: 0, y: 20 }}
           onClick={() => window.scrollTo({ top: 0 })}
           aria-label="Back to top"
-          className="fixed bottom-20 right-5 z-50 grid h-12 w-12 place-items-center rounded-full bg-terra text-white shadow-lg transition-colors hover:bg-espresso md:bottom-8 cursor-pointer"
+          className="fixed bottom-5 right-5 z-50 grid h-12 w-12 place-items-center rounded-full bg-terra text-white shadow-lg transition-colors hover:bg-espresso md:bottom-8 cursor-pointer"
         >
           <ArrowUp size={20} />
         </motion.button>

@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Header from './Header'
 import HomeScrollReset from './HomeScrollReset'
-import { BackToTop, CartDrawer, EmailPopup, Footer, MobileBar, QuickView } from './Chrome'
+import { BackToTop, CartDrawer, EmailPopup, Footer, QuickView } from './Chrome'
 import AdminToaster from './AdminToaster'
 import PageProgress from './PageProgress'
 import HeroImageWarmup from './HeroImageWarmup'
@@ -42,7 +42,6 @@ export default function StoreChrome({ children, heroSlides = [] }) {
       <CartDrawer />
       <QuickView />
       <EmailPopup />
-      <MobileBar />
       <BackToTop />
     </>
   )
