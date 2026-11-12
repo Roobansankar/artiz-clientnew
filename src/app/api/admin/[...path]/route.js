@@ -15,7 +15,7 @@ async function proxy(request, context) {
     if (orderDetail && !['GET', 'DELETE'].includes(request.method)) return Response.json({ message: 'Method not allowed.' }, { status: 405 });
     const customerDeletion = /^customers\/[a-z0-9]{20,40}$/.test(endpoint);
     if (customerDeletion && request.method !== 'DELETE') return Response.json({ message: 'Method not allowed.' }, { status: 405 });
-    if (!['auth/login', 'auth/me', 'auth/logout', 'contact-messages', 'notifications', 'newsletter', 'dashboard', 'customers', 'orders', 'products', 'products/template', 'products/bulk', 'categories', 'categories/order', 'gallery', 'hero-slides', 'hero-slides/order'].includes(endpoint) && !/^contact-messages\/[a-z0-9]{20,40}$/.test(endpoint) && !(/^newsletter\/[a-z0-9]{20,40}$/.test(endpoint) && request.method === 'DELETE') && !/^products\/[A-Za-z0-9_-]{1,40}$/.test(endpoint) && !/^categories\/[a-z0-9-]{1,140}$/.test(endpoint) && !/^gallery\/[a-z0-9]{20,40}$/.test(endpoint) && !/^hero-slides\/[a-z0-9-]{1,100}$/.test(endpoint))
+    if (!['auth/login', 'auth/me', 'auth/logout', 'contact-messages', 'notifications', 'newsletter', 'offline-bills', 'reports', 'dashboard', 'customers', 'orders', 'products', 'products/template', 'products/bulk', 'categories', 'categories/order', 'gallery', 'hero-slides', 'hero-slides/order'].includes(endpoint) && !/^contact-messages\/[a-z0-9]{20,40}$/.test(endpoint) && !(/^newsletter\/[a-z0-9]{20,40}$/.test(endpoint) && request.method === 'DELETE') && !/^products\/[A-Za-z0-9_-]{1,40}$/.test(endpoint) && !/^categories\/[a-z0-9-]{1,140}$/.test(endpoint) && !/^gallery\/[a-z0-9]{20,40}$/.test(endpoint) && !/^hero-slides\/[a-z0-9-]{1,100}$/.test(endpoint))
         if (!customerDeletion && !orderDetail && !collectCash && !orderAction && !orderInvoice) return Response.json({ message: 'Endpoint not found.' }, { status: 404 });
     const base = process.env.API_BASE_URL || 'http://127.0.0.1:5000';
     const headers = new Headers({ 'content-type': request.headers.get('content-type') || 'application/json' });
@@ -54,7 +54,7 @@ async function proxy(request, context) {
             body: body,
             cache: 'no-store',
             redirect: 'error',
-            signal: AbortSignal.timeout(orderAction || orderInvoice ? 60000 : (endpoint.startsWith('products') || endpoint.startsWith('categories') || endpoint.startsWith('gallery') || endpoint.startsWith('hero-slides')) && request.method !== 'GET' ? 60000 : 8000),
+            signal: AbortSignal.timeout(orderAction || orderInvoice || (endpoint === 'offline-bills' && request.method === 'POST') ? 60000 : (endpoint.startsWith('products') || endpoint.startsWith('categories') || endpoint.startsWith('gallery') || endpoint.startsWith('hero-slides')) && request.method !== 'GET' ? 60000 : 8000),
         });
         if (response.ok && request.method !== 'GET' && (endpoint === 'hero-slides' || endpoint.startsWith('hero-slides/'))) {
             revalidateTag('home-hero', { expire: 0 });

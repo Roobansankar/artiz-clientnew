@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import AdminOrders from './AdminOrders';
 import AdminOrderDetail from './AdminOrderDetail';
+import AdminBilling from './AdminBilling';
+import AdminReports from './AdminReports';
 import AdminCustomers from './AdminCustomers';
 import AdminNewsletter from './AdminNewsletter';
 import AdminProducts from './AdminProducts';
@@ -20,6 +22,8 @@ import { startPageProgress } from '@/components/PageProgress';
 const paths = {
     home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 21v-8h6v8"/></>,
     mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></>,
+    receipt: <><path d="M5 3h14v18l-2.5-1.5L14 21l-2-1.5-2 1.5-2.5-1.5L5 21Z"/><path d="M9 8h6M9 12h6M9 16h3"/></>,
+    report: <><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8Z"/><path d="M14 3v5h5M9 17v-3m3 3v-6m3 6v-4"/></>,
     users: <><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v3"/></>,
     settings: <><path d="m10 3-1 3-3 1-3 1 1 4-1 4 3 1 3 1 1 3h4l1-3 3-1 3-1-1-4 1-4-3-1-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></>,
     search: <><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></>,
@@ -51,7 +55,8 @@ const nav = [
     { label: 'Home Hero', path: '/admin/home-hero', icon: 'image' },
     { label: 'Contact Messages', path: '/admin/contact-messages', icon: 'message' },
     { label: 'Customers', path: '/admin/customers', icon: 'users' }, { label: 'Newsletter', path: '/admin/newsletter', icon: 'mail' }, { label: 'Orders', path: '/admin/orders', icon: 'cart' },
-    { label: 'Products', path: '/admin/products', icon: 'box' }, { label: 'Bulk Upload', path: '/admin/products/bulk', icon: 'download' }, { label: 'Gallery', path: '/admin/gallery', icon: 'image' }, { label: 'Analytics', path: '/admin/analytics', icon: 'chart' },
+    { label: 'Offline Billing', path: '/admin/billing', icon: 'receipt' },
+    { label: 'Products', path: '/admin/products', icon: 'box' }, { label: 'Bulk Upload', path: '/admin/products/bulk', icon: 'download' }, { label: 'Gallery', path: '/admin/gallery', icon: 'image' }, { label: 'Analytics', path: '/admin/analytics', icon: 'chart' }, { label: 'Reports', path: '/admin/reports', icon: 'report' },
 ];
 const settingLinks = ['General', 'Members', 'Notifications', 'Security'];
 const colors = [{ name: 'Green', value: '#00a155' }, { name: 'Blue', value: '#2563eb' }, { name: 'Violet', value: '#7c3aed' }, { name: 'Rose', value: '#e11d48' }, { name: 'Orange', value: '#ea580c' }];
@@ -162,6 +167,8 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
       {section === 'Contact Messages' && <ContactMessages />}
       {section === 'Orders' && (pathname.startsWith('/admin/orders/') ? <AdminOrderDetail id={pathname.split('/')[3]} /> : <AdminOrders notify={setNotice}/>)}
       {section === 'Customers' && <AdminCustomers />}
+      {section === 'Offline Billing' && <AdminBilling />}
+      {section === 'Reports' && <AdminReports />}
       {section === 'Newsletter' && <AdminNewsletter notify={setNotice} />}
       {section === 'Bulk Upload' && <AdminBulkUpload notify={setNotice} />}
       {section === 'Products' && <AdminProducts />}
