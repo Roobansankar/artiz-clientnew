@@ -51,14 +51,16 @@ export function ImageCollage() {
         {/* Wide feature banner */}
         <Reveal>
           <Link href="/shop/living-room" className="group relative block h-[420px] overflow-hidden rounded-2xl bg-sand md:h-[400px] lg:h-[440px]">
-            <img src="/images/banner3.png" alt="" className="absolute inset-0 h-full w-full object-cover object-right transition-transform duration-700 group-hover:scale-[1.03]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-cream via-cream/70 to-transparent md:bg-gradient-to-r md:from-cream/95 md:via-cream/55 md:to-transparent" />
-            <div className="relative flex h-full items-end p-6 md:items-center md:px-14 lg:px-20">
+            <div className="absolute inset-0">
+              <img src="/images/banner3.png" alt="Blush storage cabinet with ceramic vases in a warm ivory living room" className="absolute inset-0 h-full w-full object-cover object-right transition-transform duration-700 group-hover:scale-[1.03]" />
+            </div>
+            <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(52,39,31,0.88)_0%,rgba(52,39,31,0.35)_55%,transparent_100%)] md:bg-[linear-gradient(90deg,rgba(52,39,31,0.88)_0%,rgba(52,39,31,0.6)_35%,transparent_75%)]" />
+            <div className="relative flex h-full items-end p-7 text-cream md:items-center md:px-10 lg:px-14">
               <div className="max-w-lg">
-                <span className="subtitle">The Living Room Edit</span>
-                <h2 className="font-heading text-[32px] font-semibold leading-[1.1] md:text-[46px] lg:text-[54px]">Where Calm Meets <span className="text-terra">Comfort.</span></h2>
-                <p className="mt-4 max-w-sm text-muted md:text-[17px]">Bring warmth to every corner of your home.</p>
-                <span className="btn-dark mt-7 group-hover:bg-terra">Explore Collection <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" /></span>
+                <span className="subtitle text-[#edbea6]!">The Living Room Edit</span>
+                <h2 className="font-heading text-[32px] font-semibold leading-[1.1] md:text-[46px] lg:text-[54px]">Where Calm Meets <span className="text-[#edbea6]">Comfort.</span></h2>
+                <p className="mt-4 max-w-sm text-cream/90 md:text-[17px]">Bring warmth to every corner of your home.</p>
+                <span className="btn-light mt-7 group-hover:bg-[#edbea6]">Explore Collection <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" /></span>
               </div>
             </div>
           </Link>
@@ -68,13 +70,15 @@ export function ImageCollage() {
         <div className="grid gap-5 md:grid-cols-3">
           {collageTiles.map((tile, i) => (
             <Reveal key={tile.href} delay={0.1 * (i + 1)}>
-              <Link href={tile.href} className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-sand md:aspect-[5/4] lg:aspect-[4/3]">
-                <img src={tile.img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-cream/95 via-cream/40 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-5 lg:p-6">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-terra">{tile.sub}</span>
+              <Link href={tile.href} className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-sand transition-shadow duration-300 hover:shadow-lg md:aspect-[5/4] lg:aspect-[4/3]">
+                <div className="absolute inset-0">
+                  <img src={tile.img} alt={tile.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                </div>
+                <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(52,39,31,0.9)_0%,rgba(52,39,31,0.5)_35%,transparent_75%)]" />
+                <div className="absolute inset-x-0 bottom-0 p-5 text-cream lg:p-6">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#edbea6]">{tile.sub}</span>
                   <h3 className="mt-1 text-[22px] leading-snug lg:text-[24px]">{tile.title}</h3>
-                  <span className="btn-dark mt-4 px-5 py-2.5 text-sm group-hover:bg-terra">
+                  <span className="btn-light mt-4 px-5 py-2.5 text-sm group-hover:bg-[#edbea6]">
                     {tile.cta} <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-1" />
                   </span>
                 </div>
