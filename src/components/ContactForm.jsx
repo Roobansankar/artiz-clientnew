@@ -1,6 +1,7 @@
 'use client'
 
-import { Check, ChevronDown, Send } from 'lucide-react'
+import { ChevronDown, Send } from 'lucide-react'
+import { toast } from 'sonner'
 import { useState } from 'react'
 
 const topics = ['Product question', 'Order and delivery', 'Returns and care', 'Design advice', 'Something else']
@@ -24,12 +25,14 @@ export default function ContactForm() {
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(payload.message || 'We could not send your message. Please try again shortly.')
       form.reset()
-      setStatus({ state: 'success', message: payload.message || 'Thank you! Your message has been received.' })
+      setStatus({ state: 'idle', message: '' })
+      toast.success(payload.message || 'Thank you! Your message has been received.', { description: 'We’ll be in touch shortly.' })
     } catch (error) {
       const message = error?.name === 'TimeoutError'
         ? 'The request took too long. Please try again in a moment.'
         : error?.message || 'We could not send your message. Please try again shortly.'
-      setStatus({ state: 'error', message })
+      setStatus({ state: 'idle', message: '' })
+      toast.error(message)
     }
   }
 
@@ -39,19 +42,7 @@ export default function ContactForm() {
     <div>
       <span className="text-xs font-medium uppercase tracking-[0.16em] text-terra">Send a message</span>
       <h2 className="mt-3 font-heading text-[28px] font-semibold leading-tight md:text-[34px]">What can we help you with?</h2>
-      <p className="mt-3 text-sm leading-relaxed text-muted">Leave your details below. We will get back to you by email.</p>
-
-      {status.state === 'success' && (
-        <p role="status" className="mt-6 flex items-start gap-3 rounded-2xl bg-peach px-5 py-4 text-[15px] text-ink">
-          <Check size={18} className="mt-0.5 shrink-0 text-terra" aria-hidden="true" />
-          {status.message}
-        </p>
-      )}
-      {status.state === 'error' && (
-        <p role="alert" className="mt-6 rounded-2xl border border-terra/40 bg-peach px-5 py-4 text-[15px] text-ink">
-          {status.message}
-        </p>
-      )}
+      <p className="mt-3 text-sm leading-relaxed text-muted">Leave your details below. We will confirm on WhatsApp and get back to you shortly.</p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-5">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -63,6 +54,12 @@ export default function ContactForm() {
             <label htmlFor="contact-email" className="mb-2 block text-sm font-medium">Email address</label>
             <input id="contact-email" name="email" type="email" required maxLength={254} placeholder="jane@example.com" className={field} />
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="contact-phone" className="mb-2 block text-sm font-medium">WhatsApp number</label>
+          <input id="contact-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" required maxLength={20} minLength={10} placeholder="98765 43210" className={field} />
+          <p className="mt-1.5 text-xs text-muted">We&rsquo;ll send a confirmation to this number on WhatsApp.</p>
         </div>
 
         <div>

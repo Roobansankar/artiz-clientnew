@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUp, MapPin, Minus, Plus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { formatPrice } from '../catalog'
 import { money } from '../data'
 import { useStore } from '../store'
@@ -22,10 +23,12 @@ function useNewsletter(source) {
       const data = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(data.message || 'Could not subscribe. Please try again.')
       setEmail('')
-      setState({ status: 'done', message: data.message || 'Thank you for subscribing!' })
+      setState({ status: 'done', message: '' })
+      toast.success(data.message || 'Thank you for subscribing!', { description: 'You’ll be the first to hear about new arrivals and offers.' })
       return true
     } catch (error) {
-      setState({ status: 'error', message: error.message || 'Could not subscribe. Please try again.' })
+      setState({ status: 'error', message: '' })
+      toast.error(error.message || 'Could not subscribe. Please try again.')
       return false
     }
   }
@@ -66,7 +69,6 @@ export function Footer() {
             <input type="email" required maxLength={254} value={newsletter.email} onChange={(e) => newsletter.setEmail(e.target.value)} aria-label="Email address" placeholder="Your email address" size={1} className="w-0 min-w-0 flex-1 bg-transparent px-4 text-white outline-none placeholder:text-white/50" />
             <button disabled={newsletter.state.status === 'saving'} className="shrink-0 rounded-full bg-terra px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white hover:text-espresso cursor-pointer disabled:cursor-wait disabled:opacity-70">{newsletter.state.status === 'saving' ? 'Subscribing…' : 'Subscribe'}</button>
           </form>
-          {newsletter.state.message && <p role="status" className={`mt-3 text-sm ${newsletter.state.status === 'error' ? 'text-[#f3a589]' : 'text-white'}`}>{newsletter.state.message}</p>}
         </div>
       </div>
       <div className="container-x mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm md:flex-row">
@@ -214,7 +216,6 @@ export function EmailPopup() {
                 <input type="email" required maxLength={254} value={newsletter.email} onChange={(e) => newsletter.setEmail(e.target.value)} aria-label="Email address" placeholder="Email address" className="h-12 w-full rounded-full border border-sand bg-white px-5 outline-none focus:border-terra" />
                 <button disabled={newsletter.state.status === 'saving' || newsletter.state.status === 'done'} className="btn-dark w-full disabled:opacity-70">{newsletter.state.status === 'saving' ? 'Subscribing…' : newsletter.state.status === 'done' ? 'Subscribed' : 'Subscribe'}</button>
               </form>
-              {newsletter.state.message && <p role="status" className={`mt-3 text-sm ${newsletter.state.status === 'error' ? 'text-terra' : 'text-[#527254]'}`}>{newsletter.state.message}</p>}
               <p className="mt-3 text-xs text-muted">*By submitting this form, you agree to receive our emails and may unsubscribe at any time.</p>
               <button onClick={close} className="mt-4 text-sm underline hover:text-terra cursor-pointer">No Thanks!</button>
             </div>

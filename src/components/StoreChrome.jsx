@@ -6,6 +6,7 @@ import Header from './Header'
 import HomeScrollReset from './HomeScrollReset'
 import { BackToTop, CartDrawer, EmailPopup, Footer, QuickView } from './Chrome'
 import AdminToaster from './AdminToaster'
+import StoreToaster from './StoreToaster'
 import PageProgress from './PageProgress'
 import HeroImageWarmup from './HeroImageWarmup'
 import HomeHero from './HomeHero'
@@ -43,6 +44,7 @@ export default function StoreChrome({ children, heroSlides = [] }) {
       <QuickView />
       <EmailPopup />
       <BackToTop />
+      <StoreToaster />
     </>
   )
 }
