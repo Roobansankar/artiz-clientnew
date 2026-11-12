@@ -1,14 +1,14 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, ImageIcon, MapPin, Menu, User, X } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { ChevronDown, ImageIcon, Menu, User, X } from 'lucide-react'
 import { CartIcon, HeartIcon, SearchIcon, UserIcon } from './icons'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useStore } from '../store'
-import { ADDRESS, Logo, Socials } from './ui'
+import { ADDRESS, Logo } from './ui'
 import AccountMenu from './AccountMenu'
 import { useCategories } from './useCategories'
 
@@ -19,6 +19,47 @@ const extraLinks = [
   { label: 'Best Sellers', href: '/best-sellers', children: [] },
   { label: 'Gallery', href: '/gallery', children: [] },
 ]
+// Scrolling announcement bar text — edit freely
+const announcements = [
+  `Handcrafted with love in ${ADDRESS}`,
+  'Discover our latest New Arrivals',
+  'Explore the Artiz Best Sellers',
+  'Questions? Reach us anytime from the Contact page',
+]
+
+/* One message at a time, centred: the current one slides up and out, the next slides in */
+function AnnouncementBar() {
+  const [index, setIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const reduceMotion = useReducedMotion()
+
+  useEffect(() => {
+    if (paused) return
+    const id = setInterval(() => setIndex(i => (i + 1) % announcements.length), 3500)
+    return () => clearInterval(id)
+  }, [paused])
+
+  const offset = reduceMotion ? 0 : 18
+  return (
+    <div className="bg-espresso text-[13px] text-white/90" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <div className="container-x relative flex h-[42px] items-center justify-center overflow-hidden" aria-live="polite">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={index}
+            initial={{ y: offset, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -offset, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="truncate text-center tracking-wide"
+          >
+            {announcements[index]}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
 const discoverLinks = [
   { label: 'About Us', href: '/about', children: [] },
   { label: 'Contact Us', href: '/contact', children: [] },
@@ -137,18 +178,7 @@ export default function Header() {
   return (
     <>
       {/* Announcement bar */}
-      <div className="bg-espresso text-[13px] text-white/90">
-        <div className="container-x flex h-[42px] items-center justify-between">
-          <div className="hidden gap-5 md:flex">
-            <Link href="/account?section=orders" className="hover:text-terra">Orders</Link>
-            <Link href="/account" className="hover:text-terra">Profile</Link>
-          </div>
-          <Socials size={14} className="mx-auto md:mx-0" />
-          <p className="hidden items-center gap-1.5 md:flex">
-            <MapPin size={14} className="text-terra" /> {ADDRESS}
-          </p>
-        </div>
-      </div>
+      <AnnouncementBar />
 
       <header className="sticky top-0 z-40 w-full bg-cream shadow-[0_4px_20px_rgba(73,51,39,0.06)]">
         <div className="container-x flex h-[64px] items-center justify-between gap-4">

@@ -10,7 +10,7 @@ export default function HeroImageWarmup({ slides = [] }) {
   const pathname = usePathname()
   useEffect(() => {
     if (pathname === '/') return
-    const source = productImageSource(slides[0]?.image)
+    const source = productImageSource(window.matchMedia('(max-width: 767px)').matches && slides[0]?.mobileImage ? slides[0].mobileImage : slides[0]?.image)
     if (source === productImagePlaceholder || warmedSource === source) return
     // Warm the same responsive image URL used by the homepage, at low priority.
     // This never holds up navigation; immutable images are reused on return.

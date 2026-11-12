@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Autoplay, EffectFade, Navigation, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import Image from './ProductImage'
+import HeroPicture from './HeroPicture'
 import Link from 'next/link'
 
 export default function HomeHero({ slides = [] }) {
@@ -24,15 +24,15 @@ export default function HomeHero({ slides = [] }) {
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={slide.id}>
-            <div className="relative h-[440px] overflow-hidden md:h-[420px] lg:h-[460px] xl:h-[500px]" style={slide.blurDataUrl ? { backgroundImage: `url("${slide.blurDataUrl}")`, backgroundSize: slide.imageFit === 'contain' ? 'contain' : 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined}>
-              <Image src={slide.image} alt={slide.alt || slide.name} fill sizes="100vw" preload={index === 0} placeholder={slide.blurDataUrl ? 'blur' : 'empty'} blurDataURL={slide.blurDataUrl || undefined} className={slide.imageFit === 'contain' ? 'object-contain' : 'object-cover'} />
-              {slide.mode === 'image' ? slide.buttonHref && <Link href={slide.buttonHref} className="absolute inset-0" aria-label={slide.alt || slide.name} /> : <div className={`container-x absolute inset-0 flex items-center ${slide.alignment === 'left' ? 'justify-start' : slide.alignment === 'right' ? 'justify-end' : 'justify-center'}`}>
+            <div className={`hero-slide-frame ${slide.mobileImage && slide.mode === 'text' ? 'hero-mobile-composition' : ''} relative h-[440px] overflow-hidden md:h-[420px] lg:h-[460px] xl:h-[500px]`} style={{ '--hero-preview-desktop': slide.blurDataUrl ? `url("${slide.blurDataUrl}")` : 'none', '--hero-preview-mobile': (slide.mobileBlurDataUrl || slide.blurDataUrl) ? `url("${slide.mobileBlurDataUrl || slide.blurDataUrl}")` : 'none', backgroundSize: slide.imageFit === 'contain' ? 'contain' : 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+              <HeroPicture slide={slide} priority={index === 0} />
+              {slide.mode === 'image' ? slide.buttonHref && <Link href={slide.buttonHref} className="absolute inset-0" aria-label={slide.alt || slide.name} /> : <div className={`hero-copy container-x absolute inset-0 flex items-center ${slide.alignment === 'left' ? 'justify-start' : slide.alignment === 'right' ? 'justify-end' : 'justify-center'}`}>
                 <div className={`max-w-2xl ${slide.alignment === 'left' ? 'text-left' : slide.alignment === 'right' ? 'text-right' : 'text-center'} ${slide.textTone === 'light' ? 'text-white' : 'text-ink'}`}>
-                  <h2 className={`${index ? 'slide-anim d1' : ''} font-heading text-[40px] font-semibold leading-[1.1] md:text-[64px] xl:text-[80px]`}>
+                  <h2 className={`slide-anim d1 font-heading text-[40px] font-semibold leading-[1.1] md:text-[64px] xl:text-[80px]`}>
                     {slide.titleBefore} <span className="text-terra">{slide.titleAccent}</span> {slide.titleAfter}
                   </h2>
-                  {slide.description && <p className={`${index ? 'slide-anim d2' : ''} mt-5 max-w-md text-[16px] md:text-[18px] ${slide.alignment === 'center' ? 'mx-auto' : slide.alignment === 'right' ? 'ml-auto' : ''} ${slide.textTone === 'light' ? 'text-white/90' : 'text-muted'}`}>{slide.description}</p>}
-                  {slide.buttonText && slide.buttonHref && <div className={`${index ? 'slide-anim d3' : ''} mt-8`}><Link href={slide.buttonHref} className={slide.textTone === 'light' ? 'btn-light' : 'btn-dark'}>{slide.buttonText}<ArrowRight size={16} /></Link></div>}
+                  {slide.description && <p className={`slide-anim d2 mt-5 max-w-md text-[16px] md:text-[18px] ${slide.alignment === 'center' ? 'mx-auto' : slide.alignment === 'right' ? 'ml-auto' : ''} ${slide.textTone === 'light' ? 'text-white/90' : 'text-muted'}`}>{slide.description}</p>}
+                  {slide.buttonText && slide.buttonHref && <div className={`hero-action slide-anim d3 mt-8`}><Link href={slide.buttonHref} className={slide.textTone === 'light' ? 'btn-light' : 'btn-dark'}>{slide.buttonText}<ArrowRight size={16} /></Link></div>}
                 </div>
               </div>}
             </div>

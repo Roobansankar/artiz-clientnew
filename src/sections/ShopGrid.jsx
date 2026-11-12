@@ -136,6 +136,7 @@ function Filters({ f, setF, counts, onClose, options, maxPrice, formatMoney, cat
 /* Centered product card used on the collection grid */
 function ShopCard({ p, compareMode, compared, onCompare, formatMoney }) {
   const { addToCart, wishlist, toggleWish, setQuickView } = useStore()
+  const [swatch, setSwatch] = useState(0)
   const wished = wishlist.includes(p.id)
   return (
     <div className="group/card text-center">
@@ -173,6 +174,12 @@ function ShopCard({ p, compareMode, compared, onCompare, formatMoney }) {
         <div className="mt-1.5 flex items-center justify-center gap-2 text-[15px]">
           {p.compare > 0 && <s className="text-muted">{formatMoney(p.compare)}</s>}
           <span className={p.compare ? 'font-semibold text-terra' : 'font-semibold'}>{formatMoney(p.price)}</span>
+        </div>
+        <div className="mt-3 flex justify-center gap-2">
+          {p.colors.map((c, i) => (
+            <button key={c} title={c} onClick={() => setSwatch(i)} aria-label={c}
+              className={`h-4 w-4 rounded-full border transition-all cursor-pointer ${swatch === i ? 'ring-1 ring-ink ring-offset-2' : 'border-sand/15'}`} style={{ background: (SWATCH[c] || c) }} />
+          ))}
         </div>
       </div>
     </div>

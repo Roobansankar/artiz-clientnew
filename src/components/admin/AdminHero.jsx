@@ -12,6 +12,9 @@ export default function AdminHero() {
   const [editor, setEditor] = useState(null)
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState('')
+  const [mobileFile, setMobileFile] = useState(null)
+  const [mobilePreview, setMobilePreview] = useState('')
+  const [previewMode, setPreviewMode] = useState('desktop')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -22,6 +25,12 @@ export default function AdminHero() {
     setPreview(url)
     return () => URL.revokeObjectURL(url)
   }, [file])
+  useEffect(() => {
+    if (!mobileFile) { setMobilePreview(''); return }
+    const url = URL.createObjectURL(mobileFile)
+    setMobilePreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [mobileFile])
   async function api(path = '', options = {}) {
     const response = await fetch(`/api/admin/hero-slides${path}`, { cache: 'no-store', ...options })
     if (response.status === 401) { router.replace('/admin/login'); throw new Error('Please sign in again.') }
@@ -37,7 +46,7 @@ export default function AdminHero() {
     finally { setLoading(false) }
   }
   useEffect(() => { void load() }, [])
-  function edit(slide = blank()) { setEditor(slide); setFile(null); setError(''); setDeleting(null) }
+  function edit(slide = blank()) { setEditor({ ...slide, removeMobileImage: false }); setFile(null); setMobileFile(null); setPreviewMode('desktop'); setError(''); setDeleting(null) }
   function field(key, value) { setEditor(current => ({ ...current, [key]: value })) }
   function changed() {
     // Clear the Next Router Cache so navigation home gets the just-saved slides.
@@ -52,9 +61,10 @@ export default function AdminHero() {
       const body = new FormData()
       body.set('data', JSON.stringify(editor))
       if (file) body.set('image', file)
+      if (mobileFile) body.set('mobileImage', mobileFile)
       const { slide } = await api(editor.id ? `/${editor.id}` : '', { method: editor.id ? 'PATCH' : 'POST', body })
       setSlides(current => [...current.filter(item => item.id !== slide.id), slide].sort((a, b) => a.sortOrder - b.sortOrder))
-      setEditor(null); setFile(null); changed(); toast.success('Home hero saved')
+      setEditor(null); setFile(null); setMobileFile(null); changed(); toast.success('Home hero saved')
     } catch (reason) { setError(reason.message) }
     finally { setBusy(false) }
   }
@@ -69,21 +79,32 @@ export default function AdminHero() {
     ;[ordered[index], ordered[index + offset]] = [ordered[index + offset], ordered[index]]
     void action(async () => setSlides((await api('/order', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: ordered.map(item => item.id) }) })).slides), 'Slide order saved')
   }
-  const selectedImage = preview || editor?.image
+  const desktopImage = preview || editor?.image
+  const mobileImage = mobilePreview || (!editor?.removeMobileImage && editor?.mobileImage) || ''
+  const selectedImage = previewMode === 'mobile' ? mobileImage || desktopImage : desktopImage
+  const isFilePreview = previewMode === 'mobile' && mobileImage ? Boolean(mobilePreview) : Boolean(preview)
   return <section className="ad-hero-manager">
     <div className="ad-page-actions"><div><h2>Home hero</h2><p className="ad-muted">Manage the first banner on your homepage. Use up to 10 slides.</p></div><button type="button" disabled={busy || loading || slides.length >= 10} className="ad-primary" onClick={() => edit()}>Add slide</button></div>
     {error && <div role="alert" className="ad-product-error">{error}{!editor && <button className="ad-secondary" disabled={busy} onClick={load}>Reload slides</button>}</div>}
     {editor && <form className="ad-hero-editor" onSubmit={save}><fieldset disabled={busy}>
-      <div className="ad-page-actions"><h3>{editor.id ? 'Edit slide' : 'New slide'}</h3><button type="button" className="ad-secondary" onClick={() => { setEditor(null); setFile(null); setError('') }}>Cancel</button></div>
+      <div className="ad-page-actions"><h3>{editor.id ? 'Edit slide' : 'New slide'}</h3><button type="button" className="ad-secondary" onClick={() => { setEditor(null); setFile(null); setMobileFile(null); setError('') }}>Cancel</button></div>
       <div className="ad-hero-fields">
         <label className="ad-category-field"><span>Slide name *</span><input required minLength={2} maxLength={100} value={editor.name} onChange={event => field('name', event.target.value)} /></label>
         <label className="ad-category-field"><span>Slide type</span><select aria-label="Slide type" value={editor.mode} onChange={event => field('mode', event.target.value)}><option value="text">Image + text</option><option value="image">Image only</option></select></label>
-        <label className="ad-category-field"><span>Hero image {editor.id ? '(optional replacement)' : '*'}</span><input aria-label="Hero image" type="file" accept="image/jpeg,image/png,image/webp" onChange={event => {
+        <label className="ad-category-field"><span>Desktop hero image {editor.id ? '(optional replacement)' : '*'}</span><input aria-label="Hero image" type="file" accept="image/jpeg,image/png,image/webp" onChange={event => {
           const chosen = event.target.files?.[0]; event.target.value = ''
           if (!chosen) return
           if (chosen.size > 8 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(chosen.type)) { setError('Choose a JPG, PNG or WebP image up to 8 MB.'); return }
           setFile(chosen); setError('')
-        }} /><small className="ad-muted">Wide images work best, around 2400 × 900 pixels. Up to 8 MB.</small></label>
+        }} /><small className="ad-muted">Recommended desktop size: 2400 × 900 pixels. JPG, PNG or WebP, up to 8 MB.</small></label>
+        <div className="ad-category-field"><label><span>Mobile hero image (optional)</span><input aria-label="Mobile hero image" type="file" accept="image/jpeg,image/png,image/webp" onChange={event => {
+          const chosen = event.target.files?.[0]; event.target.value = ''
+          if (!chosen) return
+          if (chosen.size > 8 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(chosen.type)) { setError('Choose a JPG, PNG or WebP mobile image up to 8 MB.'); return }
+          setMobileFile(chosen); field('removeMobileImage', false); setPreviewMode('mobile'); setError('')
+        }} /></label><small className="ad-muted">Recommended mobile size: 900 × 1100 pixels. Used below 768px. Up to 8 MB. Without it, the desktop image is used.</small>
+          {mobileImage && <button type="button" className="ad-secondary" onClick={() => { setMobileFile(null); field('removeMobileImage', true) }}>Remove mobile image</button>}
+        </div>
         <label className="ad-category-field"><span>Image description</span><input maxLength={200} value={editor.alt} onChange={event => field('alt', event.target.value)} placeholder="Describe the image for screen readers" /></label>
         <label className="ad-category-field"><span>Image fit</span><select aria-label="Image fit" value={editor.imageFit} onChange={event => field('imageFit', event.target.value)}><option value="cover">Fill banner (may crop edges)</option><option value="contain">Show full image</option></select></label>
         <label className="ad-category-field"><span>{editor.mode === 'image' ? 'Image link (optional)' : 'Button link'}</span><input maxLength={300} value={editor.buttonHref} onChange={event => field('buttonHref', event.target.value)} placeholder="/shop/furniture" /><small className="ad-muted">Use a page on this site, such as /shop/furniture.</small></label>
@@ -95,15 +116,15 @@ export default function AdminHero() {
         </>}
       </div>
       <label className="ad-hero-active"><input type="checkbox" checked={editor.active} onChange={event => field('active', event.target.checked)} /> Show on homepage</label>
-      {selectedImage && <div className={`ad-hero-preview ad-hero-${editor.alignment} ${editor.textTone === 'light' ? 'ad-hero-light' : ''}`}>
-        <Image src={selectedImage} unoptimized={Boolean(preview)} alt={editor.alt || editor.name} fill sizes="(max-width: 900px) 100vw, 900px" style={{ objectFit: editor.imageFit }} />
+      {selectedImage && <><div className="ad-hero-actions" aria-label="Banner preview size"><button type="button" className="ad-secondary" aria-pressed={previewMode === 'desktop'} onClick={() => setPreviewMode('desktop')}>Desktop preview</button><button type="button" className="ad-secondary" aria-pressed={previewMode === 'mobile'} onClick={() => setPreviewMode('mobile')}>Mobile preview</button></div><div className={`ad-hero-preview ${previewMode === 'mobile' ? 'ad-hero-preview-mobile' : ''} ad-hero-${editor.alignment} ${editor.textTone === 'light' ? 'ad-hero-light' : ''}`}>
+        <Image src={selectedImage} unoptimized={isFilePreview} alt={editor.alt || editor.name} fill sizes="(max-width: 900px) 100vw, 900px" style={{ objectFit: editor.imageFit }} />
         {editor.mode === 'text' && <div className="ad-hero-preview-copy"><h3>{editor.titleBefore} <span>{editor.titleAccent}</span> {editor.titleAfter}</h3><p>{editor.description}</p>{editor.buttonText && editor.buttonHref && <span className="ad-hero-preview-button">{editor.buttonText}</span>}</div>}
-      </div>}
+      </div></>}
       <button type="submit" className="ad-primary">{busy ? 'Saving…' : 'Save slide'}</button>
     </fieldset></form>}
     {loading ? <p role="status" className="ad-empty">Loading hero slides…</p> : !slides.length ? <p className="ad-empty">No hero slides. Add an image or an image with text to get started.</p> : <ul className="ad-hero-list">{slides.map((slide, index) => <li key={slide.id}>
       <div className="ad-hero-thumbnail"><Image src={slide.image} alt={slide.alt || slide.name} fill sizes="240px" style={{ objectFit: slide.imageFit }} /></div>
-      <div className="ad-hero-slide-meta"><strong>{slide.name}</strong><p className="ad-muted">{slide.mode === 'image' ? 'Image only' : 'Image + text'} · {slide.active ? 'Visible' : 'Hidden'}</p><div className="ad-hero-actions">
+      <div className="ad-hero-slide-meta"><strong>{slide.name}</strong><p className="ad-muted">{slide.mode === 'image' ? 'Image only' : 'Image + text'} · {slide.active ? 'Visible' : 'Hidden'} · {slide.mobileImage ? 'Desktop + mobile images' : 'Desktop image on all screens'}</p><div className="ad-hero-actions">
         <button className="ad-secondary" disabled={busy} onClick={() => edit(slide)}>Edit</button>
         <button className="ad-secondary" aria-label={`Move ${slide.name} up`} disabled={busy || index === 0} onClick={() => move(index, -1)}>↑ Move up</button>
         <button className="ad-secondary" aria-label={`Move ${slide.name} down`} disabled={busy || index === slides.length - 1} onClick={() => move(index, 1)}>↓ Move down</button>

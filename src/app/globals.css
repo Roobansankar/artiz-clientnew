@@ -118,6 +118,8 @@
 .terra-scrollbar.swiper-scrollbar:active .swiper-scrollbar-drag { cursor: grabbing; height: 6px; top: -1px; }
 
 /* Ken Burns zoom + staggered fadeInDown on the active hero slide */
+.hero-slide-frame { background-image: var(--hero-preview-desktop, none); }
+@media (max-width: 767px) { .hero-slide-frame { background-image: var(--hero-preview-mobile, var(--hero-preview-desktop, none)); } }
 .hero-swiper .slide-media img { transform: scale(1.05); transition: transform 2.5s; }
 .hero-swiper .swiper-slide-active .slide-media img { transform: scale(1); }
 .hero-swiper .slide-anim { opacity: 0; }
@@ -139,3 +141,12 @@
 /* Swiper's accent colour (pagination, nav) → brand terracotta */
 :root { --swiper-theme-color: #be6b4a; }
 .latest-dots .swiper-pagination-bullet-active { background: var(--color-terra); }
+
+/* Portrait artwork reserves the upper wall for copy and the lower area for furniture. */
+@media (max-width: 767px) {
+  .hero-mobile-composition { height: auto; aspect-ratio: 9 / 11; }
+  .hero-mobile-composition .hero-copy { align-items: center; padding-top: 0; }
+  .hero-mobile-composition .hero-copy p { margin-top: 12px; }
+  .hero-mobile-composition .hero-action { margin-top: 16px; }
+  .hero-mobile-composition .hero-action a { min-height: 44px; padding: 12px 24px; }
+}

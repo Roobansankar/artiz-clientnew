@@ -214,8 +214,8 @@ export function BeforeAfter() {
           >
             <img src="/images/banner19.png" alt="After" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
             <img src="/images/banner20.png" alt="Before" className="absolute inset-0 h-full w-full object-cover" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }} draggable={false} />
-            <div className="absolute left-5 top-5 rounded-full bg-white/90 px-4 py-2 text-sm"><b>Before</b> · The noisy world</div>
-            <div className="absolute right-5 top-5 rounded-full bg-white/90 px-4 py-2 text-sm"><b>After</b> · Pure focus</div>
+            <div className="absolute left-3 top-3 max-w-[45%] truncate rounded-full bg-white/90 px-3 py-2 text-xs sm:left-5 sm:top-5 sm:px-4 sm:text-sm"><b>Before</b><span className="hidden sm:inline"> · The noisy world</span></div>
+            <div className="absolute right-3 top-3 max-w-[45%] truncate rounded-full bg-white/90 px-3 py-2 text-xs sm:right-5 sm:top-5 sm:px-4 sm:text-sm"><b>After</b><span className="hidden sm:inline"> · Pure focus</span></div>
             <div className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-white" style={{ left: `${pos}%` }}>
               <div className="absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-espresso shadow-lg">
                 <ChevronsLeftRight size={20} />
