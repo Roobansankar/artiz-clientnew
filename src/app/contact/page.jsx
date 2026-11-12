@@ -1,8 +1,8 @@
-import { ArrowUpRight, MapPin, MessageCircle, PencilRuler } from 'lucide-react'
+import { ArrowUpRight, Clock, MapPin, MessageCircle, PencilRuler, Phone } from 'lucide-react'
 import Link from 'next/link'
 import ContactForm from '../../components/ContactForm'
 import { Reveal } from '../../components/ui'
-import { ADDRESS } from '../../site'
+import { ADDRESS, HOURS, PHONE, PHONE_LINK } from '../../site'
 
 export const metadata = {
   title: 'Contact Us | Artiz',
@@ -34,7 +34,15 @@ export default function ContactPage() {
             <div className="mt-8 divide-y divide-sand border-y border-sand">
               <div className="flex gap-4 py-6">
                 <MapPin size={21} strokeWidth={1.5} className="mt-0.5 shrink-0 text-terra" aria-hidden="true" />
-                <div><h3 className="text-sm font-semibold">Find Artiz</h3><p className="mt-2 text-sm text-muted">{ADDRESS}</p><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-xs font-medium hover:text-terra">View location <ArrowUpRight size={14} aria-hidden="true" /></a></div>
+                <div><h3 className="text-sm font-semibold">Find Artiz</h3><p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">{ADDRESS}</p><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-xs font-medium hover:text-terra">View location <ArrowUpRight size={14} aria-hidden="true" /></a></div>
+              </div>
+              <div className="flex gap-4 py-6">
+                <Phone size={21} strokeWidth={1.5} className="mt-0.5 shrink-0 text-terra" aria-hidden="true" />
+                <div><h3 className="text-sm font-semibold">Call us</h3><a href={PHONE_LINK} className="mt-2 inline-block text-sm text-muted transition-colors hover:text-terra">{PHONE}</a></div>
+              </div>
+              <div className="flex gap-4 py-6">
+                <Clock size={21} strokeWidth={1.5} className="mt-0.5 shrink-0 text-terra" aria-hidden="true" />
+                <div><h3 className="text-sm font-semibold">Hours</h3><p className="mt-2 text-sm text-muted">{HOURS}</p></div>
               </div>
               <div className="flex gap-4 py-6">
                 <MessageCircle size={21} strokeWidth={1.5} className="mt-0.5 shrink-0 text-terra" aria-hidden="true" />

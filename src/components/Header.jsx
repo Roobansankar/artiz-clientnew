@@ -8,7 +8,8 @@ import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useStore } from '../store'
-import { ADDRESS, Logo } from './ui'
+import { Logo } from './ui'
+import { CITY } from '../site'
 import AccountMenu from './AccountMenu'
 import { useCategories } from './useCategories'
 
@@ -21,7 +22,7 @@ const extraLinks = [
 ]
 // Scrolling announcement bar text — edit freely
 const announcements = [
-  `Handcrafted with love in ${ADDRESS}`,
+  `Handcrafted with love in ${CITY}`,
   'Discover our latest New Arrivals',
   'Explore the Artiz Best Sellers',
   'Questions? Reach us anytime from the Contact page',

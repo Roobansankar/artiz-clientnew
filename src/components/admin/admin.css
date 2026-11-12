@@ -1069,3 +1069,37 @@
 .ad-login-brand .ad-logo-image { height: 40px; }
 .ad-team .ad-logo-image { height: 42px; }
 .ad-collapsed .ad-team .ad-logo-image { height: 34px; }
+
+
+/* Order delivery tracker + WhatsApp log */
+.ad-order-page-layout > .ad-delivery-card { grid-column: 1; }
+.ad-delivery-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.ad-delivery-head h3 { margin: 0; }
+.ad-delivery-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 20px; padding: 0; list-style: none; }
+.ad-delivery-steps li { position: relative; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ad-delivery-steps li:not(:last-child)::after { content: ''; position: absolute; top: 14px; left: 34px; right: -4px; height: 2px; background: var(--ad-line); }
+.ad-delivery-steps li.done:not(:last-child)::after { background: var(--ad-accent); }
+.ad-delivery-dot { position: relative; z-index: 1; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--ad-line); background: var(--ad-surface); color: var(--ad-muted); font-size: 12px; font-weight: 600; }
+.ad-delivery-steps li.done .ad-delivery-dot { border-color: var(--ad-accent); background: var(--ad-accent); color: #fff; }
+.ad-delivery-steps strong { display: block; font-size: 13px; font-weight: 600; }
+.ad-delivery-steps small { display: block; font-size: 11px; }
+.ad-delivery-complete { margin: 0; color: var(--ad-accent); font-weight: 500; font-size: 13px; }
+.ad-delivery-log-title { margin: 24px 0 10px; font-size: 13px; font-weight: 600; }
+.ad-delivery-log { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--ad-line); border-radius: 8px; }
+.ad-delivery-log li { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--ad-line); }
+.ad-delivery-log li:first-child { border-top: 0; }
+.ad-delivery-log li > div { flex: 1; min-width: 0; }
+.ad-delivery-log strong { display: block; font-size: 13px; font-weight: 500; }
+.ad-delivery-log small { display: block; font-size: 11px; }
+.ad-delivery-error { color: #dc2626; overflow-wrap: anywhere; }
+.ad-dark .ad-delivery-error { color: #f87171; }
+@media (max-width: 640px) {
+  .ad-delivery-steps { grid-template-columns: 1fr 1fr; row-gap: 16px; }
+  .ad-delivery-steps li::after { display: none; }
+  .ad-delivery-log li { flex-wrap: wrap; }
+}
+@media (min-width: 1101px) {
+  .ad-order-page-layout { grid-template-rows: auto 1fr; }
+  .ad-order-page-layout > .ad-order-page-sidebar { grid-column: 2; grid-row: 1 / span 2; }
+  .ad-order-page-layout > .ad-delivery-card { align-self: start; }
+}
