@@ -9,7 +9,31 @@ import { money } from '../data'
 import { useStore } from '../store'
 import { ADDRESS, Logo, Price, Socials } from './ui'
 
+// Shared by the footer form and the sign-up popup; posts to the server, which stores the address.
+function useNewsletter(source) {
+  const [email, setEmail] = useState('')
+  const [state, setState] = useState({ status: 'idle', message: '' })
+  async function submit(event) {
+    event.preventDefault()
+    if (state.status === 'saving') return false
+    setState({ status: 'saving', message: '' })
+    try {
+      const response = await fetch('/api/newsletter', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, source }) })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.message || 'Could not subscribe. Please try again.')
+      setEmail('')
+      setState({ status: 'done', message: data.message || 'Thank you for subscribing!' })
+      return true
+    } catch (error) {
+      setState({ status: 'error', message: error.message || 'Could not subscribe. Please try again.' })
+      return false
+    }
+  }
+  return { email, setEmail, state, submit }
+}
+
 export function Footer() {
+  const newsletter = useNewsletter('footer')
   const cols = [
     { title: 'Quick Links', links: [{ label: 'FAQ', href: '/faq' }, { label: 'Find store location', href: '#' }, { label: 'Privacy Policy', href: '#' }, { label: 'Refund Policy', href: '#' }, { label: 'Terms of Service', href: '#' }] },
     { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '/account?section=wishlist' }, { label: 'My account', href: '/account' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
@@ -38,10 +62,11 @@ export function Footer() {
         <div>
           <h4 className="mb-5 text-lg text-white">Newsletter</h4>
           <p>Be first to know about new arrivals and offers.</p>
-          <form className="mt-5 flex rounded-full border border-white/20 p-1.5 focus-within:border-terra" onSubmit={(e) => e.preventDefault()}>
-            <input type="email" required placeholder="Your email address" className="min-w-0 flex-1 bg-transparent px-4 text-white outline-none placeholder:text-white/50" />
-            <button className="rounded-full bg-terra px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white hover:text-espresso cursor-pointer">Subscribe</button>
+          <form className="mt-5 flex rounded-full border border-white/20 p-1.5 focus-within:border-terra" onSubmit={newsletter.submit}>
+            <input type="email" required maxLength={254} value={newsletter.email} onChange={(e) => newsletter.setEmail(e.target.value)} aria-label="Email address" placeholder="Your email address" className="min-w-0 flex-1 bg-transparent px-4 text-white outline-none placeholder:text-white/50" />
+            <button disabled={newsletter.state.status === 'saving'} className="rounded-full bg-terra px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white hover:text-espresso cursor-pointer disabled:cursor-wait disabled:opacity-70">{newsletter.state.status === 'saving' ? 'Subscribing…' : 'Subscribe'}</button>
           </form>
+          {newsletter.state.message && <p role="status" className={`mt-3 text-sm ${newsletter.state.status === 'error' ? 'text-[#f3a589]' : 'text-white'}`}>{newsletter.state.message}</p>}
         </div>
       </div>
       <div className="container-x mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm md:flex-row">
@@ -163,6 +188,7 @@ function QuickViewBody({ p, close }) {
 
 export function EmailPopup() {
   const [open, setOpen] = useState(false)
+  const newsletter = useNewsletter('popup')
   useEffect(() => {
     let seen = false
     try { seen = localStorage.getItem('artiz-popup') === '1' } catch { /* storage unavailable */ }
@@ -184,10 +210,11 @@ export function EmailPopup() {
               <button onClick={close} className="absolute right-4 top-4 cursor-pointer" aria-label="Close"><X /></button>
               <h3 className="text-3xl">Exclusive benefits</h3>
               <p className="mt-3 text-muted">Sign up for our newsletter to be the first to learn about new arrivals, special promotions, and online exclusives.</p>
-              <form className="mt-6 space-y-3" onSubmit={(e) => { e.preventDefault(); close() }}>
-                <input type="email" required placeholder="Email address" className="h-12 w-full rounded-full border border-sand bg-white px-5 outline-none focus:border-terra" />
-                <button className="btn-dark w-full">Subscribe</button>
+              <form className="mt-6 space-y-3" onSubmit={async (e) => { if (await newsletter.submit(e)) setTimeout(close, 1800) }}>
+                <input type="email" required maxLength={254} value={newsletter.email} onChange={(e) => newsletter.setEmail(e.target.value)} aria-label="Email address" placeholder="Email address" className="h-12 w-full rounded-full border border-sand bg-white px-5 outline-none focus:border-terra" />
+                <button disabled={newsletter.state.status === 'saving' || newsletter.state.status === 'done'} className="btn-dark w-full disabled:opacity-70">{newsletter.state.status === 'saving' ? 'Subscribing…' : newsletter.state.status === 'done' ? 'Subscribed' : 'Subscribe'}</button>
               </form>
+              {newsletter.state.message && <p role="status" className={`mt-3 text-sm ${newsletter.state.status === 'error' ? 'text-terra' : 'text-[#527254]'}`}>{newsletter.state.message}</p>}
               <p className="mt-3 text-xs text-muted">*By submitting this form, you agree to receive our emails and may unsubscribe at any time.</p>
               <button onClick={close} className="mt-4 text-sm underline hover:text-terra cursor-pointer">No Thanks!</button>
             </div>
@@ -214,7 +241,7 @@ export function BackToTop() {
           exit={{ opacity: 0, y: 20 }}
           onClick={() => window.scrollTo({ top: 0 })}
           aria-label="Back to top"
-          className="fixed bottom-5 right-5 z-50 grid h-12 w-12 place-items-center rounded-full bg-terra text-white shadow-lg transition-colors hover:bg-espresso md:bottom-8 cursor-pointer"
+          className="fixed bottom-[84px] right-5 z-50 grid h-12 w-12 place-items-center rounded-full bg-terra text-white shadow-lg transition-colors hover:bg-espresso md:bottom-8 cursor-pointer"
         >
           <ArrowUp size={20} />
         </motion.button>

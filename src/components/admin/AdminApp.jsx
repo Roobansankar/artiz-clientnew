@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import AdminOrders from './AdminOrders';
 import AdminOrderDetail from './AdminOrderDetail';
 import AdminCustomers from './AdminCustomers';
+import AdminNewsletter from './AdminNewsletter';
 import AdminProducts from './AdminProducts';
 import AdminBulkUpload from './AdminBulkUpload';
 import AdminGallery from './AdminGallery';
@@ -18,6 +19,7 @@ import AdminLoginForm from './AdminLoginForm';
 import { startPageProgress } from '@/components/PageProgress';
 const paths = {
     home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 21v-8h6v8"/></>,
+    mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></>,
     users: <><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v3"/></>,
     settings: <><path d="m10 3-1 3-3 1-3 1 1 4-1 4 3 1 3 1 1 3h4l1-3 3-1 3-1-1-4 1-4-3-1-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></>,
     search: <><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></>,
@@ -48,7 +50,7 @@ const nav = [
     { label: 'Home', path: '/admin', icon: 'home' },
     { label: 'Home Hero', path: '/admin/home-hero', icon: 'image' },
     { label: 'Contact Messages', path: '/admin/contact-messages', icon: 'message' },
-    { label: 'Customers', path: '/admin/customers', icon: 'users' }, { label: 'Orders', path: '/admin/orders', icon: 'cart' },
+    { label: 'Customers', path: '/admin/customers', icon: 'users' }, { label: 'Newsletter', path: '/admin/newsletter', icon: 'mail' }, { label: 'Orders', path: '/admin/orders', icon: 'cart' },
     { label: 'Products', path: '/admin/products', icon: 'box' }, { label: 'Bulk Upload', path: '/admin/products/bulk', icon: 'download' }, { label: 'Gallery', path: '/admin/gallery', icon: 'image' }, { label: 'Analytics', path: '/admin/analytics', icon: 'chart' },
 ];
 const settingLinks = ['General', 'Members', 'Notifications', 'Security'];
@@ -137,9 +139,9 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
     const chooseColor = (value) => { setAccent(value); localStorage.setItem('artiz-admin-accent', value); };
     const appearance = <div className="ad-appearance"><button className="ad-icon-button" aria-label="Choose theme color" aria-expanded={themeOpen} onClick={() => setThemeOpen(!themeOpen)}><Icon name="palette"/></button><button className="ad-icon-button" aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} onClick={() => chooseMode(!dark)}><Icon name={dark ? 'sun' : 'moon'}/></button>{themeOpen && <div className="ad-theme-popover"><strong>Theme color</strong><p>Customize your workspace.</p><div className="ad-color-options">{colors.map(c => <button key={c.name} onClick={() => chooseColor(c.value)} aria-pressed={accent === c.value} className={accent === c.value ? 'selected' : ''}><i style={{ background: c.value }}/>{c.name}{accent === c.value && <Icon name="check" size={13}/>}</button>)}</div></div>}</div>;
     return <div className={`ad-root ${dark ? 'ad-dark' : ''} ${collapsed ? 'ad-collapsed' : ''}`} style={{ '--ad-accent': accent }}>
-    {isLogin ? <main className="ad-login"><Link href="/" className="ad-login-brand"><span className="ad-logo">A</span>Artiz <span>Admin</span></Link><div className="ad-login-tools">{appearance}</div><section className="ad-login-card"><div className="ad-login-symbol"><Icon name="lock" size={25}/></div><h1>Log in to your account</h1><p>Welcome back! Enter your details to continue.</p><AdminLoginForm onAuthenticated={onAuthenticated}/><div className="ad-login-divider"><span>Admin access</span></div><p className="ad-login-demo">Sign in with your Artiz administrator account.</p><Link href="/" className="ad-back">← Back to Artiz storefront</Link></section><footer className="ad-login-footer">© 2026 Artiz. All rights reserved.</footer></main> : <>
+    {isLogin ? <main className="ad-login"><Link href="/" className="ad-login-brand"><img className="ad-logo-image" src="/images/logo.png" alt="" width={34} height={31}/>Artiz <span>Admin</span></Link><div className="ad-login-tools">{appearance}</div><section className="ad-login-card"><div className="ad-login-symbol"><Icon name="lock" size={25}/></div><h1>Log in to your account</h1><p>Welcome back! Enter your details to continue.</p><AdminLoginForm onAuthenticated={onAuthenticated}/><div className="ad-login-divider"><span>Admin access</span></div><p className="ad-login-demo">Sign in with your Artiz administrator account.</p><Link href="/" className="ad-back">← Back to Artiz storefront</Link></section><footer className="ad-login-footer">© 2026 Artiz. All rights reserved.</footer></main> : <>
       {menu && <button className="ad-overlay" aria-label="Close navigation" onClick={() => setMenu(false)}/>}
-      <aside className={`ad-sidebar ${menu ? 'open' : ''}`}><Link href="/admin" className="ad-team"><span className="ad-logo">A</span><strong className="ad-sidebar-text">Artiz</strong><span className="ad-team-tag ad-sidebar-text">Workspace</span><span className="ad-sidebar-text ad-team-chevron"><Icon name="chevron" size={15}/></span></Link><div className="ad-sidebar-body"><button className="ad-sidebar-search" onClick={() => setSearchOpen(true)} title="Search navigation"><Icon name="search" size={17}/><span className="ad-sidebar-text">Search...</span><kbd className="ad-sidebar-text">Ctrl K</kbd></button><nav aria-label="Admin navigation">{nav.map(n => <Link key={n.path} href={n.path} title={n.label} className={section === n.label ? 'active' : ''}><Icon name={n.icon}/><span className="ad-sidebar-text">{n.label}</span>{n.badge && <span className="ad-count ad-sidebar-text">{n.badge}</span>}</Link>)}<button type="button" title="Settings" className={`ad-settings-trigger ${isSettings ? 'active' : ''}`} aria-expanded={settingsOpen} aria-controls="ad-settings-submenu" onClick={() => { if (collapsed) {
+      <aside className={`ad-sidebar ${menu ? 'open' : ''}`}><Link href="/admin" className="ad-team"><img className="ad-logo-image" src="/images/logo.png" alt="" width={34} height={31}/><strong className="ad-sidebar-text">Artiz</strong><span className="ad-team-tag ad-sidebar-text">Workspace</span><span className="ad-sidebar-text ad-team-chevron"><Icon name="chevron" size={15}/></span></Link><div className="ad-sidebar-body"><button className="ad-sidebar-search" onClick={() => setSearchOpen(true)} title="Search navigation"><Icon name="search" size={17}/><span className="ad-sidebar-text">Search...</span><kbd className="ad-sidebar-text">Ctrl K</kbd></button><nav aria-label="Admin navigation">{nav.map(n => <Link key={n.path} href={n.path} title={n.label} className={section === n.label ? 'active' : ''}><Icon name={n.icon}/><span className="ad-sidebar-text">{n.label}</span>{n.badge && <span className="ad-count ad-sidebar-text">{n.badge}</span>}</Link>)}<button type="button" title="Settings" className={`ad-settings-trigger ${isSettings ? 'active' : ''}`} aria-expanded={settingsOpen} aria-controls="ad-settings-submenu" onClick={() => { if (collapsed) {
             setCollapsed(false);
             setSettingsOpen(true);
         }
@@ -160,6 +162,7 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
       {section === 'Contact Messages' && <ContactMessages />}
       {section === 'Orders' && (pathname.startsWith('/admin/orders/') ? <AdminOrderDetail id={pathname.split('/')[3]} /> : <AdminOrders notify={setNotice}/>)}
       {section === 'Customers' && <AdminCustomers />}
+      {section === 'Newsletter' && <AdminNewsletter notify={setNotice} />}
       {section === 'Bulk Upload' && <AdminBulkUpload notify={setNotice} />}
       {section === 'Products' && <AdminProducts />}
       {section === 'Gallery' && <AdminGallery />}

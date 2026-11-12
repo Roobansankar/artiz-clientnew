@@ -210,7 +210,7 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <button onClick={() => setSearchOpen(true)} aria-label="Search" className="hover:text-terra cursor-pointer"><SearchIcon size={22} /></button>
+            <button onClick={() => setSearchOpen(true)} aria-label="Search" className="hidden hover:text-terra cursor-pointer md:block"><SearchIcon size={22} /></button>
             <AccountMenu />
             <Link href="/account?section=wishlist" aria-label="Wishlist" className="relative hidden hover:text-terra sm:block">
               <HeartIcon size={24} />
@@ -223,6 +223,17 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {/* Mobile: fixed search button (replaces the header search icon) */}
+      {!searchOpen && !mobile && (
+        <button
+          onClick={() => setSearchOpen(true)}
+          aria-label="Search products"
+          className="fixed bottom-5 right-5 z-50 grid h-12 w-12 cursor-pointer place-items-center rounded-full bg-espresso text-white shadow-lg transition-colors hover:bg-terra md:hidden"
+        >
+          <SearchIcon size={20} />
+        </button>
+      )}
 
       {/* Search overlay */}
       <AnimatePresence>

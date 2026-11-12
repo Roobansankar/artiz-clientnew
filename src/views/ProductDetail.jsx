@@ -126,7 +126,7 @@ export default function ProductDetail({ product, category, related }) {
                 <span className={`text-2xl font-semibold md:text-[28px] ${discount ? 'text-terra' : 'text-ink'}`}>{formatPrice(option.price)}</span>
                 {discount > 0 && <><s className="text-lg text-muted">{formatPrice(option.mrp)}</s><span className="rounded-full bg-peach px-3 py-1 text-xs font-medium text-terra">{discount}% off</span></>}
               </div>
-              <p className={`mt-4 flex items-center gap-2 text-sm ${option.stock > 0 ? 'text-[#527254]' : 'text-muted'}`} aria-live="polite"><span className={`h-2 w-2 rounded-full ${option.stock > 0 ? 'bg-[#527254]' : 'bg-muted'}`} />{option.stock > 0 ? `${option.stock} in stock` : 'Currently out of stock'}</p>
+              {option.stock <= 0 && <p className="mt-4 flex items-center gap-2 text-sm text-muted" aria-live="polite"><span className="h-2 w-2 rounded-full bg-muted" />Currently out of stock</p>}
               {product.description?.trim() && <p className="mt-5 whitespace-pre-line text-[15px] leading-relaxed text-muted">{product.description}</p>}
 
               {attributes.map(attribute => attribute.key === 'color'

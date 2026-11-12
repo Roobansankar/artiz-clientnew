@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { ArrowRight, ArrowUpRight, Eye, Heart, Shuffle } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { formatPrice } from '../catalog'
@@ -13,12 +14,14 @@ export { ADDRESS }
 export function Logo({ light = false, className = '' }) {
   return (
     <Link href="/" className={`inline-flex shrink-0 items-center ${className}`} aria-label="Artiz Interior Design Studio">
-      <img
-        src="/images/artiz-logo.png"
+      <Image
+        src="/images/logo.png"
         alt="Artiz Interior Design Studio"
-        width={1200}
-        height={368}
-        className={`h-9 w-auto md:h-10 ${light ? 'brightness-0 invert' : ''}`}
+        width={1313}
+        height={1198}
+        priority={!light}
+        sizes={light ? '112px' : '64px'}
+        className={light ? 'h-24 w-auto md:h-28' : 'h-[52px] w-auto md:h-[56px]'}
       />
     </Link>
   )

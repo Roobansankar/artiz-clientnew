@@ -95,3 +95,11 @@ export const promos = [
 ]
 
 export const tabs = ['All', 'Seating', 'Sofas', 'Tables', 'Storage', 'Lighting', 'Outdoor']
+
+// PLACEHOLDER reviews for layout only — replace with real customer reviews (with their permission) before going live.
+export const reviews = [
+  { name: 'Priya Ramesh', place: 'Chennai, Tamil Nadu', project: 'Living room makeover', rating: 5, img: img('banner8.png'), text: 'Replace this with a real customer quote about their living room project, the team, and how the space feels now.' },
+  { name: 'Karthik Subramanian', place: 'Coimbatore, Tamil Nadu', project: 'Bedroom interior', rating: 5, img: img('banner9.png'), text: 'Replace this with a real customer quote about the design process, the quality of the furniture, and the final result.' },
+  { name: 'Lakshmi Narayanan', place: 'Madurai, Tamil Nadu', project: 'Dining & kitchen', rating: 5, img: img('banner10.png'), text: 'Replace this with a real customer quote about delivery, installation, and how the studio handled their requirements.' },
+  { name: 'Arun Kumar', place: 'Tiruchirappalli, Tamil Nadu', project: 'Full home interior', rating: 4, img: img('banner19.png'), text: 'Replace this with a real customer quote describing their full-home project from first consultation to handover.' },
+]

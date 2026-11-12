@@ -18,7 +18,7 @@ export function CuratedCollections() {
   return (
     <section className="section-py">
       <div className="container-x">
-        <SectionHeading sub="Curated for you" title="Smart Living Solutions" right={<RailArrows prev={prev} next={next} state={state} />} />
+        <SectionHeading sub="Curated for you" title="Smart Living Solutions" right={<div className="hidden md:block"><RailArrows prev={prev} next={next} state={state} /></div>} />
         {error && <button onClick={refresh} className="btn-outline mb-6">Retry loading categories</button>}
         <Reveal>
           <Rail rail={rail}>
