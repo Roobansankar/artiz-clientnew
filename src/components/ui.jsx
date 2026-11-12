@@ -20,8 +20,8 @@ export function Logo({ light = false, className = '' }) {
         width={1313}
         height={1198}
         priority={!light}
-        sizes={light ? '112px' : '64px'}
-        className={light ? 'h-24 w-auto md:h-28' : 'h-[44px] w-auto md:h-[56px]'}
+        sizes={light ? '88px' : '64px'}
+        className={light ? 'h-16 w-auto md:h-20' : 'h-[44px] w-auto md:h-[56px]'}
       />
     </Link>
   )
