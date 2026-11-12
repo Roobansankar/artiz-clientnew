@@ -38,14 +38,14 @@ export function FeaturedCollection({ products: curatedProducts = [] }) {
                 const option = productOption(product)
                 return <SwiperSlide key={product.id}>
                   <article className="group/curated relative">
-                    <Link href={href} className="relative block aspect-square overflow-hidden rounded-2xl bg-white">
+                    <Link href={href} className="relative block aspect-square shrink-0 overflow-hidden rounded-2xl bg-white">
                       <Image fill sizes="(max-width: 639px) 80vw, (max-width: 1023px) 45vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover/curated:scale-105 ${product.images?.[1] ? 'group-hover/curated:opacity-0 group-focus-within/curated:opacity-0' : ''}`} />
                       {product.images?.[1] && <Image fill sizes="(max-width: 639px) 80vw, (max-width: 1023px) 45vw, 25vw" src={product.images[1]} alt="" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover/curated:scale-105 group-hover/curated:opacity-100 group-focus-within/curated:opacity-100" />}
                     </Link>
                     <button type="button" onClick={() => toggleWish(product.id)} aria-label={`${wished ? 'Remove' : 'Save'} ${product.name} ${wished ? 'from' : 'to'} wishlist`} aria-pressed={wished} className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white opacity-0 transition-opacity group-hover/curated:opacity-100 focus:opacity-100"><Heart size={18} className={wished ? 'fill-terra text-terra' : ''} /></button>
                     <Link href={href} className="mt-4 block font-heading text-base font-medium hover:text-terra">{product.name}</Link>
                     <div className="mt-2 text-sm"><ProductPrice product={product} /></div>
-                    <button type="button" disabled={option.stock <= 0} onClick={() => addToCart(shopProduct(product, []))} className="btn-dark mt-4 w-full disabled:cursor-not-allowed disabled:opacity-50">{option.stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
+                    <button type="button" disabled={option.stock <= 0} onClick={() => addToCart(shopProduct(product, []))} className="btn-dark mt-auto w-full disabled:cursor-not-allowed disabled:opacity-50">{option.stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
                   </article>
                 </SwiperSlide>
               })}
@@ -193,11 +193,11 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
   const need = Math.max(0, 2 - chosen.length)
   const toggle = id => setPicked(current => current.includes(id) ? current.filter(value => value !== id) : [...current, id])
   return (
-    <section className="section-py bg-white" aria-label="Featured collection">
+    <section className="section-py featured-bundle bg-white" aria-label="Featured collection">
       <div className="container-x">
         <SectionHeading sub="Featured collection" title="Styled by Artiz" right={<ViewAll variant="button" href="/shop/furniture" />} />
         <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-6 md:grid-cols-4 md:gap-6">
           {items.map((product, index) => {
             const href = `/products/${product.slug || product.id}`
             const wished = wishlist.includes(product.id)
@@ -205,16 +205,16 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
             const option = productOption(product)
             return (
               <Reveal key={product.id} delay={index * 0.08} className="h-full">
-                <div className={`group/featured relative flex h-full flex-col rounded-2xl border-2 p-3 transition-colors ${selected ? 'border-terra' : 'border-transparent'}`}>
+                <div className={`group/featured relative flex h-full flex-col rounded-2xl border-2 p-0 transition-colors md:p-3 ${selected ? 'border-terra' : 'border-transparent'}`}>
                   <Link href={href} className="group block overflow-hidden rounded-xl bg-cream">
-                    <Image width={600} height={600} sizes="(max-width: 767px) 50vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <Image width={600} height={600} sizes="(max-width: 767px) 50vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105 md:aspect-square" />
                   </Link>
                   <button type="button" onClick={() => toggleWish(product.id)} aria-label={`Save ${product.name} to wishlist`} aria-pressed={wished} className="pointer-events-none absolute right-5 top-5 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-0 transition-opacity duration-200 hover:bg-peach group-hover/featured:pointer-events-auto group-hover/featured:opacity-100 focus:pointer-events-auto focus:opacity-100 group-focus-within/featured:pointer-events-auto group-focus-within/featured:opacity-100">
                     <Heart size={18} className={wished ? 'fill-terra text-terra' : ''} />
                   </button>
-                  <Link href={href} className="mt-4 block min-h-12 font-heading text-base font-medium leading-6 hover:text-terra">{product.name}</Link>
-                  <div className="mt-2 min-h-6 text-sm"><ProductPrice product={product} option={option} /></div>
-                  <button type="button" disabled={option.stock <= 0} aria-pressed={selected} onClick={() => toggle(product.id)} className={`mt-auto w-full cursor-pointer rounded-full py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'bg-terra text-white' : 'border border-ink hover:bg-ink hover:text-white'}`}>
+                  <Link href={href} className="mt-4 block font-heading text-base font-medium leading-6 hover:text-terra">{product.name}</Link>
+                  <div className="mt-1 text-sm"><ProductPrice product={product} option={option} /></div>
+                  <button type="button" disabled={option.stock <= 0} aria-pressed={selected} onClick={() => toggle(product.id)} className={`mt-3 w-full cursor-pointer rounded-full py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'bg-terra text-white' : 'border border-ink hover:bg-ink hover:text-white'}`}>
                     {option.stock <= 0 ? 'Out of stock' : selected ? 'Selected' : 'Select Option'}
                   </button>
                 </div>
@@ -285,17 +285,17 @@ export function TabbedCollection({ products: catalogProducts = [], categories = 
         <motion.div layout className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
           <AnimatePresence mode="popLayout">
             {list.map((p, i) => (
-              <motion.div key={p.id} layout initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }} exit={{ opacity: 0, scale: 0.95 }}>
-                <article className="group/collection relative">
-                  <Link href={`/products/${p.slug || p.id}`} className="relative block aspect-square overflow-hidden rounded-2xl bg-white">
+              <motion.div key={p.id} layout initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }} exit={{ opacity: 0, scale: 0.95 }} className="h-full">
+                <article className="group/collection relative flex h-full flex-col">
+                  <Link href={`/products/${p.slug || p.id}`} className="relative block aspect-square shrink-0 overflow-hidden rounded-2xl bg-white">
                     <Image src={p.images?.[0] || p.image || '/images/categories/decor.jpg'} alt={p.name} fill sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className={`object-cover transition-all duration-500 group-hover/collection:scale-105 ${p.images?.[1] ? 'group-hover/collection:opacity-0' : ''}`} />
                     {p.images?.[1] && <Image src={p.images[1]} alt="" fill sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover opacity-0 transition-all duration-500 group-hover/collection:opacity-100" />}
                   </Link>
                   <button type="button" onClick={() => toggleWish(p.id)} aria-label={`${wishlist.includes(p.id) ? 'Remove' : 'Save'} ${p.name} ${wishlist.includes(p.id) ? 'from' : 'to'} wishlist`} aria-pressed={wishlist.includes(p.id)} className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white"><Heart size={18} className={wishlist.includes(p.id) ? 'fill-terra text-terra' : ''} /></button>
-                  <p className="mt-4 text-xs uppercase tracking-wider text-muted">{categories.find(category => category.slug === p.categorySlug)?.name || 'Furniture'}</p>
-                  <Link href={`/products/${p.slug || p.id}`} className="mt-1 block font-heading text-base font-medium hover:text-terra">{p.name}</Link>
-                  <div className="mt-2 text-sm"><ProductPrice product={p} /></div>
-                  <button type="button" disabled={productOption(p).stock <= 0} onClick={() => addToCart(shopProduct(p, categories))} className="btn-dark mt-4 w-full disabled:cursor-not-allowed disabled:opacity-50">{productOption(p).stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
+                  <p className="mt-4 truncate text-xs uppercase tracking-wider text-muted">{categories.find(category => category.slug === p.categorySlug)?.name || 'Furniture'}</p>
+                  <Link href={`/products/${p.slug || p.id}`} className="mt-1 block line-clamp-2 font-heading text-base font-medium leading-6 hover:text-terra">{p.name}</Link>
+                  <div className="mt-1 mb-4 text-sm"><ProductPrice product={p} showFrom={false} /></div>
+                  <button type="button" disabled={productOption(p).stock <= 0} onClick={() => addToCart(shopProduct(p, categories))} className="btn-dark mt-auto w-full disabled:cursor-not-allowed disabled:opacity-50">{productOption(p).stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
                 </article>
               </motion.div>
             ))}

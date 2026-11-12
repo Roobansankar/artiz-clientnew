@@ -150,3 +150,7 @@
   .hero-mobile-composition .hero-action { margin-top: 16px; }
   .hero-mobile-composition .hero-action a { min-height: 44px; padding: 12px 24px; }
 }
+
+@media (max-width: 767px) {
+  .featured-bundle > .container-x > :first-child { margin-bottom: 24px; }
+}

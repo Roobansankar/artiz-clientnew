@@ -113,7 +113,7 @@ export default function ProductDetail({ product, category, related }) {
                   </div>}
                 </div>
               </div>
-              <p className="mt-4 text-center text-xs text-muted">Swipe to explore · Click the image for a closer look</p>
+              {/* <p className="mt-4 text-center text-xs text-muted">Swipe to explore · Click the image for a closer look</p> */}
             </section>
 
             <div className="min-w-0">
