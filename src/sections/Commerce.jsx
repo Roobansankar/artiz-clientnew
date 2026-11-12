@@ -269,9 +269,8 @@ export function TabbedCollection({ products: catalogProducts = [], categories = 
   return (
     <section className="section-py">
       <div className="container-x">
-        <div className={`relative ${furniture ? 'pt-12 lg:px-28 lg:pt-0' : ''}`}>
+        <div className="relative">
           <SectionHeading align="center" sub="The Collection" title="Handpicked, Every One." />
-          {furniture && <div className="absolute right-0 top-0"><ViewAll variant="button" href={`/shop/${encodeURIComponent(selected || furniture.slug)}`} /></div>}
         </div>
         <div className="mb-10 flex flex-wrap justify-center gap-2">
           {[{ slug: null, name: 'All' }, ...tabs].map((t) => (
