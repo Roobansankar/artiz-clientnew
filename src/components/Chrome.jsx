@@ -39,8 +39,8 @@ export function Footer() {
     { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '/account?section=wishlist' }, { label: 'My account', href: '/account' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
   ]
   return (
-    <footer className="bg-espresso pb-[35px] pt-[60px] text-white/75 lg:pt-[80px]">
-      <div className="container-x grid gap-10 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.5fr]">
+    <footer className="overflow-x-clip bg-espresso pb-[35px] pt-[60px] text-white/75 lg:pt-[80px]">
+      <div className="container-x grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)] [&>*]:min-w-0">
         <div>
           <Logo light />
           <p className="mt-5 max-w-xs">Artiz is an interior design studio crafting warm, functional spaces with thoughtful furniture and timeless detail.</p>
@@ -62,9 +62,9 @@ export function Footer() {
         <div>
           <h4 className="mb-5 text-lg text-white">Newsletter</h4>
           <p>Be first to know about new arrivals and offers.</p>
-          <form className="mt-5 flex rounded-full border border-white/20 p-1.5 focus-within:border-terra" onSubmit={newsletter.submit}>
-            <input type="email" required maxLength={254} value={newsletter.email} onChange={(e) => newsletter.setEmail(e.target.value)} aria-label="Email address" placeholder="Your email address" className="min-w-0 flex-1 bg-transparent px-4 text-white outline-none placeholder:text-white/50" />
-            <button disabled={newsletter.state.status === 'saving'} className="rounded-full bg-terra px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white hover:text-espresso cursor-pointer disabled:cursor-wait disabled:opacity-70">{newsletter.state.status === 'saving' ? 'Subscribing…' : 'Subscribe'}</button>
+          <form className="mt-5 flex w-full max-w-md rounded-full border border-white/20 p-1.5 focus-within:border-terra" onSubmit={newsletter.submit}>
+            <input type="email" required maxLength={254} value={newsletter.email} onChange={(e) => newsletter.setEmail(e.target.value)} aria-label="Email address" placeholder="Your email address" size={1} className="w-0 min-w-0 flex-1 bg-transparent px-4 text-white outline-none placeholder:text-white/50" />
+            <button disabled={newsletter.state.status === 'saving'} className="shrink-0 rounded-full bg-terra px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white hover:text-espresso cursor-pointer disabled:cursor-wait disabled:opacity-70">{newsletter.state.status === 'saving' ? 'Subscribing…' : 'Subscribe'}</button>
           </form>
           {newsletter.state.message && <p role="status" className={`mt-3 text-sm ${newsletter.state.status === 'error' ? 'text-[#f3a589]' : 'text-white'}`}>{newsletter.state.message}</p>}
         </div>
