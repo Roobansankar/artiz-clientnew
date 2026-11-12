@@ -181,7 +181,7 @@ export default function Header() {
       <AnnouncementBar />
 
       <header className="sticky top-0 z-40 w-full bg-cream shadow-[0_4px_20px_rgba(73,51,39,0.06)]">
-        <div className="container-x flex h-[64px] items-center justify-between gap-4">
+        <div className="container-x flex h-[56px] items-center md:h-[64px] justify-between gap-4">
           <button className="min-[1440px]:hidden cursor-pointer" onClick={() => setMobile(true)} aria-label="Open menu"><Menu /></button>
           <Logo className="shrink-0" />
 

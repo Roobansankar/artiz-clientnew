@@ -21,10 +21,6 @@ const collections = [
   { title: 'Lighting', img: '/images/shop/shop2.png' },
 ]
 
-const banners = [
-  { img: '/images/shop/shop-banner1.png', mobile: '/images/shop/shop-banner1-mobile.png', sub: 'The Living Capsule', pre: 'Elevate Your', accent: 'Everyday', desc: 'Bouclé, oiled oak and a low, easy silhouette for the room.' },
-  { img: '/images/shop/shop-banner2.png', mobile: '/images/shop/shop-banner2-mobile.png', sub: 'The Workroom', pre: 'Built to Be', accent: 'Kept', desc: 'Solid timber desks and storage, finished by hand and made.' },
-]
 
 const reviews = [
   { name: 'Amara Whitfield', role: 'Developer', avatar: '/images/shop/Ellipse_1034.png', text: 'Excellent furniture quality, stylish design, and comfortable finishing. The product exceeded my expectations', product: 'Fabric Lounge Chair' },
@@ -79,39 +75,6 @@ function ShopByCollection({ items = collections, category = false }) {
             ))}
           </Rail>
         </Reveal>
-      </div>
-    </section>
-  )
-}
-
-function NewArrivals() {
-  return (
-    <section className="border-t border-ink/10 bg-white py-[60px] lg:py-[90px]">
-      <div className="container-x">
-        <Reveal className="mb-12 text-center">
-          <span className="text-sm font-medium">Just landed</span>
-          <h2 className="mt-2 text-[28px] md:text-[36px]">New Arrivals</h2>
-        </Reveal>
-        <div className="grid gap-6 md:grid-cols-2">
-          {banners.map((b, i) => (
-            <Reveal key={b.sub} delay={i * 0.12}>
-              <Link href={SHOP_URL} className="group relative block overflow-hidden rounded-xl">
-                <picture>
-                  <source media="(min-width: 768px)" srcSet={b.img} />
-                  <img src={b.mobile} alt="" className="aspect-[750/550] w-full object-cover transition-transform duration-700 group-hover:scale-105 md:aspect-[727/338]" />
-                </picture>
-                <div className="absolute inset-0 flex flex-col justify-center p-6 md:p-8 lg:p-10">
-                  <span className="text-sm tracking-wide">{b.sub}</span>
-                  <h3 className="mt-3 max-w-[60%] text-[24px] leading-tight md:text-[28px]">{b.pre} <span className="text-terra">{b.accent}</span></h3>
-                  <p className="mt-3 max-w-[55%] text-sm text-ink/80">{b.desc}</p>
-                  <span className="mt-6 inline-flex w-fit items-center gap-1 rounded-md bg-terra px-5 py-3 text-sm font-medium text-white transition-colors group-hover:bg-espresso">
-                    Shop Now <ChevronRight size={16} className="transition-transform group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
       </div>
     </section>
   )
@@ -247,32 +210,6 @@ function Promises() {
   )
 }
 
-function Letter() {
-  const [done, setDone] = useState(false)
-  return (
-    <section className="bg-cream py-[60px] lg:py-[80px]">
-      <div className="container-x">
-        <Reveal>
-          <div className="rounded-2xl bg-white px-6 py-14 text-center md:py-16">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-terra">The Artiz letter</span>
-            <h2 className="mt-3 text-[28px] md:text-[36px]">First look, every drop</h2>
-            <p className="mx-auto mt-4 max-w-md text-muted">One considered email a month — new pieces, restocks and the occasional workshop note. No noise.</p>
-            {done ? (
-              <p className="mt-8 font-medium text-terra">Thanks — you're on the list.</p>
-            ) : (
-              <form onSubmit={(e) => { e.preventDefault(); setDone(true) }} className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
-                <input type="email" required placeholder="you@example.com" aria-label="Enter your email" className="h-12 flex-1 rounded-md border border-ink/15 px-4 outline-none focus:border-terra" />
-                <button className="h-12 rounded-md bg-terra px-6 font-medium text-white transition-colors hover:bg-espresso cursor-pointer">Subscribe</button>
-              </form>
-            )}
-            <p className="mt-4 text-xs text-muted">By subscribing you agree to our privacy policy. Unsubscribe any time.</p>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  )
-}
-
 export default function ShopPage({ category, collection, categoryCollections = [], categoryProducts, initialSort, remoteCatalog }) {
   const currentCollection = category || collection
   return (
@@ -280,10 +217,8 @@ export default function ShopPage({ category, collection, categoryCollections = [
       <PageBanner title={currentCollection?.name} description={currentCollection?.description} />
       {(!currentCollection || categoryCollections.length > 0) && <ShopByCollection items={currentCollection ? categoryCollections : collections} category={Boolean(currentCollection)} />}
       <ShopGrid key={currentCollection?.slug || 'all'} products={categoryProducts} catalogMode={Boolean(currentCollection) || Boolean(remoteCatalog)} currency={currentCollection || remoteCatalog ? 'INR' : 'USD'} initialSort={initialSort} remoteCatalog={remoteCatalog} />
-      {!collection && <NewArrivals />}
       {!currentCollection && <><LatestNine /><YouMayAlsoLike /><Feedback /></>}
       <Promises />
-      <Letter />
     </>
   )
 }
