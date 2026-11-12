@@ -1028,3 +1028,38 @@
 .ad-bulk-failures .ad-table td:last-child { color: #c2410c; }
 .ad-bulk-done { justify-self: start; }
 @media (max-width: 820px) { .ad-bulk-grid { grid-template-columns: 1fr; } .ad-bulk-summary { grid-template-columns: 1fr; } .ad-bulk-results { padding: 18px; } }
+
+/* Dark-mode corrections for hard-coded light colours. */
+.ad-cash-dialog { box-shadow: 0 20px 80px #0003; }
+.ad-cash-dialog::backdrop { background: #0007; backdrop-filter: blur(3px); }
+.ad-root .ad-primary.ad-danger { background: #dc2626; border-color: #dc2626; color: #fff; }
+.ad-root .ad-primary.ad-danger:hover:not(:disabled) { background: #b91c1c; border-color: #b91c1c; }
+.ad-root :is(button, .ad-primary, .ad-secondary):disabled { opacity: .6; cursor: not-allowed; }
+.ad-dark .ad-cash-dialog { box-shadow: 0 20px 80px #000a; }
+.ad-dark .ad-upload-background-note { border-color: #4a3b31; background: #2a211c; color: #e8d9cf; }
+.ad-dark .ad-product-error { color: #fb923c; border-color: #7c2d12; }
+.ad-dark .ad-category-delete-confirm { color: #fb923c; }
+.ad-dark .ad-required, .ad-dark .ad-setting-row em { color: #f87171; }
+.ad-dark .ad-category-state.active i { background: #4ade80; }
+.ad-dark .ad-category-delete-button:hover { color: #f87171; }
+.ad-dark .ad-avatar-0 { background: #1f3326; color: #86c497; }
+.ad-dark .ad-avatar-1 { background: #3a2b20; color: #e0a986; }
+.ad-dark .ad-avatar-2 { background: #26273a; color: #a9a3d6; }
+.ad-dark .ad-avatar-3 { background: #3a2530; color: #dc9ab6; }
+.ad-dark .ad-cb-item.is-selected { background: color-mix(in srgb, var(--ad-accent) 12%, var(--ad-surface)); border-color: color-mix(in srgb, var(--ad-accent) 40%, transparent); }
+.ad-dark .ad-cb-switch > span:first-child { background: #52525b; }
+.ad-dark .ad-cb-switch.is-on > span:first-child { background: #6366f1; }
+.ad-dark .ad-cb-confirm { color: #f87171; }
+.ad-dark .ad-auth-error { background: #f8717110; border-color: #f8717140; }
+.ad-dark .ad-chip-custom i, .ad-dark .ad-variant-tag i { border-color: #fff3; }
+.ad-dark .ad-variants input[aria-invalid=true] { border-color: #f87171; }
+.ad-dark .ad-swatch-error { color: #f87171; }
+.ad-dark :is(.ad-bulk-summary .has-failures strong, .ad-bulk-failures h3, .ad-bulk-failures .ad-table td:last-child) { color: #fb923c; }
+.ad-dark .ad-hero-preview, .ad-dark .ad-hero-thumbnail { border: 1px solid var(--ad-line); }
+
+/* Native dropdown lists: give options real theme colours (transparent selects otherwise open as white lists). */
+.ad-root select option, .ad-root select optgroup { background-color: var(--ad-surface); color: var(--ad-text); }
+.ad-root select option:checked { background-color: var(--ad-soft); color: var(--ad-text); }
+.ad-root select option:disabled { color: var(--ad-dimmed); }
+.ad-toolbar select { color: var(--ad-text); color-scheme: inherit; }
+.ad-toolbar select:hover { color: var(--ad-accent); }

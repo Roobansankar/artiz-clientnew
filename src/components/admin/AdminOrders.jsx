@@ -136,11 +136,11 @@ export default function AdminOrders({ notify }) {
           </tr>)}</tbody>
     </table>{!result.orders.length && !error && <div className="ad-empty">{search ? 'No orders match your search.' : status === 'PAID' ? 'No paid orders yet. They appear here as soon as a customer completes payment.' : 'No orders found.'}</div>}</div>}
     <div className="ad-table-footer"><span>{result.total} order{result.total === 1 ? '' : 's'} · Page {page} of {pages}</span><span className="ad-pagination"><button disabled={page <= 1} aria-label="Previous page" onClick={() => setPage(p => p - 1)}>‹</button><button className="active" aria-current="page">{page}</button><button disabled={page >= pages} aria-label="Next page" onClick={() => setPage(p => p + 1)}>›</button></span></div>
-    <dialog ref={deleteDialog} aria-labelledby="delete-order-title" onCancel={event => { if (saving) event.preventDefault(); else setDeleting(null); }} className="fixed inset-0 m-auto w-[min(92vw,460px)] rounded-2xl border border-sand bg-white p-6 text-ink shadow-xl backdrop:bg-espresso/50">
-      <h2 id="delete-order-title" className="text-xl font-semibold">Delete order?</h2>
-      <p className="mt-4 text-sm leading-relaxed text-muted">Permanently delete order <strong>{deleting?.number}</strong> and its item records? This cannot be undone. This will not refund a payment or restore inventory.</p>
+    <dialog ref={deleteDialog} aria-labelledby="delete-order-title" onCancel={event => { if (saving) event.preventDefault(); else setDeleting(null); }} className="ad-cash-dialog">
+      <h2 id="delete-order-title">Delete order?</h2>
+      <p className="ad-muted">Permanently delete order <strong>{deleting?.number}</strong> and its item records? This cannot be undone. This will not refund a payment or restore inventory.</p>
       {deleteError && <p className="ad-auth-error" role="alert">{deleteError}</p>}
-      <div className="mt-6 flex justify-end gap-3"><button type="button" autoFocus disabled={saving} className="ad-secondary" onClick={() => setDeleting(null)}>Cancel</button><button type="button" disabled={saving} className="ad-primary ad-danger" onClick={removeOrder}>{saving ? 'Deleting...' : 'Delete order'}</button></div>
+      <div className="ad-action-group"><button type="button" autoFocus disabled={saving} className="ad-secondary" onClick={() => setDeleting(null)}>Cancel</button><button type="button" disabled={saving} className="ad-primary ad-danger" onClick={removeOrder}>{saving ? 'Deleting...' : 'Delete order'}</button></div>
     </dialog>
   </>;
 }
