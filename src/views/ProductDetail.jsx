@@ -86,7 +86,7 @@ export default function ProductDetail({ product, category, related }) {
 
   return (
     <>
-      <section className="bg-white pb-14 pt-6 md:pb-20 md:pt-8">
+      <section className="bg-cream pb-14 pt-6 md:pb-20 md:pt-8">
         <div className="container-x">
           <nav aria-label="Breadcrumb" className="mb-7 flex flex-wrap items-center gap-2 text-xs text-muted md:mb-9">
             <Link href="/" className="hover:text-terra">Home</Link><ChevronRight size={12} aria-hidden="true" />
@@ -172,7 +172,7 @@ export default function ProductDetail({ product, category, related }) {
         </div>
       </section>
 
-      {related.length > 0 && <section className="bg-white py-12 md:py-18"><div className="container-x"><div className="mb-8 flex items-end justify-between gap-4"><div><span className="subtitle">A little more inspiration</span><h2 className="h2-title">You may also like</h2></div>{category && <Link href={`/shop/${category.slug}`} className="hidden text-sm underline underline-offset-4 hover:text-terra sm:block">Explore collection</Link>}</div><div className="grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-4">{related.map(item => <Link key={item.id} href={`/products/${item.slug || item.id}`} className="group min-w-0"><div className="aspect-square overflow-hidden rounded-xl bg-cream"><Image src={item.img} alt={item.title} width={600} height={600} sizes="(max-width: 1023px) 50vw, 25vw" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /></div><p className="mt-4 text-xs text-muted">{item.vendor}</p><h3 className="mt-1 text-sm font-medium group-hover:text-terra md:text-base">{item.title}</h3><p className="mt-2 text-sm font-semibold">{formatPrice(item.price)}</p></Link>)}</div></div></section>}
+      {related.length > 0 && <section className="bg-cream py-12 md:py-18"><div className="container-x"><div className="mb-8 flex items-end justify-between gap-4"><div><span className="subtitle">A little more inspiration</span><h2 className="h2-title">You may also like</h2></div>{category && <Link href={`/shop/${category.slug}`} className="hidden text-sm underline underline-offset-4 hover:text-terra sm:block">Explore collection</Link>}</div><div className="grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-4">{related.map(item => <Link key={item.id} href={`/products/${item.slug || item.id}`} className="group min-w-0"><div className="aspect-square overflow-hidden rounded-xl bg-cream"><Image src={item.img} alt={item.title} width={600} height={600} sizes="(max-width: 1023px) 50vw, 25vw" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /></div><p className="mt-4 text-xs text-muted">{item.vendor}</p><h3 className="mt-1 text-sm font-medium group-hover:text-terra md:text-base">{item.title}</h3><p className="mt-2 text-sm font-semibold">{formatPrice(item.price)}</p></Link>)}</div></div></section>}
 
       <dialog ref={zoom} onClick={event => { if (event.target === event.currentTarget) zoom.current?.close() }} className="fixed inset-0 m-auto max-h-[92dvh] w-[min(94vw,1000px)] max-w-none rounded-2xl bg-cream p-5 backdrop:bg-espresso/70" aria-label={`Enlarged image of ${product.title}`}>
         <div className="flex items-center justify-between gap-4"><p className="text-sm font-medium">{product.title}</p><button onClick={() => zoom.current?.close()} aria-label="Close image viewer" className="nav-circle h-9 w-9"><X size={18} /></button></div>

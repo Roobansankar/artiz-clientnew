@@ -45,7 +45,7 @@ export function FeaturedCollection({ products: curatedProducts = [] }) {
                     <button type="button" onClick={() => toggleWish(product.id)} aria-label={`${wished ? 'Remove' : 'Save'} ${product.name} ${wished ? 'from' : 'to'} wishlist`} aria-pressed={wished} className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white opacity-0 transition-opacity group-hover/curated:opacity-100 focus:opacity-100"><Heart size={18} className={wished ? 'fill-terra text-terra' : ''} /></button>
                     <Link href={href} className="mt-4 block font-heading text-base font-medium hover:text-terra">{product.name}</Link>
                     <div className="mt-2 text-sm"><ProductPrice product={product} /></div>
-                    <button type="button" disabled={option.stock <= 0} onClick={() => addToCart(shopProduct(product, []))} className="btn-dark mt-auto w-full disabled:cursor-not-allowed disabled:opacity-50">{option.stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
+                    <button type="button" disabled={option.stock <= 0} onClick={() => addToCart(shopProduct(product, []))} className="btn-dark mt-4 w-full disabled:cursor-not-allowed disabled:opacity-50">{option.stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
                   </article>
                 </SwiperSlide>
               })}
@@ -74,8 +74,7 @@ export function DiningBanner() {
         <Reveal className="max-w-lg text-white">
           <span className="mb-3 block font-medium text-white/85">New Dining Collection</span>
           <h2 className="font-heading text-[36px] font-semibold leading-[1.1] md:text-[56px]">Where Comfort Meets Craft</h2>
-          <p className="mt-4 text-lg">From <span className="font-semibold">USD $799</span></p>
-          <div className="mt-8"><ArrowBtn className="btn-light">Shop Now</ArrowBtn></div>
+          <div className="mt-8"><ArrowBtn className="btn-light" href="/shop/decor">Shop Now</ArrowBtn></div>
         </Reveal>
       </div>
     </section>
