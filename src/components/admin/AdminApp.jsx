@@ -35,6 +35,9 @@ const paths = {
     bell: <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>,
     plus: <path d="M12 5v14M5 12h14"/>, chevron: <path d="m8 4 4 4 4-4M8 20l4-4 4 4"/>,
     panel: <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M13 8l4 4-4 4"/></>,
+    menu: <><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></>,
+    panelCollapse: <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M13 8l4 4-4 4"/></>,
+    panelExpand: <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M13 8l4 4-4 4"/></>,
     sun: <><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></>,
     moon: <path d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14Z"/>,
     palette: <><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-4c-2-1-1-3 1-3h3a3 3 0 0 0 3-3 9 9 0 0 0-9-8Z"/><path d="M7 9h.01M11 6h.01M16 8h.01M6 14h.01"/></>,
@@ -75,6 +78,7 @@ const nav = [
 const canSee = (admin, page) => !!admin && (admin.role === 'OWNER' || (page !== 'OWNER' && (admin.permissions || []).includes(page)));
 const settingLinks = ['General', 'Security'];
 const colors = [{ name: 'Green', value: '#00a155' }, { name: 'Blue', value: '#2563eb' }, { name: 'Violet', value: '#7c3aed' }, { name: 'Rose', value: '#e11d48' }, { name: 'Orange', value: '#ea580c' }];
+const ADMIN_CACHE_KEY = 'artiz-admin-profile-v1';
 export default function AdminApp({ login = false }) {
     const pathname = usePathname();
     const router = useRouter();
@@ -85,11 +89,18 @@ export default function AdminApp({ login = false }) {
     useEffect(() => {
         if (isLogin)
             return;
+        try {
+            const cached = JSON.parse(sessionStorage.getItem(ADMIN_CACHE_KEY) || 'null');
+            if (cached && typeof cached.id === 'string')
+                setAdmin(cached);
+        }
+        catch { }
         const controller = new AbortController();
         setError('');
         fetch('/api/admin/auth/me', { cache: 'no-store', credentials: 'same-origin', signal: controller.signal })
             .then(async (response) => {
             if (response.status === 401) {
+                try { sessionStorage.removeItem(ADMIN_CACHE_KEY); } catch { }
                 setAdmin(null);
                 router.replace('/admin/login');
                 return;
@@ -103,11 +114,16 @@ export default function AdminApp({ login = false }) {
             setError(e.message || 'Unable to connect to the admin server.');
         } });
         return () => controller.abort();
-    }, [isLogin, pathname, retry, router]);
+    }, [isLogin, retry, router]);
+    useEffect(() => {
+        if (!admin) return;
+        try { sessionStorage.setItem(ADMIN_CACHE_KEY, JSON.stringify(admin)); } catch { }
+    }, [admin]);
     async function logout() {
         const response = await fetch('/api/admin/auth/logout', { method: 'POST', credentials: 'same-origin' });
         if (!response.ok)
             throw new Error('Sign out failed.');
+        try { sessionStorage.removeItem(ADMIN_CACHE_KEY); } catch { }
         setAdmin(null);
         startPageProgress();
         router.replace('/admin/login');
@@ -178,7 +194,7 @@ function AdminWorkspace({ login = false, admin, contentLoading, authError, onRet
         catch {
             setNotice('Could not sign out. Please try again.');
         } }}><Icon name="logout" size={16}/>Log out</button></div>}<button className="ad-profile" title="Account menu" onClick={() => setProfileOpen(!profileOpen)} aria-expanded={profileOpen}><span className="ad-avatar">AD</span><span className="ad-sidebar-text">{admin?.name || 'Admin'}</span><span className="ad-sidebar-text ad-team-chevron"><Icon name="chevron" size={15}/></span></button></div></aside>
-      <div className="ad-workarea"><header className="ad-topbar"><div className="ad-topbar-title"><button className="ad-icon-button ad-desktop-collapse" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} onClick={() => setCollapsed(!collapsed)}><Icon name="panel"/></button><button className="ad-icon-button ad-mobile-menu" aria-label="Open navigation" onClick={() => setMenu(true)}><Icon name="panel"/></button><h1>{section}</h1></div><div className="ad-topbar-actions">{appearance}<AdminNotifications enabled={!isLogin && canSee(admin, 'contact')}/></div></header>
+      <div className="ad-workarea"><header className="ad-topbar"><div className="ad-topbar-title"><button className="ad-icon-button ad-desktop-collapse" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed} onClick={() => setCollapsed(!collapsed)}><span key={collapsed ? 'panel-expand' : 'panel-collapse'} className="ad-panel-toggle-icon"><Icon name={collapsed ? 'panelExpand' : 'panelCollapse'}/></span></button><button className="ad-icon-button ad-mobile-menu" aria-label="Open navigation" onClick={() => setMenu(true)}><Icon name="menu"/></button><h1>{section}</h1></div><div className="ad-topbar-actions">{appearance}<AdminNotifications enabled={!isLogin && canSee(admin, 'contact')}/></div></header>
       {(section === 'Home' || section === 'Analytics') && <div className="ad-toolbar"><div className="ad-date-select"><Icon name="calendar" size={16}/><select aria-label="Date range" value={range} onChange={e => setRange(e.target.value)}><option>Last 14 days</option><option>Last 7 days</option><option>Last 30 days</option></select></div><span className="ad-toolbar-separator"/><select className="ad-period" aria-label="Chart interval" value={period} onChange={e => setPeriod(e.target.value)}><option>Daily</option><option>Weekly</option><option>Monthly</option></select><span className="ad-muted ad-small">India time</span></div>}
       {isSettings && <nav className="ad-settings-tabs" aria-label="Settings tabs">{settingLinks.map(n => <Link key={n} href={n === 'General' ? '/admin/settings' : '/admin/settings/' + n.toLowerCase()} className={settingsTab === n.toLowerCase() ? 'active' : ''}>{n}</Link>)}</nav>}
       <main className="ad-main" aria-busy={contentLoading}>

@@ -1460,3 +1460,37 @@
   .ad-login-card .ad-back { margin-top: 12px; }
   .ad-login-footer { display: none; }
 }
+
+/* Admin navigation and page transitions */
+.ad-sidebar {
+  transition: width .24s ease, transform .3s cubic-bezier(.22, 1, .36, 1);
+}
+.ad-workarea {
+  transition: margin-left .24s ease;
+}
+.ad-sidebar nav > a,
+.ad-sidebar nav > .ad-settings-trigger,
+.ad-sidebar-links button,
+.ad-profile,
+.ad-icon-button {
+  transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.ad-sidebar nav > a:hover,
+.ad-sidebar nav > .ad-settings-trigger:hover,
+.ad-sidebar-links button:hover {
+  transform: translateX(2px);
+}
+.ad-team { height: 72px; margin: 0; padding: 0 16px; gap: 12px; border-bottom: 1px solid var(--ad-line); }
+.ad-team .ad-logo-image { height: 40px; }
+.ad-team-tag { padding: 4px 10px; border: 1px solid color-mix(in srgb, var(--ad-accent) 22%, var(--ad-line)); border-radius: 999px; background: color-mix(in srgb, var(--ad-accent) 8%, var(--ad-surface)); color: var(--ad-accent); font-size: 10px; font-weight: 600; letter-spacing: .04em; }
+.ad-collapsed .ad-team { justify-content: center; margin: 0; padding: 0; }
+.ad-collapsed .ad-team .ad-logo-image { height: 38px; }
+.ad-panel-toggle-icon { display: inline-grid; place-items: center; animation: ad-panel-toggle-in .2s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes ad-panel-toggle-in {
+  from { opacity: .55; transform: scale(.78) rotate(-10deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ad-sidebar, .ad-workarea, .ad-sidebar nav > a, .ad-sidebar nav > .ad-settings-trigger,
+  .ad-sidebar-links button, .ad-profile, .ad-icon-button, .ad-panel-toggle-icon { transition: none !important; animation: none !important; }
+}
