@@ -191,7 +191,7 @@ export default function Header() {
 
   // Close the mobile menu after navigating to another page
   const pathname = usePathname()
-  useEffect(() => setMobile(false), [pathname])
+  useEffect(() => { setMobile(false); setSearchOpen(false) }, [pathname, setSearchOpen])
 
   return (
     <>
@@ -256,14 +256,16 @@ export default function Header() {
       {/* Search overlay */}
       <AnimatePresence>
         {searchOpen && (
-          <motion.div className="fixed inset-0 z-[60] bg-espresso/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSearchOpen(false)}>
-            <motion.div initial={{ y: '-100%' }} animate={{ y: 0 }} exit={{ y: '-100%' }} transition={{ type: 'tween', duration: 0.4 }} className="bg-cream py-12" onClick={(e) => e.stopPropagation()}>
-              <div className="container-x relative">
-                <button onClick={() => setSearchOpen(false)} className="absolute -top-6 right-6 cursor-pointer" aria-label="Close search"><X /></button>
-                <h3 className="mb-6 text-center text-2xl">What are you looking for?</h3>
-                <ProductSearch onSelect={() => setSearchOpen(false)} />
+          <motion.div className="fixed inset-0 z-[60] overflow-y-auto bg-cream" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSearchOpen(false)}>
+            <motion.section role="dialog" aria-modal="true" aria-label="Search the store" initial={{ y: -12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={{ type: 'tween', duration: 0.24 }} className="min-h-full bg-cream" onClick={(e) => e.stopPropagation()}>
+              <div className="mx-auto w-full max-w-6xl px-5 pb-12 pt-5 sm:px-8 lg:px-10">
+                <div className="mb-[8vh] flex items-center justify-between">
+                  <Logo />
+                  <button onClick={() => setSearchOpen(false)} className="nav-circle" aria-label="Close search"><X size={19} /></button>
+                </div>
+                <ProductSearch categories={categories} onSelect={() => setSearchOpen(false)} />
               </div>
-            </motion.div>
+            </motion.section>
           </motion.div>
         )}
       </AnimatePresence>
