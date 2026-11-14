@@ -145,7 +145,7 @@ export function VideoHero() {
   const scale = useTransform(scrollYProgress, [0, 0.5], [0.9, 1])
   const radius = useTransform(scrollYProgress, [0, 0.5], [40, 0])
   return (
-    <section ref={ref} className="py-[60px] lg:py-[90px]">
+    <section ref={ref} className="pb-6 pt-[60px] lg:pb-8 lg:pt-[90px]">
       <motion.div style={{ scale, borderRadius: radius }} className="relative mx-auto min-h-[520px] overflow-hidden md:min-h-[680px]">
         <video src="/images/hero-video.mp4" autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-espresso/35" />
@@ -181,33 +181,19 @@ function Stars({ rating, size = 16 }) {
 }
 
 export function CustomerReviews() {
-  const [swiper, setSwiper] = useState(null)
   const average = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
   return (
-    <section className="relative overflow-hidden bg-peach/60 py-[60px] lg:py-[100px]">
-      <div aria-hidden="true" className="pointer-events-none absolute -left-32 top-10 h-80 w-80 rounded-full bg-terra/10 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-sand/50 blur-3xl" />
-      <div className="container-x relative grid gap-10 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:items-center lg:gap-14">
-        <Reveal className="text-center lg:text-left">
-          <span className="subtitle">Customer Reviews</span>
-          <h2 className="h2-title">Loved by the Homes We Design</h2>
-          <p className="mt-4 text-muted">Real words from families who trusted Artiz with their spaces.</p>
-          <div className="mt-8 inline-flex items-center gap-4 rounded-2xl border border-sand bg-white/80 px-5 py-4 text-left shadow-[0_10px_30px_rgba(73,51,39,0.06)]">
-            <span className="font-heading text-[44px] font-semibold leading-none text-ink">{average.toFixed(1)}</span>
-            <span>
-              <Stars rating={Math.round(average)} />
-              <span className="mt-1 block text-sm text-muted">Based on {reviews.length} reviews</span>
-            </span>
-          </div>
-          <div className="mt-8 hidden justify-center md:flex gap-3 lg:justify-start">
-            <button onClick={() => swiper?.slidePrev()} className="nav-circle" aria-label="Previous review"><ArrowLeft size={18} /></button>
-            <button onClick={() => swiper?.slideNext()} className="nav-circle" aria-label="Next review"><ArrowRight size={18} /></button>
-          </div>
+    <section className="pb-[60px] pt-6 bg-cream lg:pb-[90px] lg:pt-8">
+      <div className="container-x">
+        <SectionHeading align="center" sub="Customer Reviews" title="Loved by the Homes We Design" desc="Real words from families who trusted Artiz with their spaces." />
+        <Reveal className="mb-8 flex flex-wrap items-center justify-center gap-3">
+          <Stars rating={Math.round(average)} />
+          <span className="font-semibold text-ink">{average.toFixed(1)} out of 5</span>
+          <span className="text-sm text-muted">Based on {reviews.length} reviews</span>
         </Reveal>
         <Reveal className="min-w-0">
           <Swiper
             modules={[Autoplay]}
-            onSwiper={setSwiper}
             loop={reviews.length > 2}
             autoplay={{ delay: 5500, disableOnInteraction: false, pauseOnMouseEnter: true }}
             spaceBetween={20}
@@ -217,27 +203,22 @@ export function CustomerReviews() {
           >
             {reviews.map((r, i) => (
               <SwiperSlide key={i} className="!h-auto">
-                <article className="group flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-[0_12px_40px_rgba(73,51,39,0.08)]">
-                  <div className="relative overflow-hidden">
-                    <img src={r.img} alt={r.project} loading="lazy" className="aspect-[16/9] w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-ink backdrop-blur">{r.project}</span>
+                <article className="flex h-full flex-col rounded-2xl border border-sand bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md md:p-7">
+                  <div className="flex items-center justify-between gap-4">
+                    <Stars rating={r.rating} />
+                    <Quote size={24} className="text-terra/50" fill="currentColor" strokeWidth={0} aria-hidden="true" />
                   </div>
-                  <div className="flex flex-1 flex-col p-6 md:p-7">
-                    <div className="flex items-center justify-between gap-4">
-                      <Stars rating={r.rating} />
-                      <Quote size={30} className="text-terra/25" fill="currentColor" strokeWidth={0} aria-hidden="true" />
-                    </div>
-                    <blockquote className="mt-4 flex-1 text-[16px] leading-relaxed text-ink">&ldquo;{r.text}&rdquo;</blockquote>
-                    <footer className="mt-6 flex items-center gap-3 border-t border-sand pt-5">
-                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-espresso font-heading text-sm font-semibold text-white">
-                        {r.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
-                      </span>
-                      <span className="min-w-0">
-                        <strong className="block truncate font-heading text-[15px] font-semibold text-ink">{r.name}</strong>
-                        <span className="block truncate text-sm text-muted">{r.place}</span>
-                      </span>
-                    </footer>
-                  </div>
+                  <span className="mt-5 text-xs font-semibold uppercase tracking-wider text-terra">{r.project}</span>
+                  <blockquote className="mt-2 flex-1 font-heading text-lg leading-relaxed text-ink">&ldquo;{r.text}&rdquo;</blockquote>
+                  <footer className="mt-6 flex items-center gap-3 border-t border-sand pt-4">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-peach font-heading text-sm font-semibold text-espresso">
+                      {r.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+                    </span>
+                    <span className="min-w-0">
+                      <strong className="block truncate font-heading text-[15px] font-semibold text-ink">{r.name}</strong>
+                      <span className="block truncate text-sm text-muted">{r.place}</span>
+                    </span>
+                  </footer>
                 </article>
               </SwiperSlide>
             ))}

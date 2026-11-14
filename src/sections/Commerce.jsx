@@ -206,7 +206,7 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
               <Reveal key={product.id} delay={index * 0.08} className="h-full">
                 <div className={`group/featured relative flex h-full flex-col rounded-2xl border-2 p-0 transition-colors md:p-3 ${selected ? 'border-terra' : 'border-transparent'}`}>
                   <Link href={href} className="group block overflow-hidden rounded-xl bg-cream">
-                    <Image width={600} height={600} sizes="(max-width: 767px) 50vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105 md:aspect-square" />
+                    <Image width={600} height={600} sizes="(max-width: 767px) 50vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </Link>
                   <button type="button" onClick={() => toggleWish(product.id)} aria-label={`Save ${product.name} to wishlist`} aria-pressed={wished} className="pointer-events-none absolute right-5 top-5 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-0 transition-opacity duration-200 hover:bg-peach group-hover/featured:pointer-events-auto group-hover/featured:opacity-100 focus:pointer-events-auto focus:opacity-100 group-focus-within/featured:pointer-events-auto group-focus-within/featured:opacity-100">
                     <Heart size={18} className={wished ? 'fill-terra text-terra' : ''} />

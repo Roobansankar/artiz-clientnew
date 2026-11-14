@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ChevronDown, ImageIcon, Menu, User, X } from 'lucide-react'
+import { ChevronDown, ImageIcon, LogOut, Menu, User, X } from 'lucide-react'
 import { CartIcon, HeartIcon, SearchIcon, UserIcon } from './icons'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -160,10 +160,27 @@ export default function Header() {
   const { categories, error: categoryError, refresh: refreshCategories } = useCategories()
   const nav = categoryItems(categories)
   const mobileNav = [...nav, ...extraLinks, { label: 'Discover', children: discoverLinks }]
-  const { cart, setCartOpen, wishlist, searchOpen, setSearchOpen } = useStore()
+  const { cart, setCartOpen, wishlist, searchOpen, setSearchOpen, customer, setCustomer } = useStore()
   const [mobile, setMobile] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+  const [signOutError, setSignOutError] = useState('')
   const [dismissedDropdown, setDismissedDropdown] = useState(null)
   const count = cart.reduce((n, i) => n + i.qty, 0)
+
+  async function signOutFromMobileMenu() {
+    setSigningOut(true)
+    setSignOutError('')
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' })
+      if (!response.ok) throw new Error('Could not sign out. Please try again.')
+      setCustomer(null)
+      setMobile(false)
+    } catch (error) {
+      setSignOutError(error.message || 'Could not sign out. Please try again.')
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   const closeDropdownOnNavigate = (event, key) => {
     const link = event.target.closest('a')
@@ -182,9 +199,9 @@ export default function Header() {
       <AnnouncementBar />
 
       <header className="sticky top-0 z-40 w-full bg-cream shadow-[0_4px_20px_rgba(73,51,39,0.06)]">
-        <div className="container-x flex h-[56px] items-center md:h-[64px] justify-between gap-4">
+        <div className="container-x relative flex h-[56px] items-center md:h-[64px] justify-between gap-4">
           <button className="min-[1440px]:hidden cursor-pointer" onClick={() => setMobile(true)} aria-label="Open menu"><Menu /></button>
-          <Logo className="shrink-0" />
+          <Logo className="absolute left-1/2 -translate-x-1/2 shrink-0 md:static md:translate-x-0" />
 
           <nav className="hidden h-full min-[1440px]:flex" aria-label="Main navigation">
             {categoryError && <button onClick={refreshCategories} className="px-3 text-sm text-terra">Retry categories</button>}
@@ -212,7 +229,7 @@ export default function Header() {
 
           <div className="flex items-center gap-4">
             <button onClick={() => setSearchOpen(true)} aria-label="Search" className="hidden hover:text-terra cursor-pointer md:block"><SearchIcon size={22} /></button>
-            <AccountMenu />
+            <div className="hidden md:block"><AccountMenu /></div>
             <Link href="/account?section=wishlist" aria-label="Wishlist" className="relative hidden hover:text-terra sm:block">
               <HeartIcon size={24} />
               <span className="absolute -right-2 -top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-terra text-[10px] text-white">{wishlist.length}</span>
@@ -275,9 +292,16 @@ export default function Header() {
               </div>
               <div className="shrink-0 border-t border-ink/10 px-5 py-5">
                 <div className="grid gap-3">
-                  <h4 className="text-lg">My account</h4>
-                  <Link href="/account" onClick={() => setMobile(false)} className="btn-dark w-full"><User size={16} /> Log in</Link>
-                  <Link href="/account?mode=register" onClick={() => setMobile(false)} className="btn-outline w-full">Register</Link>
+                  {customer ? <>
+                    <div><h4 className="text-lg">Hello, {customer.name}</h4><p className="mt-1 text-sm text-muted">Your account</p></div>
+                    <Link href="/account" onClick={() => setMobile(false)} className="btn-dark w-full"><User size={16} /> My account</Link>
+                    <button type="button" disabled={signingOut} onClick={signOutFromMobileMenu} className="flex w-full items-center justify-center gap-2 py-2 text-sm text-muted hover:text-terra disabled:opacity-50"><LogOut size={16} />{signingOut ? 'Signing out…' : 'Sign out'}</button>
+                    {signOutError && <p role="alert" className="text-sm text-terra">{signOutError}</p>}
+                  </> : <>
+                    <h4 className="text-lg">My account</h4>
+                    <Link href="/account" onClick={() => setMobile(false)} className="btn-dark w-full"><User size={16} /> Log in</Link>
+                    <Link href="/account?mode=register" onClick={() => setMobile(false)} className="btn-outline w-full">Register</Link>
+                  </>}
                 </div>
               </div>
             </motion.aside>

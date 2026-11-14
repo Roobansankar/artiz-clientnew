@@ -115,7 +115,7 @@ export function RailBar({ rail, state }) {
   return (
     <div
       ref={track}
-      className="relative mt-10 h-1 cursor-pointer touch-none rounded bg-sand before:absolute before:inset-x-0 before:-inset-y-4 before:content-['']"
+      className="relative mt-4 h-1 cursor-pointer touch-none rounded bg-sand md:mt-10 before:absolute before:inset-x-0 before:-inset-y-4 before:content-['']"
       onPointerDown={(e) => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); seek(e.clientX) }}
       onPointerMove={(e) => dragging.current && seek(e.clientX)}
       onPointerUp={() => { dragging.current = false; rail.current.style.scrollSnapType = '' }}

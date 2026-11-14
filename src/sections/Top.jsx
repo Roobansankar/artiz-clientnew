@@ -21,9 +21,9 @@ export function CuratedCollections() {
         <SectionHeading sub="Curated for you" title="Smart Living Solutions" right={<div className="hidden md:block"><RailArrows prev={prev} next={next} state={state} /></div>} />
         {error && <button onClick={refresh} className="btn-outline mb-6">Retry loading categories</button>}
         <Reveal>
-          <Rail rail={rail}>
+          <Rail rail={rail} className="gap-3 sm:gap-6">
             {featuredCategories.map(category => (
-              <Link key={category.slug} href={`/shop/${category.slug}`} draggable={false} className="group block w-[calc((100%-24px)/1.5)] shrink-0 snap-start sm:w-[calc((100%-48px)/2.5)] lg:w-[calc((100%-72px)/4)] xl:w-[calc((100%-96px)/5)]">
+              <Link key={category.slug} href={`/shop/${category.slug}`} draggable={false} className="group block w-[calc((100%-12px)/2)] shrink-0 snap-start sm:w-[calc((100%-48px)/2.5)] lg:w-[calc((100%-72px)/4)] xl:w-[calc((100%-120px)/6)]">
                 <div className="overflow-hidden rounded-2xl bg-sand">
                   <img src={categoryPhoto(category, categories)} alt={category.name} loading="lazy" draggable={false} className="aspect-[310/387] w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 </div>
@@ -39,46 +39,40 @@ export function CuratedCollections() {
 }
 
 const collageTiles = [
-  { img: '/images/banner4.png', sub: 'Up to 25% Off', title: 'Chairs', cta: 'Shop Chairs', href: '/shop/chairs' },
-  { img: '/images/banner2.png', sub: 'Storage', title: 'Refresh Your Space', cta: 'Shop Storage', href: '/shop/storage-cabinets' },
-  { img: '/images/banner5.png', sub: 'Up to 35% Off', title: 'Organize in Style', cta: 'Shop Decor', href: '/shop/decor-storage' },
+  { img: '/images/banner13.png', sub: 'Comfort, considered', title: 'Chairs', cta: 'Explore chairs', href: '/shop/chairs' },
+  { img: '/images/collection4.png', sub: 'Make room for more', title: 'Storage', cta: 'Explore storage', href: '/shop/storage-cabinets' },
+  { img: '/images/collection1.png', sub: 'The finishing touch', title: 'Home accents', cta: 'Explore accents', href: '/shop/decor-storage' },
 ]
 
 export function ImageCollage() {
   return (
     <section className="pb-[60px] lg:pb-[90px]" aria-label="Featured collections">
       <div className="container-x space-y-5">
-        {/* Wide feature banner */}
         <Reveal>
-          <Link href="/shop/living-room" className="group relative block h-[420px] overflow-hidden rounded-2xl bg-sand md:h-[400px] lg:h-[440px]">
-            <div className="absolute inset-0">
-              <img src="/images/banner3.png" alt="Blush storage cabinet with ceramic vases in a warm ivory living room" className="absolute inset-0 h-full w-full object-cover object-right transition-transform duration-700 group-hover:scale-[1.03]" />
-            </div>
-            <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(52,39,31,0.88)_0%,rgba(52,39,31,0.35)_55%,transparent_100%)] md:bg-[linear-gradient(90deg,rgba(52,39,31,0.88)_0%,rgba(52,39,31,0.6)_35%,transparent_75%)]" />
-            <div className="relative flex h-full items-end p-7 text-cream md:items-center md:px-10 lg:px-14">
+          <Link href="/shop/living-room" className="group relative block h-[330px] overflow-hidden rounded-2xl bg-sand md:h-[400px] lg:h-[440px]">
+            <img src="/images/banner19.png" alt="Warm neutral living and dining room with natural textures" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-espresso/80 via-espresso/45 to-transparent" />
+            <div className="relative flex h-full items-center px-6 py-8 text-cream sm:px-9 md:px-10 lg:px-14">
               <div className="max-w-lg">
-                <span className="subtitle text-[#edbea6]!">The Living Room Edit</span>
-                <h2 className="font-heading text-[32px] font-semibold leading-[1.1] md:text-[46px] lg:text-[54px]">Where Calm Meets <span className="text-[#edbea6]">Comfort.</span></h2>
-                <p className="mt-4 max-w-sm text-cream/90 md:text-[17px]">Bring warmth to every corner of your home.</p>
-                <span className="btn-light mt-7 group-hover:bg-[#edbea6]">Explore Collection <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" /></span>
+                <span className="mb-2 block text-sm font-medium text-cream/85">The Living Room Edit</span>
+                <h2 className="font-heading text-[32px] font-semibold leading-[1.1] md:text-[46px] lg:text-[54px]">A Softer Place to Land</h2>
+                <p className="mt-4 max-w-sm text-cream/90 md:text-[17px]">Thoughtful pieces and warm textures for a home that feels like yours.</p>
+                <span className="btn-terra mt-7 hover:bg-terra-dark">Explore Collection <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" /></span>
               </div>
             </div>
           </Link>
         </Reveal>
 
-        {/* Three photo tiles */}
         <div className="grid gap-5 md:grid-cols-3">
           {collageTiles.map((tile, i) => (
             <Reveal key={tile.href} delay={0.1 * (i + 1)}>
               <Link href={tile.href} className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-sand transition-shadow duration-300 hover:shadow-lg md:aspect-[5/4] lg:aspect-[4/3]">
-                <div className="absolute inset-0">
-                  <img src={tile.img} alt={tile.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                </div>
-                <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(52,39,31,0.9)_0%,rgba(52,39,31,0.5)_35%,transparent_75%)]" />
+                <img src={tile.img} alt={tile.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-espresso/85 via-espresso/25 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-5 text-cream lg:p-6">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#edbea6]">{tile.sub}</span>
-                  <h3 className="mt-1 text-[22px] leading-snug lg:text-[24px]">{tile.title}</h3>
-                  <span className="btn-light mt-4 px-5 py-2.5 text-sm group-hover:bg-[#edbea6]">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-cream/75">{tile.sub}</span>
+                  <h3 className="mt-1 text-[22px] leading-snug">{tile.title}</h3>
+                  <span className="btn-terra mt-4 px-5 py-2.5 text-sm hover:bg-terra-dark">
                     {tile.cta} <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-1" />
                   </span>
                 </div>

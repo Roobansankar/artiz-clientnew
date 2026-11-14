@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@media (max-width: 767px) {
+  .mobile-secondary-product-action { display: none !important; }
+}
+
 @theme {
   --color-cream: #faf6ee;
   --color-ink: #34271f;

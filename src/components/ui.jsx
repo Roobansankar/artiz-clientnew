@@ -110,7 +110,7 @@ export function ProductCard({ p }) {
               aria-label={label}
               title={label}
               style={{ transitionDelay: `${i * 60}ms` }}
-              className={`grid h-9 w-9 translate-x-12 place-items-center rounded-full bg-white shadow-sm opacity-0 transition-all duration-300 hover:bg-terra hover:text-white group-hover/card:translate-x-0 group-hover/card:opacity-100 cursor-pointer ${active ? 'text-terra' : ''}`}
+              className={`${i === 0 ? 'grid translate-x-0 opacity-100 md:translate-x-12 md:opacity-0 md:group-hover/card:translate-x-0 md:group-hover/card:opacity-100' : 'mobile-secondary-product-action md:grid md:translate-x-12 md:opacity-0 md:group-hover/card:translate-x-0 md:group-hover/card:opacity-100'} h-9 w-9 place-items-center rounded-full bg-white shadow-sm transition-all duration-300 hover:bg-terra hover:text-white cursor-pointer ${active ? 'text-terra' : ''}`}
             >
               <Icon size={16} fill={active ? 'currentColor' : 'none'} />
             </button>
