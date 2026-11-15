@@ -5,13 +5,11 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowUpRight, Heart, LayoutDashboard, LogOut, MapPin, Package, Pencil, Plus, Trash2, UserRound } from 'lucide-react'
-import { useStore } from '../store'
 import { formatPrice } from '../catalog'
-import ProductPrice from './ProductPrice'
 
 export const accountSections = [
   ['overview', 'Overview', LayoutDashboard], ['profile', 'My profile', UserRound],
-  ['orders', 'My orders', Package], ['wishlist', 'My wishlist', Heart], ['addresses', 'Addresses', MapPin],
+  ['orders', 'My orders', Package], ['addresses', 'Addresses', MapPin],
 ]
 const field = 'account-field mt-2 h-12 w-full rounded-lg border border-sand bg-white px-4 text-sm outline-none focus:border-terra focus:ring-2 focus:ring-terra/10'
 const initials = name => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase()
@@ -122,24 +120,12 @@ function Orders() {
     </article>)}</div>
   </>
 }
-function Wishlist() {
-  const { wishlist, toggleWish, wishlistError } = useStore()
-  const resource = useResource('/api/auth/wishlist/products')
-  // The endpoint already returns only saved pieces; the store filter hides a
-  // removed piece immediately while the server request is in flight.
-  const items = (resource.data?.products || []).filter(product => wishlist.includes(product.id))
-  return <><ResourceStatus resource={resource} />{wishlistError && <p role="alert" className="mb-4 text-sm text-terra">{wishlistError}</p>}
-    {resource.data && !items.length && <Empty icon={Heart} text="Save the pieces you love here." />}
-    <div className="grid grid-cols-2 gap-5 xl:grid-cols-3">{items.map(product => <article key={product.id} className="relative min-w-0"><Link href={`/products/${product.slug || product.id}`} className="group block"><div className="overflow-hidden rounded-xl bg-cream"><img src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className="aspect-square w-full object-cover transition-transform group-hover:scale-105" /></div><h3 className="mt-3 text-sm font-medium group-hover:text-terra">{product.name}</h3><div className="mt-2 text-sm"><ProductPrice product={product} /></div></Link><button onClick={() => toggleWish(product.id)} aria-label={`Remove ${product.name} from wishlist`} className="absolute right-2 top-2 grid h-10 w-10 place-items-center rounded-full bg-white"><Heart size={17} className="fill-terra text-terra" /></button></article>)}</div>
-  </>
-}
-
 export default function AccountDashboard({ customer, onChange, onLogout, loggingOut, logoutError }) {
   const search = useSearchParams()
   const reduceMotion = useReducedMotion()
   const active = accountSections.some(([id]) => id === search.get('section')) ? search.get('section') : 'overview'
   const title = accountSections.find(([id]) => id === active)[1]
-  const descriptions = { profile: 'Your name, email and contact details.', orders: 'Keep your purchases in one place.', wishlist: 'A little space for your favorites.', addresses: 'Ready for your next delivery.' }
+  const descriptions = { profile: 'Your name, email and contact details.', orders: 'Keep your purchases in one place.', addresses: 'Ready for your next delivery.' }
   return <section className="bg-white pb-16 pt-7 md:pb-20 md:pt-10"><div className="container-x max-w-[1240px]">
     <div className="relative overflow-hidden rounded-2xl bg-cream p-6 md:p-9">
       <div className="relative flex flex-wrap items-center justify-between gap-5">
@@ -151,11 +137,10 @@ export default function AccountDashboard({ customer, onChange, onLogout, logging
     <nav aria-label="Account navigation" className="mb-8 mt-4 flex gap-5 overflow-x-auto border-b border-sand md:gap-9">{accountSections.map(([id, label, Icon]) => <Link key={id} href={`/account?section=${id}`} scroll={false} aria-current={active === id ? 'page' : undefined} className={`relative flex shrink-0 items-center gap-2 px-1 py-4 text-sm font-medium transition-colors ${active === id ? 'text-terra' : 'text-muted hover:text-ink'}`}><Icon size={16} />{label}{active === id && <motion.span layoutId="account-tab-underline" className="absolute inset-x-0 bottom-0 h-0.5 bg-terra" transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 32 }} />}</Link>)}</nav>
       <AnimatePresence mode="wait" initial={false}>
       <motion.div key={active} initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: reduceMotion ? 0 : -6 }} transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }} className="min-w-0"><div className="mb-7"><h2 className="text-[24px] font-semibold">{active === 'overview' ? 'Make yourself at home' : title}</h2><p className="mt-2 text-sm text-muted">{active === 'overview' ? 'Everything you need, right here.' : descriptions[active]}</p></div>
-        {active === 'overview' && <><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{accountSections.slice(1).map(([id, label, Icon]) => <Link key={id} href={`/account?section=${id}`} className="group rounded-2xl border border-sand p-6 transition-all duration-200 hover:-translate-y-1 hover:border-terra/50 hover:bg-cream"><div className="mb-7 flex items-center justify-between"><span className="grid h-12 w-12 place-items-center rounded-xl bg-peach text-terra"><Icon size={23} strokeWidth={1.5} /></span><ArrowUpRight size={18} className="text-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-terra" /></div><h3 className="text-base font-semibold">{label}</h3><p className="mt-2 text-xs leading-relaxed text-muted">{descriptions[id]}</p></Link>)}</div><Link href="/shop" className="group mt-7 grid overflow-hidden rounded-2xl bg-cream sm:grid-cols-[1fr_0.8fr]"><div className="flex flex-col justify-center p-7 md:p-9"><p className="text-xs font-medium text-terra">A little inspiration</p><h3 className="mt-3 text-2xl font-semibold md:text-3xl">Your next favorite awaits.</h3><span className="mt-5 inline-flex items-center gap-2 text-sm font-medium">Explore the collection <ArrowUpRight size={17} /></span></div><img src="/images/featured-bedroom.png" alt="A warmly styled Artiz bedroom" className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-[1.02] sm:h-60" /></Link></>}
+        {active === 'overview' && <><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{accountSections.slice(1).map(([id, label, Icon]) => <Link key={id} href={`/account?section=${id}`} className="group rounded-2xl border border-sand p-6 transition-all duration-200 hover:-translate-y-1 hover:border-terra/50 hover:bg-cream"><div className="mb-7 flex items-center justify-between"><span className="grid h-12 w-12 place-items-center rounded-xl bg-peach text-terra"><Icon size={23} strokeWidth={1.5} /></span><ArrowUpRight size={18} className="text-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-terra" /></div><h3 className="text-base font-semibold">{label}</h3><p className="mt-2 text-xs leading-relaxed text-muted">{descriptions[id]}</p></Link>)}<Link href="/wishlist" className="group rounded-2xl border border-sand p-6 transition-all duration-200 hover:-translate-y-1 hover:border-terra/50 hover:bg-cream"><div className="mb-7 flex items-center justify-between"><span className="grid h-12 w-12 place-items-center rounded-xl bg-peach text-terra"><Heart size={23} strokeWidth={1.5} /></span><ArrowUpRight size={18} className="text-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-terra" /></div><h3 className="text-base font-semibold">My Wishlist</h3><p className="mt-2 text-xs leading-relaxed text-muted">A little space for your favorites.</p></Link></div><Link href="/shop" className="group mt-7 grid overflow-hidden rounded-2xl bg-cream sm:grid-cols-[1fr_0.8fr]"><div className="flex flex-col justify-center p-7 md:p-9"><p className="text-xs font-medium text-terra">A little inspiration</p><h3 className="mt-3 text-2xl font-semibold md:text-3xl">Your next favorite awaits.</h3><span className="mt-5 inline-flex items-center gap-2 text-sm font-medium">Explore the collection <ArrowUpRight size={17} /></span></div><img src="/images/featured-bedroom.png" alt="A warmly styled Artiz bedroom" className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-[1.02] sm:h-60" /></Link></>}
         {active === 'profile' && <Profile customer={customer} onChange={onChange} />}
         {active === 'addresses' && <Addresses customer={customer} />}
         {active === 'orders' && <Orders />}
-        {active === 'wishlist' && <Wishlist />}
       </motion.div>
       </AnimatePresence>
   </div></section>

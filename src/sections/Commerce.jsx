@@ -21,31 +21,31 @@ export function FeaturedCollection({ products: curatedProducts = [] }) {
         <SectionHeading sub="Curated Selection" title="Designed for Modern Homes" right={<ViewAll variant="button" href="/curated-collection" />} />
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
           <Reveal>
-            <Link href="/curated-collection" className="group relative block h-full min-h-[460px] overflow-hidden rounded-2xl">
+            <Link href="/curated-collection" className="group relative block h-full min-h-[260px] overflow-hidden rounded-2xl md:min-h-[320px] lg:min-h-[340px] xl:min-h-[420px]">
               <img src="/images/banner6.png" alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
+              <div className="absolute inset-0 flex flex-col justify-end p-5 text-white sm:p-6 lg:p-7">
                 <span className="mb-2 text-sm text-white/85">Living Room Refresh</span>
-                <h3 className="text-[28px] leading-tight">Thoughtfully chosen for your home</h3>
-                <span className="mt-6"><span className="btn-light">Shop Collection</span></span>
+                <h3 className="text-[24px] leading-tight sm:text-[26px] lg:text-[28px]">Thoughtfully chosen for your home</h3>
+                <span className="mt-5"><span className="btn-terra">Shop Collection</span></span>
               </div>
             </Link>
           </Reveal>
           <Reveal delay={0.1} className="min-w-0">
-            {curatedProducts.length ? <Swiper spaceBetween={24} slidesPerView={1.3} breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}>
+            {curatedProducts.length ? <Swiper spaceBetween={14} slidesPerView={1.4} breakpoints={{ 640: { spaceBetween: 24, slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}>
               {curatedProducts.map(product => {
                 const href = `/products/${product.slug || product.id}`
                 const wished = wishlist.includes(product.id)
                 const option = productOption(product)
                 return <SwiperSlide key={product.id}>
                   <article className="group/curated relative">
-                    <Link href={href} className="relative block aspect-square shrink-0 overflow-hidden rounded-2xl bg-white">
-                      <Image fill sizes="(max-width: 639px) 80vw, (max-width: 1023px) 45vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover/curated:scale-105 ${product.images?.[1] ? 'group-hover/curated:opacity-0 group-focus-within/curated:opacity-0' : ''}`} />
-                      {product.images?.[1] && <Image fill sizes="(max-width: 639px) 80vw, (max-width: 1023px) 45vw, 25vw" src={product.images[1]} alt="" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover/curated:scale-105 group-hover/curated:opacity-100 group-focus-within/curated:opacity-100" />}
+                    <Link href={href} className="relative block aspect-[4/3] shrink-0 overflow-hidden rounded-2xl bg-white sm:aspect-square">
+                      <Image fill sizes="(max-width: 639px) 68vw, (max-width: 1023px) 45vw, 25vw" src={product.images?.[0] || product.image || '/images/categories/decor.jpg'} alt={product.name} className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover/curated:scale-105 ${product.images?.[1] ? 'group-hover/curated:opacity-0 group-focus-within/curated:opacity-0' : ''}`} />
+                      {product.images?.[1] && <Image fill sizes="(max-width: 639px) 68vw, (max-width: 1023px) 45vw, 25vw" src={product.images[1]} alt="" className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover/curated:scale-105 group-hover/curated:opacity-100 group-focus-within/curated:opacity-100" />}
                     </Link>
                     <button type="button" onClick={() => toggleWish(product.id)} aria-label={`${wished ? 'Remove' : 'Save'} ${product.name} ${wished ? 'from' : 'to'} wishlist`} aria-pressed={wished} className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white opacity-0 transition-opacity group-hover/curated:opacity-100 focus:opacity-100"><Heart size={18} className={wished ? 'fill-terra text-terra' : ''} /></button>
-                    <Link href={href} className="mt-4 block font-heading text-base font-medium hover:text-terra">{product.name}</Link>
-                    <div className="mt-2 text-sm"><ProductPrice product={product} /></div>
-                    <button type="button" disabled={option.stock <= 0} onClick={() => addToCart(shopProduct(product, []))} className="btn-dark mt-4 w-full disabled:cursor-not-allowed disabled:opacity-50">{option.stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
+                    <Link href={href} className="mt-3 block font-heading text-base font-medium hover:text-terra">{product.name}</Link>
+                    <div className="mt-1.5 text-sm"><ProductPrice product={product} /></div>
+                    <button type="button" disabled={option.stock <= 0} onClick={() => addToCart(shopProduct(product, []))} className="btn-dark mt-3 w-full py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:mt-4 sm:py-3.5 sm:text-[15px]">{option.stock > 0 ? 'Quick Add' : 'Out of stock'}</button>
                   </article>
                 </SwiperSlide>
               })}
@@ -74,7 +74,7 @@ export function DiningBanner() {
         <Reveal className="max-w-lg text-white">
           <span className="mb-3 block font-medium text-white/85">New Dining Collection</span>
           <h2 className="font-heading text-[36px] font-semibold leading-[1.1] md:text-[56px]">Where Comfort Meets Craft</h2>
-          <div className="mt-8"><ArrowBtn className="btn-light" href="/shop/decor">Shop Now</ArrowBtn></div>
+          <div className="mt-8"><ArrowBtn className="btn-terra" href="/shop/decor">Shop Now</ArrowBtn></div>
         </Reveal>
       </div>
     </section>
@@ -213,7 +213,7 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
                   </button>
                   <Link href={href} className="mt-4 block font-heading text-base font-medium leading-6 hover:text-terra">{product.name}</Link>
                   <div className="mt-1 text-sm"><ProductPrice product={product} option={option} /></div>
-                  <button type="button" disabled={option.stock <= 0} aria-pressed={selected} onClick={() => toggle(product.id)} className={`mt-3 w-full cursor-pointer rounded-full py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'bg-terra text-white' : 'border border-ink hover:bg-ink hover:text-white'}`}>
+                  <button type="button" disabled={option.stock <= 0} aria-pressed={selected} onClick={() => toggle(product.id)} className={`mt-3 hidden w-full cursor-pointer rounded-full py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 md:block ${selected ? 'bg-terra text-white' : 'border border-ink hover:bg-ink hover:text-white'}`}>
                     {option.stock <= 0 ? 'Out of stock' : selected ? 'Selected' : 'Select Option'}
                   </button>
                 </div>
@@ -222,7 +222,7 @@ export function BundleBuilder({ products: featuredProducts = [] }) {
           })}
         </div>
         <Reveal delay={0.2}>
-          <aside className="sticky top-28 rounded-2xl bg-cream p-6">
+          <aside className="sticky top-28 hidden rounded-2xl bg-cream p-6 lg:block">
             <h3 className="text-xl">Your bundle</h3>
             <ul className="mt-4 min-h-[120px] space-y-3">
               {chosen.map(product => (

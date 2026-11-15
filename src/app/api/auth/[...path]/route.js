@@ -1,3 +1,5 @@
+import { isAllowedRequestOrigin } from '../../../../lib/request-origin'
+
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
@@ -7,10 +9,9 @@ async function proxy(request, { params }) {
   const allowed = methods[endpoint] || (/^addresses\/[a-z0-9]+$/.test(endpoint) ? ['PUT', 'DELETE'] : /^wishlist\/[a-z0-9]+$/.test(endpoint) ? ['DELETE'] : /^cart\/items\/[a-z0-9-]+$/.test(endpoint) ? ['PATCH', 'DELETE'] : null)
   if (!allowed) return Response.json({ message: 'Endpoint not found.' }, { status: 404 })
   if (!allowed.includes(request.method)) return Response.json({ message: 'Method not allowed.' }, { status: 405 })
-  const origin = request.headers.get('origin')
   // Google's top-level callback is cross-site; the server verifies state, nonce and PKCE.
   const googleCallback = endpoint === 'google/callback' && request.method === 'GET'
-  if (!googleCallback && ((origin && origin !== request.nextUrl.origin) || request.headers.get('sec-fetch-site') === 'cross-site')) return Response.json({ message: 'This origin is not allowed.' }, { status: 403 })
+  if (!googleCallback && !isAllowedRequestOrigin(request)) return Response.json({ message: 'This origin is not allowed.' }, { status: 403 })
   try {
     let body
     if (request.method !== 'GET') {

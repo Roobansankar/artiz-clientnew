@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUp, MapPin, Minus, Plus, X } from 'lucide-react'
+import { ArrowUp, MapPin, Minus, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -39,7 +39,7 @@ export function Footer() {
   const newsletter = useNewsletter('footer')
   const cols = [
     { title: 'Quick Links', links: [{ label: 'FAQ', href: '/faq' }, { label: 'Find store location', href: '#' }, { label: 'Privacy Policy', href: '#' }, { label: 'Refund Policy', href: '#' }, { label: 'Terms of Service', href: '#' }] },
-    { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '/account?section=wishlist' }, { label: 'My account', href: '/account' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
+    { title: 'Company', links: [{ label: 'About us', href: '/about' }, { label: 'Contact us', href: '/contact' }, { label: 'Wishlist', href: '/wishlist' }, { label: 'My account', href: '/account' }, { label: 'Product compare', href: '#' }, { label: 'Cart', href: '#' }] },
   ]
   return (
     <footer className="overflow-x-clip bg-espresso pb-[35px] pt-[60px] text-white/75 lg:pt-[80px]">
@@ -122,9 +122,9 @@ export function CartDrawer() {
         {cart.length === 0 && <li className="py-16 text-center text-muted">Your cart is empty</li>}
         <AnimatePresence>
           {cart.map((i) => (
-            <motion.li key={i.lineKey || i.id} layout initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 40 }} className="flex gap-4">
+            <motion.li key={i.lineKey || i.id} layout initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 40 }} className="grid grid-cols-[80px_minmax(0,1fr)_auto] items-start gap-4 sm:flex">
               <img src={i.img} alt="" className="h-20 w-20 rounded-xl bg-cream object-contain" />
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <p className="font-medium">{i.title}</p>
                 <Price price={i.price} compare={i.compare} currency={i.currency} className="text-sm" />
                 {i.priceChanged && <p className="mt-1 text-xs text-terra">Price updated since you added this.</p>}
@@ -135,7 +135,9 @@ export function CartDrawer() {
                   <button disabled={i.qty >= Math.min(i.stock ?? Infinity, i.currency === 'INR' ? 10 : Infinity)} onClick={() => updateQty(i.lineKey || i.id, i.qty + 1)} className="p-2 cursor-pointer" aria-label="Increase"><Plus size={12} /></button>
                 </div>
               </div>
-              <button onClick={() => updateQty(i.lineKey || i.id, 0)} className="self-start text-sm text-muted underline hover:text-terra cursor-pointer">Remove</button>
+              <button type="button" onClick={() => updateQty(i.lineKey || i.id, 0)} aria-label={`Remove ${i.title} from cart`} className="inline-flex h-9 w-9 shrink-0 items-center justify-center gap-1.5 rounded-full border border-sand bg-cream px-0 text-xs font-medium text-espresso transition-colors hover:border-terra/40 hover:bg-peach hover:text-terra focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terra sm:h-9 sm:w-auto sm:self-start sm:px-3">
+                <Trash2 size={14} aria-hidden="true" /><span className="hidden sm:inline">Remove</span>
+              </button>
             </motion.li>
           ))}
         </AnimatePresence>

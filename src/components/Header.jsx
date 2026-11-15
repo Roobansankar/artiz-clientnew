@@ -230,7 +230,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <button onClick={() => setSearchOpen(true)} aria-label="Search" className="hidden hover:text-terra cursor-pointer md:block"><SearchIcon size={22} /></button>
             <div className="hidden md:block"><AccountMenu /></div>
-            <Link href="/account?section=wishlist" aria-label="Wishlist" className="relative hidden hover:text-terra sm:block">
+            <Link href="/wishlist" aria-label="Wishlist" className="relative hidden hover:text-terra sm:block">
               <HeartIcon size={24} />
               <span className="absolute -right-2 -top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-terra text-[10px] text-white">{wishlist.length}</span>
             </Link>
@@ -285,7 +285,7 @@ export default function Header() {
                   {categoryError && <li><button onClick={refreshCategories} className="px-5 py-4 text-terra">Retry categories</button></li>}
                   {mobileNav.map((item) => <MobileItem key={item.label} item={item} />)}
                   <li className="border-b border-ink/20">
-                    <Link href="/account?section=wishlist" onClick={() => setMobile(false)} className="flex items-center gap-2.5 px-5 py-[15px] leading-none">
+                    <Link href="/wishlist" onClick={() => setMobile(false)} className="flex items-center gap-2.5 px-5 py-[15px] leading-none">
                       <HeartIcon size={20} /> Wishlist
                       <span className="grid h-[18px] w-[18px] place-items-center rounded-full bg-terra text-[10px] text-white">{wishlist.length}</span>
                     </Link>

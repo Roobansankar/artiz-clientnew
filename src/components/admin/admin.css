@@ -1494,3 +1494,22 @@
   .ad-sidebar, .ad-workarea, .ad-sidebar nav > a, .ad-sidebar nav > .ad-settings-trigger,
   .ad-sidebar-links button, .ad-profile, .ad-icon-button, .ad-panel-toggle-icon { transition: none !important; animation: none !important; }
 }
+
+/* Consistent, readable type scale across admin pages. */
+.ad-root { font-size: 15px; line-height: 1.55; }
+.ad-root .ad-topbar h1 { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+.ad-root .ad-sidebar nav > a,
+.ad-root .ad-sidebar nav > .ad-settings-trigger,
+.ad-root .ad-sidebar-links button { font-size: 14px; font-weight: 500; }
+.ad-root .ad-main { font-size: 14px; line-height: 1.55; }
+.ad-root .ad-main p,
+.ad-root .ad-main li,
+.ad-root .ad-main dd { font-size: 14px; line-height: 1.55; }
+.ad-root .ad-main :is(small, time) { font-size: 12px; line-height: 1.45; }
+.ad-root .ad-main :is(label, legend) { font-size: 14px; font-weight: 500; line-height: 1.45; }
+.ad-root .ad-main th { font-size: 12px; font-weight: 600; letter-spacing: .01em; }
+.ad-root .ad-main td { font-size: 14px; line-height: 1.5; }
+.ad-root .ad-main :is(button, .ad-primary, .ad-secondary, .ad-neutral-button) { font-size: 14px; font-weight: 500; }
+.ad-root .ad-login-card label { font-size: 14px; font-weight: 500; }
+.ad-root .ad-login-card > p { font-size: 14px; line-height: 1.55; }
+.ad-root :is(.ad-main, .ad-topbar) strong { font-weight: 600; }
