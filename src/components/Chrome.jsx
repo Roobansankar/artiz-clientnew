@@ -73,7 +73,6 @@ export function Footer() {
       </div>
       <div className="container-x mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm md:flex-row">
         <p>© 2026, Artiz Interior Design Studio. All rights reserved.</p>
-        <p>{ADDRESS}</p>
       </div>
     </footer>
   )

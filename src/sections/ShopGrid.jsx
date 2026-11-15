@@ -159,7 +159,7 @@ function ShopCard({ p, compareMode, compared, onCompare, formatMoney }) {
           ))}
         </div>
         <button disabled={!p.available} onClick={() => addToCart({ ...p, swatches: [] })}
-          className="absolute inset-x-3 bottom-3 flex translate-y-4 items-center justify-center gap-1.5 rounded-full bg-espresso py-3 text-sm font-medium text-white opacity-0 transition-all duration-300 hover:bg-terra group-hover/card:translate-y-0 group-hover/card:opacity-100 cursor-pointer">
+          className="absolute inset-x-3 bottom-3 hidden translate-y-4 items-center justify-center gap-1.5 rounded-full bg-espresso py-3 text-sm font-medium text-white opacity-0 transition-all duration-300 hover:bg-terra md:flex md:group-hover/card:translate-y-0 md:group-hover/card:opacity-100 cursor-pointer">
           <Plus size={15} /> {p.available ? 'Quick Add' : 'Out of stock'}
         </button>
         {compareMode && (
